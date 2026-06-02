@@ -1,7 +1,7 @@
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import { AuthProvider } from "@/context/AuthContext";
+// import Navbar from "@/components/layout/Navbar";
+// import Footer from "@/components/layout/Footer";
+// import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata = {
   title: "CloudKitchen - Marketplace",
@@ -12,11 +12,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen">
-        <AuthProvider>
-          <Navbar />
+        {/* <AuthProvider> */}
+          {/* <Navbar /> */}
           <main className="flex-grow bg-gray-50">{children}</main>
-          <Footer />
-        </AuthProvider>
+          {/* <Footer /> */}
+        {/* </AuthProvider> */}
       </body>
     </html>
   );
