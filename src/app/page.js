@@ -116,7 +116,7 @@ export default function HomePage() {
               {meals.map((meal) => (
                 <div
                   key={meal.id}
-                  className="bg-white rounded-[24px] overflow-hidden shadow hover:shadow-xl transition flex flex-col"
+                  className="bg-white rounded-3xl overflow-hidden shadow hover:shadow-xl transition flex flex-col"
                 >
                   <div className="relative h-60">
                     <Image
@@ -232,7 +232,7 @@ export default function HomePage() {
               {chefs.map((chef) => (
                 <div
                   key={chef.id}
-                  className="bg-white p-6 rounded-[24px] flex items-center gap-5 shadow"
+                  className="bg-white p-6 rounded-3xl flex items-center gap-5 shadow"
                 >
                   <Image
                     src={chef.image}
@@ -302,7 +302,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="bg-white text-black rounded-[24px] p-6">
+                <div className="bg-white text-black rounded-3xl p-6">
                   <h2 className="mb-4 flex items-center gap-2 border-b border-primary pb-5">
                     <FontAwesomeIcon
                       icon={faMessage}
@@ -337,7 +337,7 @@ export default function HomePage() {
               {testimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
-                  className="bg-white p-14 pb-8 rounded-[24px] shadow relative flex flex-col"
+                  className="bg-white p-14 pb-8 rounded-3xl shadow relative flex flex-col"
                 >
                   <FontAwesomeIcon
                     icon={faQuoteRight}

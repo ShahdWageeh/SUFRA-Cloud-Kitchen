@@ -43,7 +43,7 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/become-chef"
+            href="/register/chef"
             className="hover:text-primary transition-colors"
           >
             Become a Chef
@@ -74,9 +74,12 @@ export default function Navbar() {
             <FontAwesomeIcon icon={faCartShopping} className="text-lg" />
           </button>
 
-          <button className="hidden ml-3 sm:block bg-primary text-white px-8 py-2 rounded-full hover:opacity-90 transition">
+          <Link
+            href="/login"
+            className="hidden ml-3 sm:block bg-primary text-white px-8 py-2 rounded-full hover:opacity-90 transition"
+          >
             Sign In
-          </button>
+          </Link>
 
           <button className="md:hidden" onClick={() => setOpen(!open)}>
             <FontAwesomeIcon
@@ -98,11 +101,14 @@ export default function Navbar() {
 
             <Link href="/how-it-works">How It Works</Link>
 
-            <Link href="/become-chef">Become a Chef</Link>
+            <Link href="/register/chef">Become a Chef</Link>
 
-            <button className="bg-primary text-white py-3 rounded-full">
+            <Link
+              href="/login"
+              className="bg-primary text-center text-white py-3 rounded-full"
+            >
               Sign In
-            </button>
+            </Link>
           </div>
         </div>
       )}
