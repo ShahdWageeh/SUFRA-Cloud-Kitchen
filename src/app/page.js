@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { categories, meals, chefs, testimonials } from "@/data/landingData";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
@@ -16,7 +18,8 @@ import {
 
 export default function HomePage() {
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
       <main>
         {/* HERO SECTION */}
 
@@ -375,6 +378,7 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-    </>
+      <Footer />
+    </div>
   );
 }
