@@ -1,17 +1,7 @@
-import {
-  MessageCircle,
-  Star,
-} from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 
 export default function BrandingPage() {
-  const cookingStyles = [
-    "Levantine",
-    "Mediterranean",
-    "South Asian",
-    "Traditional Home",
-    "Fusion",
-    "+ Other",
-  ];
+  const cookingStyles = ["Levantine", "Mediterranean", "South Asian", "Traditional Home", "Fusion", "+ Other"];
 
   return (
     <div className="min-h-screen bg-[#FAF8F7] py-10 px-4">
@@ -54,7 +44,7 @@ export default function BrandingPage() {
 
             {/* Cooking Style */}
             <div className="mb-8">
-              <label className="block text-sm font-medium mb-3">
+              <label className="block text-sm mb-3 font-semibold text-[#55433D]">
                 Cooking Style
               </label>
 
@@ -72,7 +62,7 @@ export default function BrandingPage() {
 
             {/* Signature Dish */}
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm mb-2 font-semibold text-[#55433D]">
                 Your Signature Dish
               </label>
 
@@ -85,7 +75,7 @@ export default function BrandingPage() {
 
             {/* Audience */}
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm mb-2 font-semibold text-[#55433D]">
                 Who is your food for?
               </label>
 
@@ -100,7 +90,7 @@ export default function BrandingPage() {
 
             {/* Story */}
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm mb-2 font-semibold text-[#55433D]">
                 The Story Behind Your Food
               </label>
 
@@ -164,7 +154,7 @@ export default function BrandingPage() {
                 Be descriptive! Mentioning specific ingredients like
                 "hand-pressed Palestinian olive oil" or
                 "Slow-roasted za'atar" helps foodies find exactly what
-                they’re craving.
+                they're craving.
               </p>
             </div>
 
