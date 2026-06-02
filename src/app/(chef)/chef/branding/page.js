@@ -31,7 +31,7 @@ export default function BrandingPage() {
         <div className="grid lg:grid-cols-3 gap-8">
 
           {/* Form */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border p-8 shadow-sm">
+          <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-sm">
 
             <h2 className="text-2xl font-semibold mb-2">
               Describe your kitchen
@@ -52,7 +52,7 @@ export default function BrandingPage() {
                 {cookingStyles.map((style) => (
                   <button
                     key={style}
-                    className={`px-4 py-2 rounded-lg border text-sm transition`}
+                    className={`px-4 py-2 rounded-lg border border-gray-300 text-sm transition`}
                   >
                     {style}
                   </button>
@@ -69,7 +69,7 @@ export default function BrandingPage() {
               <input
                 type="text"
                 placeholder="e.g. Grandma's Slow-Cooked Lamb Maqluba"
-                className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-300"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none"
               />
             </div>
 
@@ -79,7 +79,7 @@ export default function BrandingPage() {
                 Who is your food for?
               </label>
 
-              <select className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-300">
+              <select className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-300">
                 <option>Select your target audience</option>
                 <option>Families</option>
                 <option>Students</option>
@@ -98,7 +98,7 @@ export default function BrandingPage() {
                 rows={5}
                 maxLength={500}
                 placeholder="Share the heritage, the secret spices, or the memories that make your cooking special."
-                className="w-full border rounded-lg px-4 py-3 resize-none outline-none focus:ring-2 focus:ring-orange-300"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none outline-none focus:ring-2 focus:ring-orange-300"
               />
 
               <div className="text-right text-xs text-gray-400 mt-1">
@@ -159,7 +159,7 @@ export default function BrandingPage() {
             </div>
 
             {/* Testimonial */}
-            <div className="border rounded-2xl p-5 bg-white">
+            <div className="border border-gray-300 rounded-2xl p-5 bg-white">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
                   <Star size={18} className="text-[#B64B1D]" />
