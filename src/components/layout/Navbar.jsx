@@ -1,35 +1,111 @@
-import Link from 'next/link';
+"use client";
 
-const Navbar = () => {
+import { useState } from "react";
+import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBars,
+  faXmark,
+  faBell,
+  faCartShopping,
+  faMagnifyingGlass,
+} from "@fortawesome/free-solid-svg-icons";
+
+export default function Navbar() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-orange-600">
-              CloudKitchen
-            </Link>
-          </div>
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="/foods" className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md font-medium">
-                Browse Food
-              </Link>
-              <Link href="/cart" className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md font-medium">
-                Cart
-              </Link>
-              <Link href="/auth/login" className="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md font-medium">
-                Login
-              </Link>
-              <Link href="/dashboard/vendor" className="bg-orange-600 text-white px-4 py-2 rounded-md font-medium hover:bg-orange-700">
-                Become a Vendor
-              </Link>
-            </div>
+    <header className="sticky top-0 z-50 bg-surface border-b border-outline/20 backdrop-blur">
+      <nav className="container mx-auto h-18 px-4 lg:px-8 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="text-2xl font-bold text-primary">
+          Matbakhna
+        </Link>
+
+        {/* Desktop Links */}
+        <div className="hidden text-sm md:flex items-center gap-8">
+          <Link href="/" className="text-primary font-semibold">
+            Browse
+          </Link>
+
+          <Link
+            href="/categories"
+            className="hover:text-primary transition-colors"
+          >
+            Categories
+          </Link>
+
+          <Link
+            href="/how-it-works"
+            className="hover:text-primary transition-colors"
+          >
+            How It Works
+          </Link>
+
+          <Link
+            href="/become-chef"
+            className="hover:text-primary transition-colors"
+          >
+            Become a Chef
+          </Link>
+        </div>
+
+        {/* Search */}
+        <div className="hidden border-primary-container border lg:flex items-center bg-secondary-container px-4 py-2 rounded-full w-72">
+          <FontAwesomeIcon
+            icon={faMagnifyingGlass}
+            className="text-text-secondary"
+          />
+
+          <input
+            type="text"
+            placeholder="Search dishes..."
+            className="bg-transparent outline-none ml-3 w-full"
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-4">
+          <button>
+            <FontAwesomeIcon icon={faBell} className="text-lg" />
+          </button>
+
+          <button>
+            <FontAwesomeIcon icon={faCartShopping} className="text-lg" />
+          </button>
+
+          <button className="hidden ml-3 sm:block bg-primary text-white px-8 py-2 rounded-full hover:opacity-90 transition">
+            Sign In
+          </button>
+
+          <button className="md:hidden" onClick={() => setOpen(!open)}>
+            <FontAwesomeIcon
+              icon={open ? faXmark : faBars}
+              className="text-xl"
+            />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Menu */}
+
+      {open && (
+        <div className="md:hidden border-t border-outline/20 bg-surface">
+          <div className="flex flex-col gap-5 p-5">
+            <Link href="/">Browse</Link>
+
+            <Link href="/categories">Categories</Link>
+
+            <Link href="/how-it-works">How It Works</Link>
+
+            <Link href="/become-chef">Become a Chef</Link>
+
+            <button className="bg-primary text-white py-3 rounded-full">
+              Sign In
+            </button>
           </div>
         </div>
-      </div>
-    </nav>
+      )}
+    </header>
   );
-};
-
-export default Navbar;
+}
