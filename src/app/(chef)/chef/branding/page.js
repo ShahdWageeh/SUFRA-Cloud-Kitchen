@@ -9,7 +9,7 @@ export default function BrandingPage() {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-[#B64B1D]">
+          <h1 className="text-3xl font-bold text-primary">
             Matbakhna
           </h1>
 
@@ -18,13 +18,13 @@ export default function BrandingPage() {
               Chef Onboarding
             </span>
 
-            <span className="text-xs bg-orange-100 text-[#B64B1D] px-2 py-1 rounded-full">
+            <span className="text-xs bg-orange-100 text-primary px-2 py-1 rounded-full">
               Step 1 of 3
             </span>
           </div>
 
           <div className="w-full h-2 bg-gray-200 rounded-full mt-3">
-            <div className="h-full w-1/3 bg-[#B64B1D] rounded-full"></div>
+            <div className="h-full w-1/3 bg-primary rounded-full"></div>
           </div>
         </div>
 
@@ -44,7 +44,7 @@ export default function BrandingPage() {
 
             {/* Cooking Style */}
             <div className="mb-8">
-              <label className="block text-sm mb-3 font-semibold text-[#55433D]">
+              <label className="block text-sm mb-3 font-semibold text-text-secondary">
                 Cooking Style
               </label>
 
@@ -52,7 +52,7 @@ export default function BrandingPage() {
                 {cookingStyles.map((style) => (
                   <button
                     key={style}
-                    className={`px-4 py-2 rounded-lg border border-gray-300 text-sm transition`}
+                    className={`px-4 py-2 rounded-lg border border-gray-300 text-sm transition hover:bg-[#FFDBD0]`}
                   >
                     {style}
                   </button>
@@ -62,7 +62,7 @@ export default function BrandingPage() {
 
             {/* Signature Dish */}
             <div className="mb-6">
-              <label className="block text-sm mb-2 font-semibold text-[#55433D]">
+              <label className="block text-sm mb-2 font-semibold text-text-secondary">
                 Your Signature Dish
               </label>
 
@@ -75,7 +75,7 @@ export default function BrandingPage() {
 
             {/* Audience */}
             <div className="mb-6">
-              <label className="block text-sm mb-2 font-semibold text-[#55433D]">
+              <label className="block text-sm mb-2 font-semibold text-text-secondary">
                 Who is your food for?
               </label>
 
@@ -90,7 +90,7 @@ export default function BrandingPage() {
 
             {/* Story */}
             <div>
-              <label className="block text-sm mb-2 font-semibold text-[#55433D]">
+              <label className="block text-sm mb-2 font-semibold text-text-secondary">
                 The Story Behind Your Food
               </label>
 
@@ -108,7 +108,7 @@ export default function BrandingPage() {
 
             {/* Buttons */}
             <div className="flex gap-4 mt-8">
-              <button className="bg-[#B64B1D] text-white px-6 py-3 rounded-full hover:opacity-90">
+              <button className="bg-primary text-white px-6 py-3 rounded-full hover:opacity-90">
                 Continue to Kitchen Setup
               </button>
 
@@ -162,7 +162,7 @@ export default function BrandingPage() {
             <div className="border border-gray-300 rounded-2xl p-5 bg-white">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                  <Star size={18} className="text-[#B64B1D]" />
+                  <Star size={18} className="text-primary" />
                 </div>
 
                 <div>
