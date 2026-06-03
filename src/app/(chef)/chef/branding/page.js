@@ -10,7 +10,7 @@ export default function BrandingPage() {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-primary">
-            Matbakhna
+            Sofra
           </h1>
 
           <div className="flex items-center gap-3 mt-2">
@@ -167,7 +167,7 @@ export default function BrandingPage() {
 
                 <div>
                   <p className="text-sm text-gray-600 italic">
-                    Joining Matbakhna allowed me to turn my Sunday
+                    Joining Sofra allowed me to turn my Sunday
                     tradition into a thriving local business.
                   </p>
 
