@@ -10,6 +10,7 @@ import {
   faCartShopping,
   faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
+import Image from "next/image";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -18,9 +19,12 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 bg-surface border-b border-outline/20 backdrop-blur">
       <nav className="container mx-auto h-18 px-4 lg:px-8 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-primary">
-          Matbakhna
-        </Link>
+        <div className="flex items-center gap-3">
+          <Image src="/icon.png" alt="logo" width="50" height="50"></Image>
+          <Link href="/" className="text-2xl font-bold text-primary">
+            SUFRA
+          </Link>
+        </div>
 
         {/* Desktop Links */}
         <div className="hidden text-sm md:flex items-center gap-8">
@@ -28,18 +32,15 @@ export default function Navbar() {
             Browse
           </Link>
 
-          <Link
-            href="/categories"
-            className="hover:text-primary transition-colors"
-          >
-            Categories
+          <Link href="/about" className="hover:text-primary transition-colors">
+            About
           </Link>
 
           <Link
-            href="/how-it-works"
+            href="/contact"
             className="hover:text-primary transition-colors"
           >
-            How It Works
+            Contact
           </Link>
 
           <Link

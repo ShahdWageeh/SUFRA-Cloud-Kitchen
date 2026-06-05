@@ -59,10 +59,10 @@ export default function LoginForm() {
             sizes="46vw"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/5 to-black/55" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/35 via-black/5 to-black/55" />
           <div className="absolute left-14 top-16 max-w-xs text-white">
             <Link href="/" className="text-2xl font-bold">
-              Matbakhna
+              Sufra
             </Link>
             <p className="mt-3 text-sm leading-5 text-white/90">
               Welcome back to the heart of the home. Your community kitchen is waiting.
@@ -77,16 +77,16 @@ export default function LoginForm() {
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
                 M
               </span>
-              Chef Maria, Matbakhna Partner
+              Chef Maria, Sufra Partner
             </div>
           </div>
         </aside>
 
         <div className="flex min-h-dvh items-center justify-center px-5 py-10 sm:px-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-[430px]">
+          <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-107.5">
             <div className="mb-9 lg:hidden">
               <Link href="/" className="text-2xl font-bold text-primary">
-                Matbakhna
+                Sufra
               </Link>
             </div>
 
