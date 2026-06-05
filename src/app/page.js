@@ -2,6 +2,7 @@ import Image from "next/image";
 import { categories, meals, chefs, testimonials } from "@/data/landingData";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import CategoriesSlider from "@/components/ui/CategoriesSlider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
@@ -15,6 +16,7 @@ import {
   faMessage,
   faQuoteRight,
 } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -77,30 +79,9 @@ export default function HomePage() {
               <h2 className="text-3xl lg:text-4xl font-bold">
                 Explore Categories
               </h2>
-
-              <button className="text-primary flex items-center gap-2">
-                See All
-                <FontAwesomeIcon icon={faArrowRight} />
-              </button>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              {categories.map((category) => (
-                <div
-                  key={category.id}
-                  className="text-center group cursor-pointer"
-                >
-                  <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full bg-surface-low flex items-center justify-center mx-auto mb-4 transition group-hover:bg-primary">
-                    <FontAwesomeIcon
-                      icon={category.icon}
-                      className="text-3xl text-primary group-hover:text-white"
-                    />
-                  </div>
-
-                  <h3>{category.title}</h3>
-                </div>
-              ))}
-            </div>
+            <CategoriesSlider categories={categories} />
           </div>
         </section>
 
@@ -108,9 +89,18 @@ export default function HomePage() {
 
         <section className="py-20 bg-secondary-container">
           <div className="container mx-auto px-4 lg:px-8">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-12">
-              Most Loved Meals
-            </h2>
+            <div className="flex justify-between items-center mb-12">
+              <h2 className="text-3xl lg:text-4xl font-bold">
+                Most Loved Meals
+              </h2>
+              <Link
+                href="/meals"
+                className="text-primary flex items-center gap-2"
+              >
+                See All
+                <FontAwesomeIcon icon={faArrowRight} />
+              </Link>
+            </div>
 
             <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-8">
               {meals.map((meal) => (
@@ -168,7 +158,7 @@ export default function HomePage() {
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-8">
             <h2 className="text-3xl lg:text-4xl font-bold text-center mb-16">
-              How Matbakhna Works
+              How Sufra Works
             </h2>
 
             <div className="grid md:grid-cols-3 gap-10">
@@ -224,9 +214,18 @@ export default function HomePage() {
 
         <section className="py-20 bg-surface-low">
           <div className="container mx-auto px-4 lg:px-8">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-12">
-              Meet Our Featured Chefs
-            </h2>
+            <div className="flex justify-between items-center mb-12">
+              <h2 className="text-3xl lg:text-4xl font-bold">
+                Meet Our Featured Chefs
+              </h2>
+              <Link
+                href="/chefs"
+                className="text-primary flex items-center gap-2"
+              >
+                See All
+                <FontAwesomeIcon icon={faArrowRight} />
+              </Link>
+            </div>
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
               {chefs.map((chef) => (
@@ -287,12 +286,12 @@ export default function HomePage() {
                     for you.
                   </p>
                   <div className="mt-8 flex flex-col md:flex-row gap-4">
-                    <button className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
+                    <Link href="customer/meal-planner" className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
                       <h4 className="text-left text-xl font-semibold">
                         Meal Planner
                       </h4>
                       <p>Weekly menus tailored for you.</p>
-                    </button>
+                    </Link>
                     <button className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
                       <h4 className="text-left text-xl font-semibold">
                         Smart Picks
@@ -366,13 +365,18 @@ export default function HomePage() {
               </h2>
 
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <button className="bg-primary text-white px-20 py-4 rounded-full">
+                <Link
+                  href="/register/customer"
+                  className="bg-primary text-white px-20 py-4 rounded-full"
+                >
                   Start Your Journey
-                </button>
-
-                <button className="border-2 border-primary text-primary px-20 py-4 rounded-full">
+                </Link>
+                <Link
+                  href="/register/chef"
+                  className="border-2 border-primary text-primary px-20 py-4 rounded-full"
+                >
                   Become A Chef
-                </button>
+                </Link>
               </div>
             </div>
           </div>

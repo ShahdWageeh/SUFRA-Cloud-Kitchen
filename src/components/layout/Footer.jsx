@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Brand */}
 
           <div>
-            <h2 className="text-2xl font-bold text-primary mb-4">Matbakhna</h2>
+            <h2 className="text-2xl font-bold text-primary mb-4">SUFRA</h2>
 
             <p className="text-text-secondary leading-7">
               Celebrating home-cooked heritage and authentic flavors from local
@@ -82,7 +82,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-outline/20 mt-10 pt-6 text-center text-sm text-text-secondary">
-          © 2026 Matbakhna. All Rights Reserved.
+          © 2026 Sufra. All Rights Reserved.
         </div>
       </div>
     </footer>

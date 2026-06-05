@@ -73,7 +73,7 @@ export default function RegisterForm({ accountType, endpoint }) {
         <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-7">
           <div className="text-center">
             <Link href="/" className="text-2xl font-bold text-primary">
-              Matbakhna
+              Sufra
             </Link>
             <p className="mt-2 text-xs text-text-secondary">
               Join our community of authentic home chefs.
@@ -82,7 +82,7 @@ export default function RegisterForm({ accountType, endpoint }) {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full max-w-[430px] rounded-lg bg-white/88 px-7 py-8 shadow-[0_14px_35px_rgba(27,28,28,0.13)] ring-1 ring-primary/10 sm:px-9"
+            className="w-full max-w-107.5 rounded-lg bg-white/88 px-7 py-8 shadow-[0_14px_35px_rgba(27,28,28,0.13)] ring-1 ring-primary/10 sm:px-9"
           >
             <h1 className="mb-6 text-center text-xl font-bold text-text-primary">
               Create your account
@@ -206,7 +206,7 @@ export default function RegisterForm({ accountType, endpoint }) {
         </div>
 
         <p className="mt-6 text-center text-[10px] text-text-secondary/70">
-          © 2026 Matbakhna - Celebrating home-cooked heritage.
+          © 2026 Sufra - Celebrating home-cooked heritage.
         </p>
       </div>
     </section>
