@@ -109,12 +109,13 @@ export default function ChefSidebar({ isOpen, onClose }) {
         {/* Bottom Account Section */}
 
         <div className="border-t border-[#e9dfdc] pt-5">
-          <button
-            type="button"
-            className="mb-4 w-full rounded-xl bg-[#964326] py-3 text-[14px] font-bold text-white transition hover:bg-[#7d3820]"
+          <Link
+            href="/chef/meals/create"
+            onClick={onClose}
+            className="mb-4 block w-full rounded-xl bg-[#964326] py-3 text-center text-[14px] font-bold text-white transition hover:bg-[#7d3820]"
           >
             Create New Listing
-          </button>
+          </Link>
 
           <div className="rounded-2xl bg-[#f2ece9] p-3">
             <div className="flex items-center gap-3">

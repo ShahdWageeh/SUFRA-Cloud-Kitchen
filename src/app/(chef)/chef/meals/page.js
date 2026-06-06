@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import {
   Plus,
@@ -17,6 +21,21 @@ function formatPrice(price) {
 }
 
 export default function MealsPage() {
+  const [meals, setMeals] = useState(mealListings);
+
+  const toggleStatus = (mealId) => {
+    setMeals((currentMeals) =>
+      currentMeals.map((meal) =>
+        meal.id === mealId
+          ? {
+              ...meal,
+              status: meal.status === "Active" ? "Inactive" : "Active",
+            }
+          : meal,
+      ),
+    );
+  };
+
   return (
     <div className="space-y-6 md:space-y-8">
       {/* Header */}
@@ -26,13 +45,13 @@ export default function MealsPage() {
           You have 12 active meal listings today.
         </p>
 
-        <button
-          type="button"
+        <Link
+          href="/chef/meals/create"
           className="inline-flex items-center gap-2 rounded-full bg-[#964326] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#82402a]"
         >
           <Plus size={16} />
           Create New Listing
-        </button>
+        </Link>
       </div>
 
       {/* Analytics */}
@@ -107,7 +126,7 @@ export default function MealsPage() {
                   Price
                 </th>
 
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#8B7E78]">
+                <th className=" w-[120px]  px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#8B7E78]">
                   Status
                 </th>
 
@@ -118,7 +137,7 @@ export default function MealsPage() {
             </thead>
 
             <tbody>
-              {mealListings.map((meal, index) => (
+              {meals.map((meal, index) => (
                 <tr
                   key={meal.id}
                   className={
@@ -175,15 +194,17 @@ export default function MealsPage() {
                   {/* Status */}
 
                   <td className="px-6 py-5">
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                    <button
+                      type="button"
+                      onClick={() => toggleStatus(meal.id)}
+                      className={`inline-flex cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 ${
                         meal.status === "Active"
-                          ? "bg-[#E4F5F1] text-[#1F7F6E]"
-                          : "bg-[#F2F2F2] text-[#6E6D6D]"
+                          ? "bg-[#E4F5F1] text-[#1F7F6E] hover:bg-[#d4eee6]"
+                          : "bg-[#F2F2F2] text-[#6E6D6D] hover:bg-[#e4e4e4]"
                       }`}
                     >
                       {meal.status}
-                    </span>
+                    </button>
                   </td>
 
                   {/* Actions */}
@@ -215,7 +236,7 @@ export default function MealsPage() {
 
         <div className="flex flex-col gap-3 border-t border-[#EFE4DF] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-[#7D6D67]">
-            Showing {mealListings.length} of 24 meals
+            Showing {meals.length} of 24 meals{" "}
           </p>
 
           <div className="flex items-center gap-2">
