@@ -73,7 +73,7 @@ export default function ChefSidebar({ isOpen, onClose }) {
 
         <div>
           <h1 className="text-[2rem] font-semibold leading-tight text-[#2d201b]">
-            Sofra
+            Sufra
           </h1>
 
           <p className="mt-1 text-sm text-[#7e6a63]">Chef Portal</p>

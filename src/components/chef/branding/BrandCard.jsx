@@ -1,4 +1,4 @@
-import LogoConceptCard from "@/components/chef/LogoConceptCard";
+import LogoConceptCard from "@/components/chef/branding/LogoConceptCard";
 
 
 export default function BrandCard({ data }) {

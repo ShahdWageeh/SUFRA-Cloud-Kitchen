@@ -1,6 +1,6 @@
-import BrandCard from "@/components/chef/BrandCard";
-import BrandPaletteCard from "@/components/chef/BrandPaletteCard";
-import MarketEdgeCard from "@/components/chef/MarketEdgeCard";
+import BrandCard from "@/components/chef/branding/BrandCard";
+import BrandPaletteCard from "@/components/chef/branding/BrandPaletteCard";
+import MarketEdgeCard from "@/components/chef/branding/MarketEdgeCard";
 import { RefreshCw } from 'lucide-react';
 
 export default function BrandRevealPage() {

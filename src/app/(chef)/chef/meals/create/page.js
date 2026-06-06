@@ -14,14 +14,6 @@ import {
 } from "lucide-react";
 
 const initialIngredients = ["Basmati Rice", "Saffron"];
-const categoryOptions = [
-  "Main Dish",
-  "Appetizer",
-  "Dessert",
-  "Soup & Salad",
-  "Bakery",
-  "Beverage",
-];
 
 const allergenOptions = [
   "Gluten Free",
@@ -38,6 +30,7 @@ function FieldLabel({ children }) {
   );
 }
 
+// Fixed Secondary Photo Slot component using native HTML label triggers
 function SecondaryPhotoSlot({ id, label, imageSrc, onFileSelect, onRemove }) {
   return (
     <div className="relative aspect-square min-h-24 w-full">
@@ -87,12 +80,8 @@ export default function CreatePage() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("Main Dish");
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [ingredients, setIngredients] = useState(initialIngredients);
   const [ingredientInput, setIngredientInput] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Kept for UI selection state
   const [allergens, setAllergens] = useState({
     "Gluten Free": false,
     "Contains Nuts": false,
@@ -119,7 +108,7 @@ export default function CreatePage() {
 
   const removeMainImage = (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    e.stopPropagation(); 
     setMainImage(null);
     setMainImagePreview(null);
     const inputElement = document.getElementById("main-image-upload");
@@ -178,79 +167,19 @@ export default function CreatePage() {
     }));
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
-
-    // Validations based on backend constraints
-    if (!mealName.trim()) {
-      alert("Meal name is required");
-      return;
-    }
-
-    if (!description.trim()) {
-      alert("Description is required");
-      return;
-    }
-
-    if (!price) {
-      alert("Price is required");
-      return;
-    }
-
-    if (!mainImage) {
-      alert("Please upload at least a main meal image");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      const formData = new FormData();
-      formData.append("name", mealName.trim());
-      formData.append("description", description.trim());
-      formData.append("price", price);
-      formData.append("category", category);
-
-      // Pass ingredients array as a valid backend JSON Array string
-      if (ingredients.length > 0) {
-        formData.append("ingredients", JSON.stringify(ingredients));
-      }
-
-      // Append primary image matching key parameter 'mealImages'
-      formData.append("mealImages", mainImage);
-
-      // Append optional structural secondary images into array payload parameter
-      if (secondaryImages.slot1.file) {
-        formData.append("mealImages", secondaryImages.slot1.file);
-      }
-      if (secondaryImages.slot2.file) {
-        formData.append("mealImages", secondaryImages.slot2.file);
-      }
-
-      // Retrieve secure authentication bearer token from localStorage
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/meals`, {
-        method: "POST",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to create meal");
-      }
-
-      alert("Meal created successfully!");
-    } catch (error) {
-      console.error(error);
-      alert(error.message || "Something went wrong");
-    } finally {
-      setIsSubmitting(false);
-    }
+    console.log({
+      mealName,
+      description,
+      price,
+      category,
+      ingredients,
+      allergens,
+      mainImage,
+      secondaryImage1: secondaryImages.slot1.file,
+      secondaryImage2: secondaryImages.slot2.file,
+    });
   };
 
   return (
@@ -275,6 +204,7 @@ export default function CreatePage() {
       {/* Section 1: Photography Card */}
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
         <div className="grid gap-5 lg:grid-cols-[1.85fr_1fr]">
+          {/* Main Photo Field Component */}
           <label
             htmlFor="main-image-upload"
             className="relative block aspect-[3/2] min-h-72 w-full overflow-hidden rounded-2xl border-2 border-dashed border-[#b96a4d] bg-[#fffdfb] cursor-pointer"
@@ -319,6 +249,7 @@ export default function CreatePage() {
             )}
           </label>
 
+          {/* Right Column: Tips & Secondary Images */}
           <div className="flex flex-col gap-4">
             <div className="rounded-2xl border border-[#f0dfd5] bg-[#fff3e9] p-5">
               <div className="flex gap-3">
@@ -395,60 +326,16 @@ export default function CreatePage() {
               />
             </div>
 
-            {/* Custom Enhanced Dropdown Field */}
             <div className="mt-5">
               <FieldLabel>Category</FieldLabel>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setIsCategoryDropdownOpen(!isCategoryDropdownOpen)
-                  }
-                  aria-expanded={isCategoryDropdownOpen}
-                  className={`flex h-12 w-full items-center justify-between rounded-xl border bg-white px-4 text-left text-sm font-semibold text-[#2f221d] transition-all duration-200 outline-none hover:bg-[#fffaf7] ${
-                    isCategoryDropdownOpen
-                      ? "border-[#964326] ring-4 ring-[#964326]/10"
-                      : "border-[#eaded8]"
-                  }`}
-                >
-                  <span>{category}</span>
-                  <ChevronDown
-                    size={18}
-                    className={`text-[#8b766f] transition-transform duration-200 ${
-                      isCategoryDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {isCategoryDropdownOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsCategoryDropdownOpen(false)}
-                    />
-                    <ul className="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-60 overflow-y-auto rounded-xl border border-[#eee2dd] bg-white py-1.5 shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
-                      {categoryOptions.map((option) => (
-                        <li key={option}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCategory(option);
-                              setIsCategoryDropdownOpen(false);
-                            }}
-                            className={`flex h-10 w-full items-center px-4 text-left text-sm font-medium transition-colors ${
-                              category === option
-                                ? "bg-[#fff4ef] font-semibold text-[#964326]"
-                                : "text-[#3c302b] hover:bg-[#fffaf7] hover:text-[#964326]"
-                            }`}
-                          >
-                            {option}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={() => setCategory("Main Dish")}
+                className="flex h-12 w-full items-center justify-between rounded-xl border border-[#eaded8] bg-white px-4 text-left text-sm font-semibold text-[#2f221d] transition hover:bg-[#fffaf7] focus:border-[#964326] focus:outline-none focus:ring-4 focus:ring-[#964326]/10"
+              >
+                <span>{category}</span>
+                <ChevronDown size={18} className="text-[#8b766f]" />
+              </button>
             </div>
 
             <div className="mt-5 flex items-start gap-3 rounded-xl border border-[#f0dfd5] bg-[#fff7ef] p-4 text-sm text-[#6f554a]">
@@ -531,11 +418,10 @@ export default function CreatePage() {
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="inline-flex items-center gap-2 rounded-full bg-[#964326] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#7f3920] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-full bg-[#964326] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#7f3920]"
         >
           <Save size={17} strokeWidth={2} />
-          {isSubmitting ? "Creating Meal..." : "List My Meal"}
+          List My Meal
         </button>
       </footer>
     </form>
