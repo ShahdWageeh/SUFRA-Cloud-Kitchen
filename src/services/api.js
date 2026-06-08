@@ -1,17 +1,41 @@
-// Base API service layer
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import axios from "axios";
+import tokenService from "./tokenService";
 
-export const api = {
-  get: async (endpoint) => {
-    // Fetch logic
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    "Content-Type": "application/json",
   },
-  post: async (endpoint, data) => {
-    // Post logic
+});
+
+api.interceptors.request.use(
+  (config) => {
+    const token = tokenService.get();
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
   },
-  put: async (endpoint, data) => {
-    // Put logic
+  (error) => Promise.reject(error),
+);
+
+api.interceptors.response.use(
+  (response) => response,
+
+  (error) => {
+    if (error.response?.status === 401) {
+      tokenService.remove();
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+    }
+
+    return Promise.reject(error);
   },
-  delete: async (endpoint) => {
-    // Delete logic
-  },
-};
+);
+
+export default api;
