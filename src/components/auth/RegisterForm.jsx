@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,9 +18,11 @@ import { registerSchema } from "@/schemas/authSchemas";
 import AuthDivider from "@/components/auth/AuthDivider";
 import AuthInput from "@/components/auth/AuthInput";
 import SocialButton from "@/components/auth/SocialButton";
+import useAuth from "@/hooks/useAuth";
+import { toast } from "react-hot-toast";
 
 export default function RegisterForm({ accountType, endpoint }) {
-  const [formMessage, setFormMessage] = useState("");
+  const { register: registerUser, loading } = useAuth();
   const {
     register,
     handleSubmit,
@@ -39,36 +40,37 @@ export default function RegisterForm({ accountType, endpoint }) {
   });
 
   const onSubmit = async (values) => {
-    const payload = {
+    const result = await registerUser({
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
-      phoneNumber: values.phoneNumber,
+      phone: values.phoneNumber,
       password: values.password,
       role: accountType,
-    };
+    });
 
-    try {
-      setFormMessage("");
-      // TODO: Replace with the real API call: POST ${endpoint}
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      console.info("Register payload ready", endpoint, payload);
-      // TODO: Show success toast and redirect after API integration.
-      setFormMessage("Account details are ready to submit.");
-    } catch (error) {
-      console.error("Registration failed", error);
-      // TODO: Show error toast from API response.
-      setFormMessage("Something went wrong. Please try again.");
+    if (!result.success) {
+      toast.error(result.message);
+
+      return;
     }
-  };
 
+    toast.success(
+      accountType === "chef"
+        ? "Registration successful! Complete your verification."
+        : "Welcome to Matbakhna!",
+    );
+  };
   return (
     <section className="relative min-h-dvh overflow-hidden bg-background">
       <div
         className="absolute inset-0 bg-[url('/registerBackground.jpg')] bg-cover bg-center"
         aria-hidden="true"
       />
-      <div className="absolute top-4 left-4 right-4 bottom-4 bg-white/50 backdrop-blur-[1px]" aria-hidden="true" />
+      <div
+        className="absolute top-4 left-4 right-4 bottom-4 bg-white/50 backdrop-blur-[1px]"
+        aria-hidden="true"
+      />
       <div className="relative flex min-h-dvh flex-col px-5 py-8 sm:px-8 lg:px-12">
         <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-7">
           <div className="text-center">
@@ -160,17 +162,11 @@ export default function RegisterForm({ accountType, endpoint }) {
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || loading}
               className="mt-6 h-14 w-full rounded-full bg-primary px-6 text-base font-bold text-white shadow-[0_10px_20px_rgba(150,67,38,0.24)] transition hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-65"
             >
-              {isSubmitting ? "Creating..." : "Create Account"}
+              {loading ? "Creating..." : "Create Account"}
             </button>
-
-            {formMessage && (
-              <p className="mt-3 text-center text-xs font-medium text-text-secondary">
-                {formMessage}
-              </p>
-            )}
 
             <div className="my-6">
               <AuthDivider>Or continue with</AuthDivider>
@@ -183,7 +179,10 @@ export default function RegisterForm({ accountType, endpoint }) {
 
             <p className="mt-8 text-center text-xs text-text-secondary">
               Already have an account?{" "}
-              <Link href="/login" className="font-semibold text-primary">
+              <Link
+                href={accountType === "chef" ? "/login?role=chef" : "/login"}
+                className="font-semibold text-primary"
+              >
                 Sign In
               </Link>
             </p>
@@ -191,7 +190,10 @@ export default function RegisterForm({ accountType, endpoint }) {
 
           <div className="flex flex-wrap items-center justify-center gap-5 text-[11px] text-text-secondary">
             <span className="flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faShieldHalved} className="text-teal-600" />
+              <FontAwesomeIcon
+                icon={faShieldHalved}
+                className="text-teal-600"
+              />
               Secure Payment
             </span>
             <span className="flex items-center gap-1.5">

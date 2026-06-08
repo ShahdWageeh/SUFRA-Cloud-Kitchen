@@ -5,5 +5,5 @@ export const metadata = {
 };
 
 export default function ChefRegisterPage() {
-  return <RegisterForm accountType="chef" endpoint="/api/chefs/register" />;
+  return <RegisterForm accountType="chef"/>;
 }

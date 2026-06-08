@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?(\(?\d{2,4}\)?[-.\s]?)?\d{6,12}$/;
+const phoneRegex = /^01[0125][0-9]{8}$/;
 
 export const registerSchema = z
   .object({
@@ -15,7 +15,7 @@ export const registerSchema = z
     password: z
       .string()
       .min(1, "Password is required")
-      .min(8, "Password must be at least 8 characters"),
+      .min(8, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(1, "Confirm password is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
