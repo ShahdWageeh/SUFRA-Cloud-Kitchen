@@ -1,7 +1,93 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { MessageCircle, Star } from "lucide-react";
+import { brandingService } from "@/services";
+import useAuth from "@/hooks/useAuth";
 
 export default function BrandingPage() {
-  const cookingStyles = ["Levantine", "Mediterranean", "South Asian", "Traditional Home", "Fusion", "+ Other"];
+  const router = useRouter();
+  const { loading, user } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+
+    if (!loading && user && user.role !== "chef") {
+      router.replace("/");
+    }
+  }, [loading, user, router]);
+
+  const cookingStyles = [
+    "Levantine",
+    "Mediterranean",
+    "South Asian",
+    "Traditional Home",
+    "Fusion",
+    "+ Other",
+  ];
+
+  const [selectedStyles, setSelectedStyles] = useState([]);
+  const [signatureDish, setSignatureDish] = useState("");
+  const [audience, setAudience] = useState("");
+  const [story, setStory] = useState("");
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [error, setError] = useState("");
+
+  function toggleStyle(style) {
+    setSelectedStyles((prev) =>
+      prev.includes(style) ? prev.filter((s) => s !== style) : [...prev, style],
+    );
+  }
+
+  async function handleContinue() {
+    setError("");
+
+    if (selectedStyles.length === 0) {
+      setError("Please select at least one cooking style.");
+      return;
+    }
+
+    if (!signatureDish.trim()) {
+      setError("Please enter your signature dish.");
+      return;
+    }
+
+    if (story.trim().length < 60) {
+      setError("Please provide a story of at least 60 characters.");
+      return;
+    }
+
+    const payload = {
+      cookingStyles: selectedStyles,
+      signatureDish,
+      story,
+    };
+
+    try {
+      setLoadingSubmit(true);
+
+      const result = await brandingService.generateKitchenBranding(payload);
+
+      console.log("DEBUG: Full backend response:", result);
+      console.log("DEBUG: Backend response.data:", result.data);
+
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("brandingResponse", JSON.stringify(result.data));
+        sessionStorage.setItem("brandingForm", JSON.stringify(payload));
+        console.log("DEBUG: Stored in sessionStorage - brandingResponse:", result.data);
+      }
+
+      router.push("/chef/branding/reveal");
+    } catch (err) {
+      console.error("DEBUG: Error from backend:", err?.response?.data);
+      setError(err?.response?.data?.message || "Failed to generate branding.");
+    } finally {
+      setLoadingSubmit(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF8F7] py-10 px-4">
@@ -9,14 +95,10 @@ export default function BrandingPage() {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-primary">
-            Sufra
-          </h1>
+          <h1 className="text-3xl font-bold text-primary">Sufra</h1>
 
           <div className="flex items-center gap-3 mt-2">
-            <span className="text-sm text-gray-500">
-              Chef Onboarding
-            </span>
+            <span className="text-sm text-gray-500">Chef Onboarding</span>
 
             <span className="text-xs bg-orange-100 text-primary px-2 py-1 rounded-full">
               Step 1 of 3
@@ -33,26 +115,26 @@ export default function BrandingPage() {
           {/* Form */}
           <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-sm">
 
-            <h2 className="text-2xl font-semibold mb-2">
-              Describe your kitchen
-            </h2>
+            <h2 className="text-2xl font-semibold mb-2">Describe your kitchen</h2>
 
             <p className="text-gray-500 mb-8">
-              Tell us about the flavors that define your craft and the people
-              you love to feed.
+              Tell us about the flavors that define your craft and the people you love to feed.
             </p>
 
             {/* Cooking Style */}
             <div className="mb-8">
-              <label className="block text-sm mb-3 font-semibold text-text-secondary">
-                Cooking Style
-              </label>
+              <label className="block text-sm mb-3 font-semibold text-text-secondary">Cooking Style</label>
 
               <div className="flex flex-wrap gap-3">
                 {cookingStyles.map((style) => (
                   <button
                     key={style}
-                    className={`px-4 py-2 rounded-lg border border-gray-300 text-sm transition hover:bg-[#FFDBD0]`}
+                    onClick={() => toggleStyle(style)}
+                    className={`px-4 py-2 rounded-lg border text-sm transition ${
+                      selectedStyles.includes(style)
+                        ? "bg-primary text-white border-primary"
+                        : "border-gray-300 hover:bg-[#FFDBD0]"
+                    }`}
                   >
                     {style}
                   </button>
@@ -62,11 +144,11 @@ export default function BrandingPage() {
 
             {/* Signature Dish */}
             <div className="mb-6">
-              <label className="block text-sm mb-2 font-semibold text-text-secondary">
-                Your Signature Dish
-              </label>
+              <label className="block text-sm mb-2 font-semibold text-text-secondary">Your Signature Dish</label>
 
               <input
+                value={signatureDish}
+                onChange={(e) => setSignatureDish(e.target.value)}
                 type="text"
                 placeholder="e.g. Grandma's Slow-Cooked Lamb Maqluba"
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none"
@@ -75,12 +157,14 @@ export default function BrandingPage() {
 
             {/* Audience */}
             <div className="mb-6">
-              <label className="block text-sm mb-2 font-semibold text-text-secondary">
-                Who is your food for?
-              </label>
+              <label className="block text-sm mb-2 font-semibold text-text-secondary">Who is your food for?</label>
 
-              <select className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-300">
-                <option>Select your target audience</option>
+              <select
+                value={audience}
+                onChange={(e) => setAudience(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-300"
+              >
+                <option value="">Select your target audience</option>
                 <option>Families</option>
                 <option>Students</option>
                 <option>Professionals</option>
@@ -90,31 +174,33 @@ export default function BrandingPage() {
 
             {/* Story */}
             <div>
-              <label className="block text-sm mb-2 font-semibold text-text-secondary">
-                The Story Behind Your Food
-              </label>
+              <label className="block text-sm mb-2 font-semibold text-text-secondary">The Story Behind Your Food</label>
 
               <textarea
+                value={story}
+                onChange={(e) => setStory(e.target.value)}
                 rows={5}
                 maxLength={500}
                 placeholder="Share the heritage, the secret spices, or the memories that make your cooking special."
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none outline-none focus:ring-2 focus:ring-orange-300"
               />
 
-              <div className="text-right text-xs text-gray-400 mt-1">
-                Min 60 characters
-              </div>
+              <div className="text-right text-xs text-gray-400 mt-1">Min 60 characters</div>
             </div>
+
+            {error && <div className="text-sm text-red-500 mt-3">{error}</div>}
 
             {/* Buttons */}
             <div className="flex gap-4 mt-8">
-              <button className="bg-primary text-white px-6 py-3 rounded-full hover:opacity-90">
-                Continue to Kitchen Setup
+              <button
+                onClick={handleContinue}
+                disabled={loadingSubmit}
+                className="bg-primary text-white px-6 py-3 rounded-full hover:opacity-90"
+              >
+                {loadingSubmit ? "Generating..." : "Continue to Kitchen Setup"}
               </button>
 
-              <button className="text-gray-500">
-                Save as Draft
-              </button>
+              <button className="text-gray-500">Save as Draft</button>
             </div>
           </div>
 
@@ -130,13 +216,10 @@ export default function BrandingPage() {
               />
 
               <div className="absolute inset-0 bg-black/45 flex flex-col justify-end p-5 text-white">
-                <h3 className="text-xl font-semibold">
-                  Your passion, our platform.
-                </h3>
+                <h3 className="text-xl font-semibold">Your passion, our platform.</h3>
 
                 <p className="text-sm mt-2">
-                  Every great meal starts with a story. We help you tell yours
-                  to the community.
+                  Every great meal starts with a story. We help you tell yours to the community.
                 </p>
               </div>
             </div>
@@ -145,16 +228,11 @@ export default function BrandingPage() {
             <div className="bg-teal-600 text-white rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-2">
                 <MessageCircle size={18} />
-                <span className="font-medium">
-                  Chef Tip
-                </span>
+                <span className="font-medium">Chef Tip</span>
               </div>
 
               <p className="text-sm leading-relaxed">
-                Be descriptive! Mentioning specific ingredients like
-                "hand-pressed Palestinian olive oil" or
-                "Slow-roasted za'atar" helps foodies find exactly what
-                they're craving.
+                Be descriptive! Mentioning specific ingredients like "hand-pressed Palestinian olive oil" or "Slow-roasted za'atar" helps foodies find exactly what they're craving.
               </p>
             </div>
 
@@ -167,13 +245,10 @@ export default function BrandingPage() {
 
                 <div>
                   <p className="text-sm text-gray-600 italic">
-                    Joining Sufra allowed me to turn my Sunday
-                    tradition into a thriving local business.
+                    Joining Sufra allowed me to turn my Sunday tradition into a thriving local business.
                   </p>
 
-                  <p className="text-xs text-gray-400 mt-2">
-                    — Chef Amira, Mediterranean Specialist
-                  </p>
+                  <p className="text-xs text-gray-400 mt-2">— Chef Amira, Mediterranean Specialist</p>
                 </div>
               </div>
             </div>
