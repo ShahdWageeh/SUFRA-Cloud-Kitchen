@@ -14,7 +14,7 @@ export default function RoleGuard({ children, allowedRoles }) {
 
     if (!user) return;
 
-    if (!allowedRoles.includes(user.role)) {
+    if (!allowedRoles?.includes(user?.role)) {
       router.replace("/");
     }
   }, [loading, user, allowedRoles, router]);
@@ -23,7 +23,7 @@ export default function RoleGuard({ children, allowedRoles }) {
 
   if (!user) return null;
 
-  if (!allowedRoles.includes(user.role)) return null;
+  if (!allowedRoles?.includes(user?.role)) return null;
 
   return children;
 }

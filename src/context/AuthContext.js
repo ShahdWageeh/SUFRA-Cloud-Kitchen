@@ -2,7 +2,6 @@
 
 import {
   createContext,
-  useContext,
   useState,
   useEffect,
   useCallback,
@@ -107,26 +106,26 @@ export function AuthProvider({ children }) {
             const verification =
               await verificationService.getVerificationStatus();
 
-            const status = verification.data.status;
+            const status = verification.data.data.status;
 
             switch (status) {
               case "approved":
-                router.push("/chef/dashboard");
+                router.replace("/chef/dashboard");
                 break;
 
               case "pending":
-                router.push("/chef/onboarding");
+                router.replace("/chef/waiting");
                 break;
 
               case "failed":
-                router.push("/chef/onboarding");
+                router.replace("/chef/onboarding");
                 break;
 
               default:
-                router.push("/chef/onboarding");
+                router.replace("/chef/onboarding");
             }
           } catch (error) {
-            router.push("/chef/onboarding");
+            router.replace("/chef/onboarding");
           }
         } else if (loggedUser.role === "customer") {
           router.push("/customer/dashboard");

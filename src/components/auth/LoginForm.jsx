@@ -19,11 +19,10 @@ import AuthInput from "@/components/auth/AuthInput";
 import SocialButton from "@/components/auth/SocialButton";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "react-hot-toast";
-import { User } from "lucide-react";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const { login, loading } = useAuth();
+  const { login, loading, user } = useAuth();
   const roleParam = searchParams.get("role");
   const isChefOnlyLogin = roleParam === "chef";
   const [selectedRole, setSelectedRole] = useState(
@@ -54,7 +53,8 @@ export default function LoginForm() {
       return;
     }
 
-    toast.success(`Welcome back, ${User.firstName}`);
+    toast.success(`Welcome back, ${user?.firstName}`);
+    console.log(user)
   };
 
   return (
