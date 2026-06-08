@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   Camera,
   ChevronDown,
@@ -12,8 +14,6 @@ import {
   Save,
   X,
 } from "lucide-react";
-
-const initialIngredients = ["Basmati Rice", "Saffron"];
 
 const allergenOptions = [
   "Gluten Free",
@@ -30,7 +30,6 @@ function FieldLabel({ children }) {
   );
 }
 
-// Fixed Secondary Photo Slot component using native HTML label triggers
 function SecondaryPhotoSlot({ id, label, imageSrc, onFileSelect, onRemove }) {
   return (
     <div className="relative aspect-square min-h-24 w-full">
@@ -76,11 +75,14 @@ function SecondaryPhotoSlot({ id, label, imageSrc, onFileSelect, onRemove }) {
 }
 
 export default function CreatePage() {
+  const { token, logout } = useAuth();
+  const router = useRouter();
+
+  // Core Form Inputs
   const [mealName, setMealName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("Main Dish");
-  const [ingredients, setIngredients] = useState(initialIngredients);
+  const [ingredients, setIngredients] = useState([]);
   const [ingredientInput, setIngredientInput] = useState("");
   const [allergens, setAllergens] = useState({
     "Gluten Free": false,
@@ -89,6 +91,11 @@ export default function CreatePage() {
     "Dairy Free": false,
   });
 
+  // Dynamic Backend Categories States
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   // Image Upload States
   const [mainImage, setMainImage] = useState(null);
   const [mainImagePreview, setMainImagePreview] = useState(null);
@@ -96,6 +103,31 @@ export default function CreatePage() {
     slot1: { file: null, preview: null },
     slot2: { file: null, preview: null },
   });
+
+  // UI Processing Submittion States
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(null);
+
+  // 1. Fetch System Categories on Mount
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const response = await fetch(`${baseUrl}/categories`);
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          setCategories(result.data || []);
+          if (result.data && result.data.length > 0) {
+            setSelectedCategory(result.data[0]._id); // Fallback to initial ID entry
+          }
+        }
+      } catch (err) {
+        console.error("Failed loading backend categories mapping:", err);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   // Image Event Handlers
   const handleMainImageChange = (event) => {
@@ -108,7 +140,7 @@ export default function CreatePage() {
 
   const removeMainImage = (e) => {
     e.preventDefault();
-    e.stopPropagation(); 
+    e.stopPropagation();
     setMainImage(null);
     setMainImagePreview(null);
     const inputElement = document.getElementById("main-image-upload");
@@ -136,21 +168,16 @@ export default function CreatePage() {
     if (inputElement) inputElement.value = "";
   };
 
-  // Ingredient Handling Logic
+  // Ingredient Handlers
   const addIngredient = (value) => {
     const nextIngredient = value.trim().replace(/,$/, "");
     if (!nextIngredient || ingredients.includes(nextIngredient)) return;
-    setIngredients((currentIngredients) => [
-      ...currentIngredients,
-      nextIngredient,
-    ]);
+    setIngredients((current) => [...current, nextIngredient]);
     setIngredientInput("");
   };
 
   const removeIngredient = (ingredient) => {
-    setIngredients((currentIngredients) =>
-      currentIngredients.filter((item) => item !== ingredient),
-    );
+    setIngredients((current) => current.filter((item) => item !== ingredient));
   };
 
   const handleIngredientKeyDown = (event) => {
@@ -161,32 +188,123 @@ export default function CreatePage() {
   };
 
   const toggleAllergen = (option) => {
-    setAllergens((currentAllergens) => ({
-      ...currentAllergens,
-      [option]: !currentAllergens[option],
+    setAllergens((current) => ({
+      ...current,
+      [option]: !current[option],
     }));
   };
 
-  const handleSubmit = (event) => {
+  // 2. Submit Multipart FormData to Backend
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log({
-      mealName,
-      description,
-      price,
-      category,
-      ingredients,
-      allergens,
-      mainImage,
-      secondaryImage1: secondaryImages.slot1.file,
-      secondaryImage2: secondaryImages.slot2.file,
-    });
+    setFormError(null);
+
+    if (!token) {
+      setFormError("Authentication session missing. Please log in again.");
+      return;
+    }
+
+    if (
+      !mealName.trim() ||
+      !description.trim() ||
+      !price ||
+      !selectedCategory
+    ) {
+      setFormError("Please fill out all required foundational fields.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const formData = new FormData();
+
+      // Append core text values
+      formData.append("name", mealName.trim());
+      formData.append("description", description.trim());
+      formData.append("price", parseFloat(price));
+      formData.append("category", selectedCategory); // passes standard database _id mapping
+
+      // Structure ingredients array into independent items
+      ingredients.forEach((ing) => {
+        formData.append("ingredients", ing);
+      });
+
+      // Filter active dietary flags into plain array collection strings
+      const activeAllergens = Object.keys(allergens).filter(
+        (key) => allergens[key],
+      );
+      activeAllergens.forEach((allergen) => {
+        formData.append("allergens", allergen);
+      });
+
+      // Append Main Image file binary payload
+      if (mainImage) {
+        formData.append("mealImages", mainImage);
+      }
+
+      // Append available secondary images slots safely
+      if (secondaryImages.slot1.file) {
+        formData.append("mealImages", secondaryImages.slot1.file);
+      }
+      if (secondaryImages.slot2.file) {
+        formData.append("mealImages", secondaryImages.slot2.file);
+      }
+
+      // Execute POST fetch with multi-part headers left to browser computation
+      const response = await fetch(`${baseUrl}/meals`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // CRITICAL: Do NOT set Content-Type header manually here.
+          // The browser needs to inject boundary delimiters for FormData multi-part uploads automatically.
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.status === 401) {
+        logout();
+        throw new Error(
+          "Session expired. Please re-authenticate your profile dashboard.",
+        );
+      }
+
+      if (response.ok && result.success) {
+        router.push("/chef/meals"); // Redirect to table overview listing dashboard on success
+      } else {
+        throw new Error(
+          result.message || "Failed to finalize new menu catalog listing.",
+        );
+      }
+    } catch (err) {
+      console.error("Form creation execution failed:", err);
+      setFormError(
+        err.message ||
+          "Network exceptions processing content validation framework.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  // Find active displaying category name
+  const currentCategoryObj = categories.find((c) => c._id === selectedCategory);
+  const activeCategoryLabel = currentCategoryObj
+    ? currentCategoryObj.name
+    : "Select Category";
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-6xl space-y-6 p-4">
       <header>
         <nav className="flex items-center gap-2 text-sm font-medium">
-          <span className="text-[#96837b]">Meal Listings</span>
+          <Link
+            href="/chef/meals"
+            className="text-[#96837b] hover:text-[#964326]"
+          >
+            Meal Listings
+          </Link>
           <span className="text-[#c7b7b0]">&gt;</span>
           <span className="text-[#964326]">Add New Meal</span>
         </nav>
@@ -200,6 +318,12 @@ export default function CreatePage() {
           marketplace.
         </p>
       </header>
+
+      {formError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+          {formError}
+        </div>
+      )}
 
       {/* Section 1: Photography Card */}
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
@@ -287,9 +411,10 @@ export default function CreatePage() {
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
         <div className="grid gap-7 lg:grid-cols-2">
           <div>
-            <FieldLabel>Meal Name</FieldLabel>
+            <FieldLabel>Meal Name *</FieldLabel>
             <input
               type="text"
+              required
               value={mealName}
               onChange={(event) => setMealName(event.target.value)}
               placeholder="e.g. Traditional Saudi Kabsa"
@@ -297,8 +422,9 @@ export default function CreatePage() {
             />
 
             <div className="mt-5">
-              <FieldLabel>Description</FieldLabel>
+              <FieldLabel>Description *</FieldLabel>
               <textarea
+                required
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Tell the story behind this dish, its flavors, and special ingredients..."
@@ -309,7 +435,7 @@ export default function CreatePage() {
           </div>
 
           <div>
-            <FieldLabel>Price (EGP)</FieldLabel>
+            <FieldLabel>Price (EGP) *</FieldLabel>
             <div className="flex h-12 overflow-hidden rounded-xl border border-[#eaded8] bg-white transition focus-within:border-[#964326] focus-within:ring-4 focus-within:ring-[#964326]/10">
               <span className="flex items-center border-r border-[#eaded8] bg-[#fbf6f3] px-4 text-sm font-extrabold text-[#964326]">
                 EGP
@@ -317,6 +443,7 @@ export default function CreatePage() {
 
               <input
                 type="number"
+                required
                 min="0"
                 step="0.01"
                 value={price}
@@ -326,16 +453,41 @@ export default function CreatePage() {
               />
             </div>
 
-            <div className="mt-5">
-              <FieldLabel>Category</FieldLabel>
+            {/* Dynamic Category Selector Component */}
+            <div className="mt-5 relative">
+              <FieldLabel>Category *</FieldLabel>
               <button
                 type="button"
-                onClick={() => setCategory("Main Dish")}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex h-12 w-full items-center justify-between rounded-xl border border-[#eaded8] bg-white px-4 text-left text-sm font-semibold text-[#2f221d] transition hover:bg-[#fffaf7] focus:border-[#964326] focus:outline-none focus:ring-4 focus:ring-[#964326]/10"
               >
-                <span>{category}</span>
+                <span>{activeCategoryLabel}</span>
                 <ChevronDown size={18} className="text-[#8b766f]" />
               </button>
+
+              {dropdownOpen && (
+                <div className="absolute left-0 z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-[#eaded8] bg-white shadow-lg py-1">
+                  {categories.length === 0 ? (
+                    <div className="px-4 py-2 text-sm text-gray-500">
+                      No categories loaded.
+                    </div>
+                  ) : (
+                    categories.map((cat) => (
+                      <button
+                        key={cat._id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedCategory(cat._id);
+                          setDropdownOpen(false);
+                        }}
+                        className="block w-full px-4 py-2 text-left text-sm text-[#2f221d] hover:bg-[#fff6f1] hover:text-[#964326] font-medium"
+                      >
+                        {cat.name}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="mt-5 flex items-start gap-3 rounded-xl border border-[#f0dfd5] bg-[#fff7ef] p-4 text-sm text-[#6f554a]">
@@ -344,7 +496,10 @@ export default function CreatePage() {
                 className="mt-0.5 shrink-0 text-[#964326]"
                 strokeWidth={2}
               />
-              <p>Average price for this category is 45-65 EGP</p>
+              <p>
+                Verify pricing guidelines correctly before publishing items to
+                active delivery routes.
+              </p>
             </div>
           </div>
         </div>
@@ -354,7 +509,7 @@ export default function CreatePage() {
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
         <div className="grid gap-7 lg:grid-cols-2">
           <div>
-            <FieldLabel>Ingredients (Separated by comma)</FieldLabel>
+            <FieldLabel>Ingredients (Separated by comma or Enter)</FieldLabel>
             <div className="flex min-h-12 flex-wrap items-center gap-2 rounded-xl border border-[#eaded8] bg-white px-3 py-2 transition focus-within:border-[#964326] focus-within:ring-4 focus-within:ring-[#964326]/10">
               {ingredients.map((ingredient) => (
                 <span
@@ -418,10 +573,11 @@ export default function CreatePage() {
 
         <button
           type="submit"
-          className="inline-flex items-center gap-2 rounded-full bg-[#964326] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#7f3920]"
+          disabled={isSubmitting}
+          className="inline-flex items-center gap-2 rounded-full bg-[#964326] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#7f3920] disabled:bg-[#c78873] disabled:cursor-not-allowed"
         >
           <Save size={17} strokeWidth={2} />
-          List My Meal
+          {isSubmitting ? "Listing Meal..." : "List My Meal"}
         </button>
       </footer>
     </form>
