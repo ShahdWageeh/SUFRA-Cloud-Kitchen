@@ -9,11 +9,27 @@ import {
   faBell,
   faCartShopping,
   faMagnifyingGlass,
+  faChevronDown,
+  faRightFromBracket,
+  faReceipt,
+  faTableColumns,
 } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
+import useAuth from "@/hooks/useAuth";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const { user, isCustomer, logout } = useAuth();
+
+  const customerName =
+    user?.firstName || user?.name?.split(" ")?.[0] || user?.email || "Customer";
+  const avatarInitial = customerName.charAt(0).toUpperCase();
+
+  const closeMenus = () => {
+    setOpen(false);
+    setProfileOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-surface border-b border-outline/20 backdrop-blur">
@@ -75,12 +91,78 @@ export default function Navbar() {
             <FontAwesomeIcon icon={faCartShopping} className="text-lg" />
           </button>
 
-          <Link
-            href="/login"
-            className="hidden ml-3 sm:block bg-primary text-white px-8 py-2 rounded-full hover:opacity-90 transition"
-          >
-            Sign In
-          </Link>
+          {isCustomer ? (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setProfileOpen((current) => !current)}
+                className="flex items-center gap-2 rounded-full border border-primary/20 bg-white p-1 pr-3 shadow-sm transition hover:border-primary"
+                aria-expanded={profileOpen}
+                aria-haspopup="menu"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+                  {avatarInitial}
+                </span>
+                <span className="hidden max-w-24 truncate text-sm font-semibold text-text-primary sm:block">
+                  {customerName}
+                </span>
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className={`hidden h-3 w-3 text-text-secondary transition sm:block ${
+                    profileOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {profileOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-3 w-56 overflow-hidden rounded-xl border border-primary/10 bg-white py-2 shadow-xl"
+                >
+                  <Link
+                    href="/customer/dashboard"
+                    onClick={closeMenus}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-primary transition hover:bg-secondary-container hover:text-primary"
+                    role="menuitem"
+                  >
+                    <FontAwesomeIcon icon={faTableColumns} className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/customer/orders"
+                    onClick={closeMenus}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-primary transition hover:bg-secondary-container hover:text-primary"
+                    role="menuitem"
+                  >
+                    <FontAwesomeIcon icon={faReceipt} className="h-4 w-4" />
+                    Orders
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeMenus();
+                      logout();
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 transition hover:bg-red-50"
+                    role="menuitem"
+                  >
+                    <FontAwesomeIcon
+                      icon={faRightFromBracket}
+                      className="h-4 w-4"
+                    />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden ml-3 sm:block bg-primary text-white px-8 py-2 rounded-full hover:opacity-90 transition"
+            >
+              Sign In
+            </Link>
+          )}
 
           <button className="md:hidden" onClick={() => setOpen(!open)}>
             <FontAwesomeIcon
@@ -104,12 +186,35 @@ export default function Navbar() {
 
             <Link href="/register/chef">Become a Chef</Link>
 
-            <Link
-              href="/login"
-              className="bg-primary text-center text-white py-3 rounded-full"
-            >
-              Sign In
-            </Link>
+            {isCustomer ? (
+              <>
+                <Link href="/customer/dashboard" onClick={closeMenus}>
+                  Dashboard
+                </Link>
+
+                <Link href="/customer/orders" onClick={closeMenus}>
+                  Orders
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenus();
+                    logout();
+                  }}
+                  className="bg-primary text-center text-white py-3 rounded-full"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-primary text-center text-white py-3 rounded-full"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       )}

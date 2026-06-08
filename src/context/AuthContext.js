@@ -1,125 +1,192 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { useRouter } from "next/navigation";
+import { authService, verificationService, tokenService } from "@/services";
 
-const AuthContext = createContext(null);
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+export const AuthContext = createContext(null);
+export function AuthProvider({ children }) {
   const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(tokenService.get());
+  const [loading, setLoading] = useState(true);
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const isAuthenticated = !!token;
+  const isChef = user?.role === "chef";
+  const isCustomer = user?.role === "customer";
+  const isAdmin = user?.role === "admin";
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const currentUser = await authService.me();
+      setUser(currentUser.data);
+      return currentUser.data;
+    } catch (error) {
+      tokenService.remove();
+      setToken(null);
+      setUser(null);
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
-    async function checkExistingSession() {
+    async function restoreSession() {
       try {
-        const storedToken = localStorage.getItem("token");
-
-        if (
-          !storedToken ||
-          storedToken === "null" ||
-          storedToken === "undefined"
-        ) {
+        const storedToken = tokenService.get();
+        if (!storedToken) {
           setLoading(false);
           return;
         }
-
-        const response = await fetch(`${baseUrl}/auth/me`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${storedToken}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          setToken(storedToken);
-          setUser(result.data);
-        } else {
-          localStorage.removeItem("token");
-        }
-      } catch (err) {
-        console.error("Session restoration failed:", err);
+        setToken(storedToken);
+        await refreshUser();
       } finally {
         setLoading(false);
       }
     }
 
-    checkExistingSession();
-  }, [baseUrl]);
+    restoreSession();
+  }, [refreshUser]);
 
-  const login = async (credentials) => {
-    try {
+  const register = useCallback(
+    async (data) => {
       setLoading(true);
 
-      const response = await fetch(`${baseUrl}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        const userToken = result.data.token;
-        const userData = result.data.user;
-
-        localStorage.setItem("token", userToken);
-
-        setToken(userToken);
-        setUser(userData);
-
-        if (userData.role === "chef") {
-          router.push("/chef/dashboard");
+      try {
+        const response = await authService.register(data);
+        const user = response.data.user;
+        const token = response.data.token;
+        tokenService.save(token);
+        setToken(token);
+        setUser(user);
+        if (user.role === "chef") {
+          router.push("/chef/onboarding");
         } else {
-          router.push("/");
+          router.push("/customer/dashboard");
         }
 
-        return { success: true };
-      } else {
+        return {
+          success: true,
+          user,
+        };
+      } catch (error) {
         return {
           success: false,
-          message: result.message || "Login credentials invalid.",
+          message: error?.response?.data?.message || "Registration failed.",
         };
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Auth Login Network Exception:", err);
-      return {
-        success: false,
-        message: "Server unreachable. Please check your network connection.",
-      };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
-    router.push("/login");
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
-      {!loading && children}
-    </AuthContext.Provider>
+    },
+    [router],
   );
-};
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error(
-      "useAuth must be wrapped inside an AuthProvider element inside your layout tree.",
-    );
-  }
-  return context;
-};
+  const login = useCallback(
+    async (credentials) => {
+      setLoading(true);
+
+      try {
+        const response = await authService.login(credentials);
+
+        const loggedUser = response.data.user;
+        const accessToken = response.data.token;
+
+        tokenService.save(accessToken);
+
+        setToken(accessToken);
+        setUser(loggedUser);
+
+        if (loggedUser.role === "chef") {
+          try {
+            const verification =
+              await verificationService.getVerificationStatus();
+
+            const status = verification.data.status;
+
+            switch (status) {
+              case "approved":
+                router.push("/chef/dashboard");
+                break;
+
+              case "pending":
+                router.push("/chef/onboarding");
+                break;
+
+              case "failed":
+                router.push("/chef/onboarding");
+                break;
+
+              default:
+                router.push("/chef/onboarding");
+            }
+          } catch (error) {
+            router.push("/chef/onboarding");
+          }
+        } else if (loggedUser.role === "customer") {
+          router.push("/customer/dashboard");
+        } else if (loggedUser.role === "admin") {
+          router.push("/admin/dashboard");
+        }
+
+        return {
+          success: true,
+          user: loggedUser,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message:
+            error?.response?.data?.message || "Invalid email or password.",
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [router],
+  );
+
+  const logout = useCallback(() => {
+    tokenService.remove();
+    setUser(null);
+    setToken(null);
+
+    router.replace("/login");
+  }, [router]);
+
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      loading,
+      isAuthenticated,
+      isChef,
+      isCustomer,
+      isAdmin,
+      register,
+      login,
+      logout,
+      refreshUser,
+    }),
+    [
+      user,
+      token,
+      loading,
+      isAuthenticated,
+      isChef,
+      isCustomer,
+      isAdmin,
+      register,
+      login,
+      logout,
+      refreshUser,
+    ],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}

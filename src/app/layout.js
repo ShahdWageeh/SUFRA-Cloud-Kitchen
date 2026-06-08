@@ -3,6 +3,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import AppProviders from "@/providers/AppProviders";
 
 config.autoAddCss = false;
 
@@ -19,7 +20,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={jakarta.className}>
-        <AuthProvider>{children}</AuthProvider>
+        <AppProviders>
+          <AuthProvider>{children}</AuthProvider>
+        </AppProviders>
       </body>
     </html>
   );

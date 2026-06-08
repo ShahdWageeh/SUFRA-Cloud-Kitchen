@@ -1,17 +1,16 @@
-import { useAuth } from '@/context/AuthContext';
+"use client";
 
-export const useAuthActions = () => {
-  const { setUser } = useAuth();
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
-  const login = async (credentials) => {
-    // Logic for login will go here
-    console.log('Logging in...', credentials);
-  };
+export default function useAuth() {
+  const context = useContext(AuthContext);
 
-  const logout = () => {
-    // Logic for logout will go here
-    setUser(null);
-  };
+  if (!context) {
+    throw new Error(
+      "useAuth must be used within an AuthProvider."
+    );
+  }
 
-  return { login, logout };
-};
+  return context;
+}

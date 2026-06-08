@@ -5,5 +5,5 @@ export const metadata = {
 };
 
 export default function CustomerRegisterPage() {
-  return <RegisterForm accountType="customer" endpoint="/api/customers/register" />;
+  return <RegisterForm accountType="customer"/>;
 }
