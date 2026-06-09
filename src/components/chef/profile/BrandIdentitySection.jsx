@@ -3,6 +3,8 @@ import { Palette } from "lucide-react";
 
 export default function BrandIdentitySection({
   profile,
+  brandIdentity,
+  onChange,
 }) {
   return (
     <SectionCard>
@@ -11,9 +13,7 @@ export default function BrandIdentitySection({
           <Palette className="text-primary" />
         </div>
 
-        <h2 className="text-4xl font-bold">
-          Brand Identity
-        </h2>
+        <h2 className="text-4xl font-bold">Brand Identity</h2>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -24,8 +24,8 @@ export default function BrandIdentitySection({
           </label>
 
           <img
-            src={profile.logo}
-            alt=""
+            src={profile?.logo || "https://images.unsplash.com/photo-1504674900247-0877df9cc836"}
+            alt="Kitchen logo"
             className="
               w-full
               h-[260px]
@@ -43,17 +43,23 @@ export default function BrandIdentitySection({
 
           <Field
             label="Kitchen Name"
-            value={profile.name}
+            name="name"
+            value={brandIdentity.name}
+            onChange={onChange}
           />
 
           <Field
             label="Kitchen Slogan"
-            value={profile.slogan}
+            name="slogan"
+            value={brandIdentity.slogan}
+            onChange={onChange}
           />
 
           <TextAreaField
             label="Brand Bio"
-            value={profile.bio}
+            name="bio"
+            value={brandIdentity.bio}
+            onChange={onChange}
           />
         </div>
       </div>
@@ -61,7 +67,7 @@ export default function BrandIdentitySection({
   );
 }
 
-function Field({ label, value }) {
+function Field({ label, name, value, onChange }) {
   return (
     <div>
       <label className="block mb-2 font-medium text-text-secondary">
@@ -70,7 +76,7 @@ function Field({ label, value }) {
 
       <input
         value={value}
-        readOnly
+        onChange={(event) => onChange(name, event.target.value)}
         className="
           w-full
           border
@@ -84,10 +90,7 @@ function Field({ label, value }) {
   );
 }
 
-function TextAreaField({
-  label,
-  value,
-}) {
+function TextAreaField({ label, name, value, onChange }) {
   return (
     <div>
       <label className="block mb-2 font-medium text-text-secondary">
@@ -96,7 +99,7 @@ function TextAreaField({
 
       <textarea
         value={value}
-        readOnly
+        onChange={(event) => onChange(name, event.target.value)}
         rows={5}
         className="
           w-full
