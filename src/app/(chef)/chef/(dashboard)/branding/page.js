@@ -9,6 +9,7 @@ import useAuth from "@/hooks/useAuth";
 export default function BrandingPage() {
   const router = useRouter();
   const { loading, user } = useAuth();
+  console.log("user log", user);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -71,18 +72,13 @@ export default function BrandingPage() {
 
       const result = await brandingService.generateKitchenBranding(payload);
 
-      console.log("DEBUG: Full backend response:", result);
-      console.log("DEBUG: Backend response.data:", result.data);
-
       if (typeof window !== "undefined") {
         sessionStorage.setItem("brandingResponse", JSON.stringify(result.data));
         sessionStorage.setItem("brandingForm", JSON.stringify(payload));
-        console.log("DEBUG: Stored in sessionStorage - brandingResponse:", result.data);
       }
 
       router.push("/chef/branding/reveal");
     } catch (err) {
-      console.error("DEBUG: Error from backend:", err?.response?.data);
       setError(err?.response?.data?.message || "Failed to generate branding.");
     } finally {
       setLoadingSubmit(false);

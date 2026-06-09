@@ -1,4 +1,4 @@
-export default function ProfileFooter() {
+export default function ProfileFooter({ onDiscard, onSave, saving }) {
     return (
         <div
             className=" sticky bottom-0 bg-white border-t border-surface-low"
@@ -12,6 +12,8 @@ export default function ProfileFooter() {
 
                 <div className="flex gap-4">
                     <button
+                        type="button"
+                        onClick={onDiscard}
                         className="
             px-8 py-3
             border
@@ -23,14 +25,18 @@ export default function ProfileFooter() {
                     </button>
 
                     <button
+                        type="button"
+                        onClick={onSave}
+                        disabled={saving}
                         className="
             px-8 py-3
             rounded-2xl
             bg-primary
             text-white
+            disabled:opacity-50
           "
                     >
-                        Save Changes
+                        {saving ? "Saving..." : "Save Changes"}
                     </button>
                 </div>
             </div>
