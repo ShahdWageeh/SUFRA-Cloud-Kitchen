@@ -30,6 +30,10 @@ class AuthService {
   logout() {
     tokenService.remove();
   }
+
+  clearSession() {
+    tokenService.remove();
+  }
 }
 
 const authService = new AuthService();

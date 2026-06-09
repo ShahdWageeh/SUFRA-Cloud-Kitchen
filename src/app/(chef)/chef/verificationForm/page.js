@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUser,
@@ -20,41 +22,101 @@ import {
   faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 import UploadZone from "@/components/ui/UploadZone";
+import { verificationService } from "@/services";
 
 export default function VerificationForm() {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState({});
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const getFirstFile = (fieldName) => uploadedFiles[fieldName]?.[0] || null;
+
+  const validateFiles = () => {
+    const nationalIdImage = getFirstFile("idFront");
+    const nationalIdBackImage = getFirstFile("idBack");
+    const healthCertificateImage = getFirstFile("healthCert");
+    const kitchenImages = [1, 2, 3, 4, 5]
+      .map((num) => getFirstFile(`kitchenPhoto${num}`))
+      .filter(Boolean);
+
+    if (!nationalIdImage) {
+      return "Please upload the front side of your National ID.";
+    }
+
+    if (!nationalIdBackImage) {
+      return "Please upload the back side of your National ID.";
+    }
+
+    if (!healthCertificateImage) {
+      return "Please upload your health certificate.";
+    }
+
+    if (kitchenImages.length < 3) {
+      return "Please upload at least 3 kitchen images.";
+    }
+
+    if (kitchenImages.length > 5) {
+      return "Please upload no more than 5 kitchen images.";
+    }
 
     if (!isConfirmed) {
-      alert("Please confirm the information accuracy before submitting.");
+      return "Please confirm the information accuracy before submitting.";
+    }
+
+    return null;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const validationError = validateFiles();
+
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert(
-        "Verification request submitted successfully! Redirecting to dashboard...",
+    try {
+      const formData = new FormData();
+      formData.append("nationalIdImage", getFirstFile("idFront"));
+      formData.append("nationalIdBackImage", getFirstFile("idBack"));
+      formData.append("healthCertificateImage", getFirstFile("healthCert"));
+
+      [1, 2, 3, 4, 5]
+        .map((num) => getFirstFile(`kitchenPhoto${num}`))
+        .filter(Boolean)
+        .forEach((file) => {
+          formData.append("kitchenImages", file);
+        });
+
+      await verificationService.submitVerification(formData);
+
+      toast.success("Verification request submitted successfully.");
+      router.push("/chef/waitingVerify");
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          "Failed to submit verification request.",
       );
-    }, 2000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFileChange = (e, fieldName) => {
     if (e.target.files.length > 0) {
       setUploadedFiles((prev) => ({
         ...prev,
-        [fieldName]: true,
+        [fieldName]: Array.from(e.target.files),
       }));
     }
   };
 
   return (
-    <main className="bg-[url(/registerBackground.jpg)] bg-center bg-cover bg-no-repeat pt-4 pb-20 px-4 sm:px-6 bg-(--color-background) min-h-screen font-(--font-display)">
+    <main className="bg-secondary-container bg-center bg-cover bg-no-repeat pt-4 pb-20 px-4 sm:px-6  min-h-screen font-(--font-display)">
       <div className="max-w-3xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-10">
