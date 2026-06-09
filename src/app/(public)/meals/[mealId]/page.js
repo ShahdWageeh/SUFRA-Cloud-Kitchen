@@ -13,11 +13,23 @@ import {
   faStar,
   faTruckFast,
 } from "@fortawesome/free-solid-svg-icons";
-import { mealsResponse } from "@/data/mealsData";
+import { mealService } from "@/services";
+import { normalizePublicMeal } from "@/utils/mealUtils";
 
 const RelatedMealsSection = dynamic(() => import("@/components/public/RelatedMealsSection"), {
   loading: () => <div className="mt-12 h-64 rounded-xl bg-secondary-container" />,
 });
+
+function getGalleryImages(meal) {
+  const images = meal.images?.length ? meal.images : [meal.image];
+  const gallery = images.slice(0, 4);
+
+  while (gallery.length < 4) {
+    gallery.push(meal.image);
+  }
+
+  return gallery;
+}
 
 async function getMealDetailData(mealId) {
   const state = {
@@ -26,16 +38,30 @@ async function getMealDetailData(mealId) {
   };
 
   try {
-    // TODO: Replace local data with API call.
-    // GET /api/meals/:mealId
-    const meal = mealsResponse.data.meals.find((item) => item.id === mealId);
-    const relatedMeals = mealsResponse.data.meals
-      .filter((item) => item.id !== mealId && (item.chefId === meal?.chefId || item.category === meal?.category))
-      .slice(0, 4);
+    const mealResponse = await mealService.getMealById(mealId);
+    const meal = mealResponse.data ? normalizePublicMeal(mealResponse.data) : null;
+
+    if (!meal) {
+      return { ...state, data: { meal: null, relatedMeals: [] } };
+    }
+
+    let relatedMeals = [];
+
+    if (meal.chefId) {
+      const chefMealsResponse = await mealService.getActiveMeals({ chefId: meal.chefId });
+      relatedMeals = (chefMealsResponse.data || [])
+        .map(normalizePublicMeal)
+        .filter((item) => item.chefId === meal.chefId && item.id !== meal.id)
+        .slice(0, 4);
+    }
 
     return { ...state, data: { meal, relatedMeals } };
   } catch (error) {
-    return { ...state, error: error.message, data: { meal: null, relatedMeals: [] } };
+    return {
+      ...state,
+      error: error.response?.data?.message || error.message,
+      data: { meal: null, relatedMeals: [] },
+    };
   }
 }
 
@@ -43,6 +69,7 @@ export default async function MealDetailPage({ params }) {
   const { mealId } = await params;
   const { data, error } = await getMealDetailData(mealId);
   const meal = data.meal;
+  const galleryImages = meal ? getGalleryImages(meal) : [];
 
   if (error || !meal) {
     return (
@@ -73,8 +100,8 @@ export default async function MealDetailPage({ params }) {
               </button>
             </div>
             <div className="mt-4 grid grid-cols-4 gap-3">
-              {[meal.image, "/meal2.jpg", "/meal3.jpg", "/meal4.jpg"].map((image, index) => (
-                <div key={image + index} className="relative aspect-square overflow-hidden rounded-md bg-secondary-container ring-1 ring-primary/10">
+              {galleryImages.map((image, index) => (
+                <div key={`${image}-${index}`} className="relative aspect-square overflow-hidden rounded-md bg-secondary-container ring-1 ring-primary/10">
                   <Image src={image} alt={`${meal.name} preview ${index + 1}`} fill sizes="120px" className="object-cover" />
                 </div>
               ))}
@@ -82,7 +109,9 @@ export default async function MealDetailPage({ params }) {
           </div>
 
           <article className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-primary/10 lg:p-8">
-            <p className="text-xs font-bold uppercase tracking-wide text-primary">{meal.cuisine} - {meal.category.replace("-", " ")}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-primary">
+              {meal.cuisine} - {meal.categoryLabel}
+            </p>
             <div className="mt-3 flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">{meal.name}</h1>
@@ -108,26 +137,30 @@ export default async function MealDetailPage({ params }) {
 
             <p className="mt-6 text-sm leading-7 text-text-secondary">{meal.description}</p>
 
-            <div className="mt-6">
-              <h2 className="text-sm font-bold">Ingredients</h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {meal.ingredients.map((ingredient) => (
-                  <span key={ingredient} className="rounded-full bg-secondary-container px-3 py-2 text-xs font-semibold text-text-secondary">
-                    {ingredient}
-                  </span>
-                ))}
+            {meal.ingredients.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-sm font-bold">Ingredients</h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {meal.ingredients.map((ingredient) => (
+                    <span key={ingredient} className="rounded-full bg-secondary-container px-3 py-2 text-xs font-semibold text-text-secondary">
+                      {ingredient}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            <Link href={`/chefs/${meal.chefId}`} className="mt-6 flex items-center gap-4 rounded-lg bg-background p-4 ring-1 ring-primary/10 transition hover:ring-primary">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <FontAwesomeIcon icon={faShieldHeart} className="h-5 w-5" />
-              </span>
-              <span>
-                <span className="block text-sm font-bold">{meal.chefName}</span>
-                <span className="block text-xs text-text-secondary">Verified home chef - view profile</span>
-              </span>
-            </Link>
+            {meal.chefId && (
+              <Link href={`/chefs/${meal.chefId}`} className="mt-6 flex items-center gap-4 rounded-lg bg-background p-4 ring-1 ring-primary/10 transition hover:ring-primary">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <FontAwesomeIcon icon={faShieldHeart} className="h-5 w-5" />
+                </span>
+                <span>
+                  <span className="block text-sm font-bold">{meal.chefName}</span>
+                  <span className="block text-xs text-text-secondary">Verified home chef - view profile</span>
+                </span>
+              </Link>
+            )}
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex h-12 w-36 items-center justify-between rounded-full border border-primary/20 px-4">

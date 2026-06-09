@@ -1,14 +1,13 @@
 import Image from "next/image";
-import { categories, meals, chefs, testimonials } from "@/data/landingData";
+import { testimonials } from "@/data/landingData";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import CategoriesSlider from "@/components/ui/CategoriesSlider";
+import LandingCategoriesSection from "@/components/public/LandingCategoriesSection";
+import LandingMealsSection from "@/components/public/LandingMealsSection";
+import LandingFeaturedChefsSection from "@/components/public/LandingFeaturedChefsSection";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
-  faArrowRight,
-  faCartShopping,
-  faStar,
   faMagnifyingGlass,
   faHandPointer,
   faUtensils,
@@ -73,85 +72,11 @@ export default function HomePage() {
 
         {/* CATEGORIES */}
 
-        <section className="py-20">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-3xl lg:text-4xl font-bold">
-                Explore Categories
-              </h2>
-            </div>
-
-            <CategoriesSlider categories={categories} />
-          </div>
-        </section>
+        <LandingCategoriesSection />
 
         {/* MOST LOVED MEALS */}
 
-        <section className="py-20 bg-secondary-container">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex justify-between items-center mb-12">
-              <h2 className="text-3xl lg:text-4xl font-bold">
-                Most Loved Meals
-              </h2>
-              <Link
-                href="/meals"
-                className="text-primary flex items-center gap-2"
-              >
-                See All
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Link>
-            </div>
-
-            <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-8">
-              {meals.map((meal) => (
-                <div
-                  key={meal.id}
-                  className="bg-white rounded-3xl overflow-hidden shadow hover:shadow-xl transition flex flex-col"
-                >
-                  <div className="relative h-60">
-                    <Image
-                      src={meal.image}
-                      alt={meal.title}
-                      fill
-                      className="object-cover"
-                    />
-
-                    <span className="absolute top-4 right-4 bg-secondary-container px-3 py-1 rounded-full font-semibold">
-                      ${meal.price}
-                    </span>
-                  </div>
-
-                  <div className="p-5 flex flex-col flex-1">
-                    <div className="flex justify-between mb-3">
-                      <h3 className="font-bold text-lg">{meal.title}</h3>
-
-                      <span className="flex items-center gap-1">
-                        <FontAwesomeIcon
-                          icon={faStar}
-                          className="text-yellow-500"
-                        />
-                        {meal.rating}
-                      </span>
-                    </div>
-
-                    {/* الجزء ده هيتمدد */}
-                    <div className="flex-1 border-b border-primary-container pb-5 mb-5">
-                      <p className="text-text-secondary">{meal.description}</p>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{meal.chef}</span>
-
-                      <button className="bg-primary text-white p-3 rounded-full">
-                        <FontAwesomeIcon icon={faCartShopping} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <LandingMealsSection />
 
         {/* HOW IT WORKS */}
 
@@ -212,56 +137,7 @@ export default function HomePage() {
 
         {/* FEATURED CHEFS */}
 
-        <section className="py-20 bg-surface-low">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex justify-between items-center mb-12">
-              <h2 className="text-3xl lg:text-4xl font-bold">
-                Meet Our Featured Chefs
-              </h2>
-              <Link
-                href="/chefs"
-                className="text-primary flex items-center gap-2"
-              >
-                See All
-                <FontAwesomeIcon icon={faArrowRight} />
-              </Link>
-            </div>
-
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {chefs.map((chef) => (
-                <div
-                  key={chef.id}
-                  className="bg-white p-6 rounded-3xl flex items-center gap-5 shadow"
-                >
-                  <Image
-                    src={chef.image}
-                    alt={chef.name}
-                    width={90}
-                    height={90}
-                    className="rounded-full object-cover"
-                  />
-
-                  <div>
-                    <h3 className="font-bold text-lg">{chef.name}</h3>
-
-                    <p className="text-primary mb-2">{chef.specialty}</p>
-
-                    <div className="flex items-center gap-2 text-sm">
-                      <FontAwesomeIcon
-                        icon={faStar}
-                        className="text-yellow-500"
-                      />
-
-                      {chef.rating}
-
-                      <span>({chef.reviews} Reviews)</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <LandingFeaturedChefsSection />
 
         {/* AI SECTION */}
 

@@ -1,14 +1,17 @@
 import Image from "next/image";
+import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
-  faCartShopping,
-  faShieldHeart,
   faStar,
   faTruckFast,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
+import MealsGrid from "@/components/public/MealsGrid";
 import { chefProfileResponse } from "@/data/chefProfileData";
+import { chefService, mealService } from "@/services";
+import { isVerifiedChef, normalizeChefProfile } from "@/utils/chefUtils";
+import { normalizePublicMeal } from "@/utils/mealUtils";
 
 const statIconMap = {
   rating: faStar,
@@ -16,51 +19,7 @@ const statIconMap = {
   followers: faUsers,
 };
 
-function Rating({ value, compact = false }) {
-  return (
-    <span className="inline-flex items-center gap-1 text-primary">
-      <FontAwesomeIcon
-        icon={faStar}
-        className={compact ? "h-2.5 w-2.5" : "h-3 w-3"}
-      />
-      <span className={compact ? "text-[10px]" : "text-xs"}>{value}</span>
-    </span>
-  );
-}
-
-function MealCard({ meal }) {
-  return (
-    <article className="overflow-hidden rounded-md bg-white shadow-[0_12px_35px_rgba(27,28,28,0.08)] ring-1 ring-primary/10">
-      <div className="relative aspect-[1.45] overflow-hidden">
-        <Image
-          src={meal.image}
-          alt={meal.name}
-          fill
-          sizes="(max-width: 768px) 100vw, 31vw"
-          className="object-cover"
-        />
-        <span className="absolute right-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold text-primary shadow-sm">
-          {meal.price}
-        </span>
-      </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="text-sm font-bold leading-snug text-text-primary">
-            {meal.name}
-          </h3>
-          <Rating value={meal.rating} compact />
-        </div>
-        <p className="mt-2 min-h-10 text-xs leading-5 text-text-secondary">
-          {meal.description}
-        </p>
-        <button className="mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-secondary-container text-xs font-semibold text-text-secondary transition hover:bg-primary hover:text-white">
-          <FontAwesomeIcon icon={faCartShopping} className="h-3 w-3" />
-          {meal.cta}
-        </button>
-      </div>
-    </article>
-  );
-}
+const OFFERING_FILTERS = ["All Items", "Main Course", "Sides", "Desserts"];
 
 function TestimonialCard({ review }) {
   return (
@@ -98,8 +57,59 @@ function TestimonialCard({ review }) {
   );
 }
 
-export default function ChefProfilePage() {
-  const { chef, offerings, reviews } = chefProfileResponse.data;
+async function getChefProfileData(chefId) {
+  const state = {
+    isLoading: false,
+    error: null,
+  };
+
+  try {
+    const [chefResponse, mealsResponse] = await Promise.all([
+      chefService.getChefById(chefId),
+      mealService.getActiveMeals({ chefId }),
+    ]);
+
+    const chefData = chefResponse.data;
+    const chef =
+      chefData && isVerifiedChef(chefData)
+        ? normalizeChefProfile(chefData)
+        : null;
+
+    if (!chef) {
+      return { ...state, data: { chef: null, meals: [] } };
+    }
+
+    const meals = (mealsResponse.data || [])
+      .map(normalizePublicMeal)
+      .filter((meal) => meal.chefId === chef.id);
+
+    return { ...state, data: { chef, meals } };
+  } catch (error) {
+    return {
+      ...state,
+      error: error.response?.data?.message || error.message,
+      data: { chef: null, meals: [] },
+    };
+  }
+}
+
+export default async function ChefProfilePage({ params }) {
+  const { chefId } = await params;
+  const { data, error } = await getChefProfileData(chefId);
+  const chef = data.chef;
+  const reviews = chefProfileResponse.data.reviews;
+
+  if (error || !chef) {
+    return (
+      <main className="bg-background px-4 py-16 text-center text-text-primary">
+        <h1 className="text-3xl font-bold">Chef not found</h1>
+        <p className="mt-2 text-sm text-text-secondary">This chef profile is unavailable right now.</p>
+        <Link href="/chefs" className="mt-6 inline-flex rounded-full bg-primary px-6 py-3 text-xs font-bold text-white">
+          Back to Chefs
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background text-text-primary">
@@ -175,12 +185,12 @@ export default function ChefProfilePage() {
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-primary">
-              {offerings.eyebrow}
+              Top Chefs Menu
             </p>
             <h2 className="mt-1 text-2xl font-bold">Signature Offerings</h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            {offerings.filters.map((filter, index) => (
+            {OFFERING_FILTERS.map((filter, index) => (
               <button
                 key={filter}
                 className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
@@ -194,11 +204,18 @@ export default function ChefProfilePage() {
             ))}
           </div>
         </div>
-        <div className="grid gap-5 md:grid-cols-3">
-          {offerings.meals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} />
-          ))}
-        </div>
+
+        {data.meals.length === 0 ? (
+          <div className="rounded-lg bg-white p-8 text-center text-sm text-text-secondary ring-1 ring-primary/10">
+            This chef has not published any active meals yet.
+          </div>
+        ) : (
+          <MealsGrid
+            meals={data.meals}
+            gridClassName="grid gap-5 md:grid-cols-3"
+            buttonLabel="Load More Meals"
+          />
+        )}
       </section>
 
       <section className="bg-secondary-container/45">

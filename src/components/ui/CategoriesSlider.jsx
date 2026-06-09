@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
+import { Navigation } from "swiper/modules";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -42,14 +42,24 @@ export default function CategoriesSlider({ categories }) {
         {categories.map((category) => (
           <SwiperSlide key={category.id}>
             <Link
-              href="/meals/categories/1"
+              href={`/meals/categories/${category.slug || category.id}`}
               className="text-center group cursor-pointer"
             >
-              <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full bg-surface-low flex items-center justify-center mx-auto mb-4 transition group-hover:bg-primary">
-                <FontAwesomeIcon
-                  icon={category.icon}
-                  className="text-3xl text-primary group-hover:text-white"
-                />
+              <div className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full bg-surface-low flex items-center justify-center mx-auto mb-4 transition group-hover:bg-primary overflow-hidden">
+                {category.image ? (
+                  <Image
+                    src={category.image}
+                    alt={category.title}
+                    fill
+                    sizes="(max-width: 1024px) 96px, 128px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <FontAwesomeIcon
+                    icon={category.icon}
+                    className="text-3xl text-primary group-hover:text-white"
+                  />
+                )}
               </div>
               <h3>{category.title}</h3>
             </Link>

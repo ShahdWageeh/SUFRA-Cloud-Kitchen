@@ -1,7 +1,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faMagnifyingGlass, faSliders } from "@fortawesome/free-solid-svg-icons";
-import ChefCard from "@/components/public/ChefCard";
-import { chefsResponse } from "@/data/chefsData";
+import ChefsGrid from "@/components/public/ChefsGrid";
+import { chefService } from "@/services";
+import { normalizeChef } from "@/utils/chefUtils";
+
+const CHEF_FILTERS = ["All Chefs", "Near Me", "Top Rated", "Available Today"];
 
 async function getChefsPageData() {
   const state = {
@@ -10,11 +13,22 @@ async function getChefsPageData() {
   };
 
   try {
-    // TODO: Replace local data with API call.
-    // GET /api/chefs
-    return { ...state, data: chefsResponse.data };
+    const response = await chefService.getVerifiedChefs();
+    const chefs = (response.data || []).map(normalizeChef);
+
+    return {
+      ...state,
+      data: {
+        filters: CHEF_FILTERS,
+        chefs,
+      },
+    };
   } catch (error) {
-    return { ...state, error: error.message, data: { filters: [], chefs: [] } };
+    return {
+      ...state,
+      error: error.response?.data?.message || error.message,
+      data: { filters: CHEF_FILTERS, chefs: [] },
+    };
   }
 }
 
@@ -67,19 +81,15 @@ export default async function ChefsPage() {
           <div className="mt-8 rounded-lg bg-white p-8 text-center text-sm text-text-secondary ring-1 ring-primary/10">
             We could not load chefs right now.
           </div>
+        ) : data.chefs.length === 0 ? (
+          <div className="mt-8 rounded-lg bg-white p-8 text-center text-sm text-text-secondary ring-1 ring-primary/10">
+            No chefs are available right now. Check back soon.
+          </div>
         ) : (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {data.chefs.map((chef) => (
-              <ChefCard key={chef.id} chef={chef} />
-            ))}
+          <div className="mt-8">
+            <ChefsGrid chefs={data.chefs} />
           </div>
         )}
-
-        <div className="mt-10 text-center">
-          <button className="rounded-full bg-primary px-8 py-3 text-xs font-bold text-white transition hover:bg-primary-container">
-            View More Chefs
-          </button>
-        </div>
       </section>
     </main>
   );
