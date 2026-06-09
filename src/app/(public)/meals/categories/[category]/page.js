@@ -2,31 +2,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faMagnifyingGlass, faSliders } from "@fortawesome/free-solid-svg-icons";
-import MealCard from "@/components/public/MealCard";
-import { mealsResponse } from "@/data/mealsData";
+import CategoryMealsGrid from "@/components/public/CategoryMealsGrid";
+import { categoryService } from "@/services";
+import { normalizeCategory, normalizeMeal } from "@/utils/mealUtils";
 
-async function getCategoryMealsData(categorySlug) {
+async function getCategoryMealsData(categorySlugOrId) {
   const state = {
     isLoading: false,
     error: null,
   };
 
   try {
-    // TODO: Replace local data with API call.
-    // GET /api/meals?category={category}
-    const category = mealsResponse.data.categories.find((item) => item.slug === categorySlug);
-    const meals = mealsResponse.data.meals.filter((meal) => meal.category === categorySlug || meal.cuisine.toLowerCase() === categorySlug);
+    const { category, categories, meals } =
+      await categoryService.getCategoryPageData(categorySlugOrId);
 
     return {
       ...state,
       data: {
-        category,
-        categories: mealsResponse.data.categories,
-        meals,
+        category: category ? normalizeCategory(category) : null,
+        categories: categories.map(normalizeCategory),
+        meals: meals.map(normalizeMeal),
       },
     };
   } catch (error) {
-    return { ...state, error: error.message, data: { category: null, categories: [], meals: [] } };
+    return {
+      ...state,
+      error: error.response?.data?.message || error.message,
+      data: { category: null, categories: [], meals: [] },
+    };
   }
 }
 
@@ -48,7 +51,14 @@ export default async function CategoryPage({ params }) {
       <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-xl bg-text-primary">
           <div className="relative h-72 sm:h-80">
-            <Image src={featuredMeal?.image || "/heroEnhance.jpeg"} alt={`${title} meals`} fill priority sizes="100vw" className="object-cover opacity-75" />
+            <Image
+              src={data.category?.image || featuredMeal?.image || "/heroEnhance.jpeg"}
+              alt={`${title} meals`}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover opacity-75"
+            />
             <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-black/10" />
           </div>
           <div className="absolute inset-0 flex items-center px-6 sm:px-10">
@@ -87,7 +97,11 @@ export default async function CategoryPage({ params }) {
             All Clients
           </Link>
           {data.categories.map((item) => (
-            <Link key={item.id} href={`/meals/categories/${item.slug}`} className={`shrink-0 text-sm font-bold ${item.slug === category ? "text-primary" : "text-text-secondary"}`}>
+            <Link
+              key={item.id}
+              href={`/meals/categories/${item.slug || item.id}`}
+              className={`shrink-0 text-sm font-bold ${item.slug === category || item.id === category ? "text-primary" : "text-text-secondary"}`}
+            >
               {item.label}
             </Link>
           ))}
@@ -102,11 +116,7 @@ export default async function CategoryPage({ params }) {
             </Link>
           </div>
         ) : (
-          <div className="mt-8 grid gap-5 md:grid-cols-4">
-            {data.meals.map((meal, index) => (
-              <MealCard key={meal.id} meal={meal} featured={index === 0} />
-            ))}
-          </div>
+          <CategoryMealsGrid meals={data.meals} />
         )}
       </section>
     </main>

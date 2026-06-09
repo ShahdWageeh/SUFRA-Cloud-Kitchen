@@ -3,17 +3,14 @@
 Welcome to the Cloud Kitchen Backend API documentation. This project provides a comprehensive set of APIs for managing chefs, customers, meals, categories, and AI-powered kitchen branding.
 
 ## Base URL
-
 `http://localhost:3000/api`
 
 ---
 
 ## 1. Authentication Module (`/auth`)
-
 Handles user registration, login, and session retrieval.
 
 ### Register User
-
 Create a new account (Chef, Customer, or Admin).
 
 - **URL:** `/auth/register`
@@ -23,7 +20,6 @@ Create a new account (Chef, Customer, or Admin).
 - **Optional Fields:** `phone`
 - **Roles:** `customer`, `chef`, `admin`
 - **Request Body Example:**
-
 ```json
 {
   "email": "user@example.com",
@@ -34,9 +30,7 @@ Create a new account (Chef, Customer, or Admin).
   "phone": "01234567890"
 }
 ```
-
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -50,7 +44,6 @@ Create a new account (Chef, Customer, or Admin).
 ```
 
 ### Login User
-
 Authenticate and receive a JWT token.
 
 - **URL:** `/auth/login`
@@ -58,7 +51,6 @@ Authenticate and receive a JWT token.
 - **Auth Required:** No
 - **Mandatory Fields:** `email`, `password`, `role`
 - **Request Body Example:**
-
 ```json
 {
   "email": "user@example.com",
@@ -66,9 +58,7 @@ Authenticate and receive a JWT token.
   "role": "chef"
 }
 ```
-
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -82,14 +72,12 @@ Authenticate and receive a JWT token.
 ```
 
 ### Get Current User
-
 Retrieve profile of the authenticated user.
 
 - **URL:** `/auth/me`
 - **Method:** `GET`
 - **Auth Required:** Yes (Bearer Token)
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -102,18 +90,15 @@ Retrieve profile of the authenticated user.
 ---
 
 ## 2. Chef Module (`/chefs`)
-
 Manage chef-specific details, profile updates, and branding.
 
 ### Get All Chefs
-
 Retrieve all registered chefs.
 
 - **URL:** `/chefs`
 - **Method:** `GET`
 - **Auth Required:** No
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -133,14 +118,12 @@ Retrieve all registered chefs.
 ```
 
 ### Get Chef Details
-
 Retrieve details of a specific chef.
 
 - **URL:** `/chefs/:id`
 - **Method:** `GET`
 - **Auth Required:** No
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -162,7 +145,6 @@ Retrieve details of a specific chef.
 ```
 
 ### Update Profile
-
 Update chef's kitchen details and personal info.
 
 - **URL:** `/chefs/profile`
@@ -170,7 +152,6 @@ Update chef's kitchen details and personal info.
 - **Auth Required:** Yes (Chef role)
 - **Optional Fields:** `firstName`, `lastName`, `phone`, `kitchenName`, `slogan`, `description`, `password`
 - **Request Body Example:**
-
 ```json
 {
   "kitchenName": "Mario's Italian Kitchen",
@@ -178,9 +159,7 @@ Update chef's kitchen details and personal info.
   "description": "Authentic homemade pasta and sauces."
 }
 ```
-
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -191,14 +170,12 @@ Update chef's kitchen details and personal info.
 ```
 
 ### Toggle Verification (Admin Only)
-
 Toggle the verification status of a chef.
 
 - **URL:** `/chefs/:id/toggle-verification`
 - **Method:** `PATCH`
 - **Auth Required:** Yes (Admin role)
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -209,7 +186,6 @@ Toggle the verification status of a chef.
 ```
 
 ### Generate AI Kitchen Branding
-
 Get AI-generated suggestions for kitchen name, slogan, and description.
 
 - **URL:** `/chefs/kitchen-branding`
@@ -217,7 +193,6 @@ Get AI-generated suggestions for kitchen name, slogan, and description.
 - **Auth Required:** Yes (Chef role)
 - **Mandatory Fields:** `cookingStyles` (Array), `signatureDish`, `story`
 - **Request Body Example:**
-
 ```json
 {
   "cookingStyles": ["Italian", "Mediterranean"],
@@ -225,9 +200,7 @@ Get AI-generated suggestions for kitchen name, slogan, and description.
   "story": "I spent 10 years in coastal Italy learning traditional recipes."
 }
 ```
-
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -244,18 +217,16 @@ Get AI-generated suggestions for kitchen name, slogan, and description.
 ---
 
 ## 3. Chef Verification Module (`/verification-request`)
-
 Submit and manage identity verification documents.
 
 ### Submit Verification Request
-
 Upload documents for admin review. Uses Cloudinary for storage.
 
 - **URL:** `/verification-request`
 - **Method:** `POST`
 - **Auth Required:** Yes (Chef role)
 - **Body Type:** `multipart/form-data`
-- **Mandatory Files:**
+- **Mandatory Files:** 
   - `nationalIdImage` (1 front image)
   - `nationalIdBackImage` (1 back image)
   - `healthCertificateImage` (1 image)
@@ -263,14 +234,12 @@ Upload documents for admin review. Uses Cloudinary for storage.
 - **Success Response:** Returns the request details with Cloudinary URLs and `pending` status.
 
 ### Get Verification Status
-
 Check the status of your verification request.
 
 - **URL:** `/verification-request/status`
 - **Method:** `GET`
 - **Auth Required:** Yes (Chef role)
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -287,14 +256,12 @@ Check the status of your verification request.
 ```
 
 ### Get Pending Requests (Admin Only)
-
 Retrieve all pending verification requests for review.
 
 - **URL:** `/verification-request/pending`
 - **Method:** `GET`
 - **Auth Required:** Yes (Admin role)
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -305,7 +272,6 @@ Retrieve all pending verification requests for review.
 ```
 
 ### Update Status (Admin Only)
-
 Approve or fail a verification request.
 
 - **URL:** `/verification-request/:id/status`
@@ -313,7 +279,6 @@ Approve or fail a verification request.
 - **Auth Required:** Yes (Admin role)
 - **Mandatory Fields:** `status` (`pending`, `approved`, `failed`)
 - **Request Body Example:**
-
 ```json
 { "status": "approved" }
 ```
@@ -321,11 +286,9 @@ Approve or fail a verification request.
 ---
 
 ## 4. Meals Module (`/meals`)
-
 Full CRUD for managing kitchen meals.
 
 ### Get All Meals
-
 Retrieve all meals (supports filtering via query params).
 
 - **URL:** `/meals`
@@ -334,7 +297,6 @@ Retrieve all meals (supports filtering via query params).
 - **Query Params (Optional):** `chefId`, `categories`, `minPrice`, `maxPrice`
 
 ### Get Active Meals
-
 Retrieve all active meals, optionally filtered by categories.
 
 - **URL:** `/meals/active`
@@ -343,7 +305,6 @@ Retrieve all active meals, optionally filtered by categories.
 - **Query Params (Optional):** `categories` (comma-separated IDs)
 
 ### Get Meal By ID
-
 Retrieve details of a specific meal.
 
 - **URL:** `/meals/:id`
@@ -351,7 +312,6 @@ Retrieve details of a specific meal.
 - **Auth Required:** No
 
 ### Create Meal
-
 Add a new meal to the kitchen.
 
 - **URL:** `/meals`
@@ -368,7 +328,6 @@ Add a new meal to the kitchen.
   - `ingredients`: `["pasta", "eggs", "pecorino"]`
   - `mealImages`: (Files)
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -379,7 +338,6 @@ Add a new meal to the kitchen.
 ```
 
 ### Update Meal
-
 Update an existing meal.
 
 - **URL:** `/meals/:id`
@@ -389,7 +347,6 @@ Update an existing meal.
 - **Optional Fields:** All creation fields.
 
 ### Delete Meal
-
 Remove a meal from the kitchen.
 
 - **URL:** `/meals/:id`
@@ -397,7 +354,6 @@ Remove a meal from the kitchen.
 - **Auth Required:** Yes (Chef owner only)
 
 ### Update Meal Status
-
 Toggle meal visibility.
 
 - **URL:** `/meals/:id/status`
@@ -408,19 +364,48 @@ Toggle meal visibility.
 ---
 
 ## 5. Categories Module (`/categories`)
-
 Manage meal categories (Admin Only for modifications).
 
 ### Get Active Categories
-
 Retrieve all active categories for public browsing.
 
 - **URL:** `/categories/active`
 - **Method:** `GET`
 - **Auth Required:** No
 
-### Get All Categories (Admin Only)
+### Get Active Categories with Random Meals
+Retrieve all active categories, each including a selection of random active meals.
 
+- **URL:** `/categories/active-with-meals`
+- **Method:** `GET`
+- **Auth Required:** No
+- **Query Params (Optional):** `limit` (Number of random meals per category, Default: 5)
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": [
+    {
+      "_id": "...",
+      "name": "Italian",
+      "image": "...",
+      "meals": [
+        {
+          "_id": "...",
+          "name": "Pasta Carbonara",
+          "price": 15,
+          "chefId": { "kitchenName": "..." }
+        },
+        ...
+      ]
+    }
+  ],
+  "message": "Active categories with random meals retrieved successfully"
+}
+```
+
+### Get All Categories (Admin Only)
 Retrieve all categories (active and inactive).
 
 - **URL:** `/categories`
@@ -428,7 +413,6 @@ Retrieve all categories (active and inactive).
 - **Auth Required:** Yes (Admin role)
 
 ### Get Category By ID (Admin Only)
-
 Retrieve a specific category.
 
 - **URL:** `/categories/:id`
@@ -436,7 +420,6 @@ Retrieve a specific category.
 - **Auth Required:** Yes (Admin role)
 
 ### Create Category (Admin Only)
-
 Add a new category.
 
 - **URL:** `/categories`
@@ -445,7 +428,6 @@ Add a new category.
 - **Body Type:** `multipart/form-data`
 - **Mandatory Fields:** `name`, `image` (1 file)
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -456,7 +438,6 @@ Add a new category.
 ```
 
 ### Update Category (Admin Only)
-
 Update an existing category.
 
 - **URL:** `/categories/:id`
@@ -466,7 +447,6 @@ Update an existing category.
 - **Optional Fields:** `name`, `image`
 
 ### Delete Category (Admin Only)
-
 Remove a category.
 
 - **URL:** `/categories/:id`
@@ -474,7 +454,6 @@ Remove a category.
 - **Auth Required:** Yes (Admin role)
 
 ### Update Category Status (Admin Only)
-
 Change visibility of a category.
 
 - **URL:** `/categories/:id/status`
@@ -485,18 +464,15 @@ Change visibility of a category.
 ---
 
 ## 6. Cart Module (`/cart`)
-
 Manage customer shopping cart.
 
 ### Get Current Cart
-
 Retrieve the items in the customer's cart.
 
 - **URL:** `/cart`
 - **Method:** `GET`
 - **Auth Required:** Yes (Customer role)
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -521,7 +497,6 @@ Retrieve the items in the customer's cart.
 ```
 
 ### Add Item to Cart
-
 Add a meal to the cart. If the meal is already in the cart, its quantity is increased.
 
 - **URL:** `/cart/items`
@@ -530,7 +505,6 @@ Add a meal to the cart. If the meal is already in the cart, its quantity is incr
 - **Mandatory Fields:** `mealId`
 - **Optional Fields:** `quantity` (Default: 1)
 - **Request Body Example:**
-
 ```json
 {
   "mealId": "mealId123",
@@ -539,7 +513,6 @@ Add a meal to the cart. If the meal is already in the cart, its quantity is incr
 ```
 
 ### Update Item Quantity
-
 Update the quantity of a meal already in the cart.
 
 - **URL:** `/cart/items/:mealId`
@@ -547,7 +520,6 @@ Update the quantity of a meal already in the cart.
 - **Auth Required:** Yes (Customer role)
 - **Mandatory Fields:** `quantity`
 - **Request Body Example:**
-
 ```json
 {
   "quantity": 5
@@ -555,7 +527,6 @@ Update the quantity of a meal already in the cart.
 ```
 
 ### Remove Item from Cart
-
 Remove a specific meal from the cart.
 
 - **URL:** `/cart/items/:mealId`
@@ -563,7 +534,6 @@ Remove a specific meal from the cart.
 - **Auth Required:** Yes (Customer role)
 
 ### Clear Cart
-
 Remove all items from the cart.
 
 - **URL:** `/cart`
@@ -573,54 +543,49 @@ Remove all items from the cart.
 ---
 
 ## 7. Orders Module (`/orders`)
-
 Manage customer orders and checkout.
 
 ### Checkout
-
 Create an order from the current cart items.
 
 - **URL:** `/orders/checkout`
 - **Method:** `POST`
 - **Auth Required:** Yes (Customer role)
+- **Mandatory Fields:** `paymentMethod` (`cash`, `paymob`)
 - **Optional Fields:** `shippingAddress`, `contactPhone` (Uses profile defaults if not provided)
 - **Success Response:**
-
 ```json
 {
   "success": true,
   "statusCode": 201,
   "data": {
-    "_id": "...",
-    "customerId": "...",
-    "items": [
-      {
-        "mealId": "...",
-        "name": "Spaghetti Carbonara",
-        "chefId": "...",
-        "unitPrice": 15.99,
-        "quantity": 2,
-        "subtotal": 31.98
-      }
-    ],
-    "totalAmount": 31.98,
-    "status": "preparing",
-    "shippingAddress": "...",
-    "contactPhone": "..."
+    "order": {
+      "_id": "...",
+      "customerId": "...",
+      "items": [...],
+      "totalAmount": 31.98,
+      "status": "awaiting_payment",
+      "shippingAddress": "...",
+      "contactPhone": "..."
+    },
+    "payment": {
+      "_id": "...",
+      "paymentMethod": "paymob",
+      "paymentStatus": "pending"
+    },
+    "paymobUrl": "https://accept.paymob.com/..." (Only if paymentMethod is paymob)
   },
   "message": "Order placed successfully"
 }
 ```
 
 ### Get My Orders
-
 Retrieve all orders for the authenticated customer. Includes full item snapshots and statuses.
 
 - **URL:** `/orders/my-orders`
 - **Method:** `GET`
 - **Auth Required:** Yes (Customer role)
 - **Success Response:**
-
 ```json
 {
   "success": true,
@@ -649,7 +614,6 @@ Retrieve all orders for the authenticated customer. Includes full item snapshots
 ```
 
 ### Get Chef Orders
-
 Retrieve all orders containing items from the authenticated chef. Only items belonging to the chef are returned.
 
 - **URL:** `/orders/chef/orders`
@@ -657,7 +621,6 @@ Retrieve all orders containing items from the authenticated chef. Only items bel
 - **Auth Required:** Yes (Chef role)
 
 ### Get Order Details
-
 Retrieve details of a specific order.
 
 - **URL:** `/orders/:id`
@@ -665,16 +628,14 @@ Retrieve details of a specific order.
 - **Auth Required:** Yes (Relevant Customer, Chef, or Admin)
 
 ### Update Order Status
-
 Change the status of an order.
 
 - **URL:** `/orders/:id/status`
 - **Method:** `PATCH`
 - **Auth Required:** Yes (Chef or Admin role)
-- **Mandatory Fields:** `status` (`preparing`, `out_for_delivery`, `delivered`)
+- **Mandatory Fields:** `status` (`awaiting_payment`, `preparing`, `out_for_delivery`, `completed`)
 
 ### Update Order Item Status
-
 Change the status of a specific item in an order.
 
 - **URL:** `/orders/:id/items/status`
@@ -684,12 +645,99 @@ Change the status of a specific item in an order.
 
 ---
 
+## 8. Settlement Module (`/settlement`)
+Financial features for chefs to track earnings and wallet.
+
+### Get Chef Wallet
+Retrieve the current balance of the chef.
+
+- **URL:** `/settlement/wallet`
+- **Method:** `GET`
+- **Auth Required:** Yes (Chef role)
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "chefId": "...",
+    "availableBalance": 150.50
+  },
+  "message": "Wallet retrieved successfully"
+}
+```
+
+### Get Earnings History
+Retrieve all earnings records for the chef.
+
+- **URL:** `/settlement/earnings`
+- **Method:** `GET`
+- **Auth Required:** Yes (Chef role)
+
+---
+
+## 9. Withdrawals Module (`/withdrawals`)
+Manage payout requests for chefs.
+
+### Request Withdrawal
+Submit a request to withdraw funds from the wallet.
+
+- **URL:** `/withdrawals/request`
+- **Method:** `POST`
+- **Auth Required:** Yes (Chef role)
+- **Mandatory Fields:** `amount`
+- **Optional Fields:** `notes`
+
+### Get Withdrawal History (Chef)
+Retrieve personal withdrawal history.
+
+- **URL:** `/withdrawals/history`
+- **Method:** `GET`
+- **Auth Required:** Yes (Chef role)
+
+### Get All Withdrawal Requests (Admin Only)
+List all withdrawal requests.
+
+- **URL:** `/withdrawals/requests`
+- **Method:** `GET`
+- **Auth Required:** Yes (Admin role)
+- **Query Params (Optional):** `status` (`pending`, `approved`, `rejected`, `completed`)
+
+### Approve Withdrawal (Admin Only)
+Approve a withdrawal request and deduct funds from the chef's wallet.
+
+- **URL:** `/withdrawals/:id/approve`
+- **Method:** `PATCH`
+- **Auth Required:** Yes (Admin role)
+- **Optional Fields:** `notes`
+
+### Reject Withdrawal (Admin Only)
+Reject a withdrawal request.
+
+- **URL:** `/withdrawals/:id/reject`
+- **Method:** `PATCH`
+- **Auth Required:** Yes (Admin role)
+- **Optional Fields:** `notes`
+
+---
+
+## 10. Payments Module (`/payments`)
+Payment-related webhooks and integrations.
+
+### Paymob Webhook
+Automated callback for Paymob transaction confirmation.
+
+- **URL:** `/payments/paymob/webhook`
+- **Method:** `POST`
+- **Auth Required:** No (External)
+- **Description:** This endpoint is called by Paymob to confirm successful transactions. It automatically updates the payment status and order state.
+
+---
+
 ## Common Error Responses
 
 ### 400 Bad Request
-
 Missing fields or validation error.
-
 ```json
 {
   "success": false,
@@ -700,9 +748,7 @@ Missing fields or validation error.
 ```
 
 ### 401 Unauthorized
-
 Invalid or missing token.
-
 ```json
 {
   "success": false,
@@ -712,9 +758,7 @@ Invalid or missing token.
 ```
 
 ### 403 Forbidden
-
 Role mismatch or ownership violation.
-
 ```json
 {
   "success": false,
@@ -724,9 +768,7 @@ Role mismatch or ownership violation.
 ```
 
 ### 404 Not Found
-
 Resource does not exist.
-
 ```json
 {
   "success": false,
@@ -736,9 +778,7 @@ Resource does not exist.
 ```
 
 ### 500 Internal Server Error
-
 Unexpected server error.
-
 ```json
 {
   "success": false,

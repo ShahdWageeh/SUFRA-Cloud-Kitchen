@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faMagnifyingGlass, faSliders } from "@fortawesome/free-solid-svg-icons";
-import MealCard from "@/components/public/MealCard";
-import { mealsResponse } from "@/data/mealsData";
+import MealsGrid from "@/components/public/MealsGrid";
+import { categoryService, mealService } from "@/services";
+import { normalizeCategory, normalizePublicMeal } from "@/utils/mealUtils";
 
 async function getMealsPageData() {
   const state = {
@@ -11,11 +12,24 @@ async function getMealsPageData() {
   };
 
   try {
-    // TODO: Replace local data with API call.
-    // GET /api/meals
-    return { ...state, data: mealsResponse.data };
+    const [mealsResponse, categoriesResponse] = await Promise.all([
+      mealService.getActiveMeals(),
+      categoryService.getActiveCategories(),
+    ]);
+
+    const meals = (mealsResponse.data || []).map(normalizePublicMeal);
+    const categories = (categoriesResponse.data || []).map(normalizeCategory);
+
+    return {
+      ...state,
+      data: { categories, meals },
+    };
   } catch (error) {
-    return { ...state, error: error.message, data: { categories: [], meals: [] } };
+    return {
+      ...state,
+      error: error.response?.data?.message || error.message,
+      data: { categories: [], meals: [] },
+    };
   }
 }
 
@@ -75,7 +89,11 @@ export default async function MealsPage() {
               All
             </Link>
             {data.categories.slice(0, 4).map((category) => (
-              <Link key={category.id} href={`/meals/categories/${category.slug}`} className="rounded-full border border-primary/15 bg-white px-4 py-2 text-xs font-bold text-text-secondary transition hover:border-primary hover:text-primary">
+              <Link
+                key={category.id}
+                href={`/meals/categories/${category.slug || category.id}`}
+                className="rounded-full border border-primary/15 bg-white px-4 py-2 text-xs font-bold text-text-secondary transition hover:border-primary hover:text-primary"
+              >
                 {category.label}
               </Link>
             ))}
@@ -86,19 +104,13 @@ export default async function MealsPage() {
           <div className="rounded-lg bg-white p-8 text-center text-sm text-text-secondary ring-1 ring-primary/10">
             We could not load meals right now.
           </div>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {meals.map((meal) => (
-              <MealCard key={meal.id} meal={meal} />
-            ))}
+        ) : meals.length === 0 ? (
+          <div className="rounded-lg bg-white p-8 text-center text-sm text-text-secondary ring-1 ring-primary/10">
+            No meals are available right now. Check back soon.
           </div>
+        ) : (
+          <MealsGrid meals={meals} />
         )}
-
-        <div className="mt-10 text-center">
-          <button className="rounded-full border border-primary px-7 py-3 text-xs font-bold text-primary transition hover:bg-primary hover:text-white">
-            Load More Meals
-          </button>
-        </div>
       </section>
     </main>
   );
