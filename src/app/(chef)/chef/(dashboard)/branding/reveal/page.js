@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import BrandCard from "@/components/chef/branding/BrandCard";
 import BrandPaletteCard from "@/components/chef/branding/BrandPaletteCard";
 import MarketEdgeCard from "@/components/chef/branding/MarketEdgeCard";
 import { RefreshCw } from "lucide-react";
 
 export default function BrandRevealPage() {
+    const router = useRouter();
     const [brandData, setBrandData] = useState(null);
     const [isUsingFallback, setIsUsingFallback] = useState(false);
 
@@ -16,18 +18,10 @@ export default function BrandRevealPage() {
         const resp = sessionStorage.getItem("brandingResponse");
         const form = sessionStorage.getItem("brandingForm");
 
-        console.log("DEBUG: brandingResponse from sessionStorage:", resp);
-        console.log("DEBUG: brandingForm from sessionStorage:", form);
-
         if (resp) {
             try {
                 const parsed = JSON.parse(resp);
                 const parsedForm = form ? JSON.parse(form) : null;
-
-                console.log("DEBUG: parsed response:", parsed);
-                console.log("DEBUG: parsed.kitchenName:", parsed.kitchenName);
-                console.log("DEBUG: parsed.slogan:", parsed.slogan);
-                console.log("DEBUG: parsed.description:", parsed.description);
 
                 const mapped = {
                     brandName: parsed.kitchenName || "Your Kitchen",
@@ -47,17 +41,14 @@ export default function BrandRevealPage() {
                     ],
                 };
 
-                console.log("DEBUG: final mapped brandData:", mapped);
                 setBrandData(mapped);
                 return;
             } catch (e) {
-                console.error("DEBUG: error parsing sessionStorage data:", e);
                 // fallthrough to defaults
             }
         }
 
         // default static data fallback
-        console.warn("DEBUG: Using fallback data - no brandingResponse in sessionStorage");
         setIsUsingFallback(true);
         setBrandData({
             brandName: "Amina's Authentic Bites",
@@ -141,7 +132,12 @@ export default function BrandRevealPage() {
                     </span>
                 </button>
 
-                <button className="px-8 py-3 rounded-full bg-primary text-white hover:opacity-90">Confirm & Continue</button>
+                <button
+                    onClick={() => router.push("/chef/profile")}
+                    className="px-8 py-3 rounded-full bg-primary text-white hover:opacity-90"
+                >
+                    Confirm & Continue
+                </button>
             </div>
         </div>
     );

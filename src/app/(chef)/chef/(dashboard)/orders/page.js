@@ -1,52 +1,64 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import OrdersTabs from "@/components/chef/orders/OrdersTabs";
 import OrdersList from "@/components/chef/orders/OrdersList";
 import StatsSection from "@/components/chef/orders/StatsSection";
+import useAuth from "@/hooks/useAuth";
+import { ordersService } from "@/services";
 
 export default function OrdersPage() {
-  // TODO: Replace with backend data
+  const { token } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const orders = [
-    {
-      id: "#ORD-8821",
-      priority: "new",
-      amount: 145,
-      timeAgo: "12 mins ago",
-      customer: "Sarah Jamila",
-      items: "2x Grilled Chicken Mandi, 1x Fattoush",
-      note: "Please extra spicy sauce on the side.",
-      type: "delivery",
-      image: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFuZHklMjBmb29kfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    {
-      id: "#ORD-8825",
-      priority: "high",
-      amount: 210,
-      timeAgo: "5 mins ago",
-      customer: "Ahmed Al-Sayed",
-      items: "1x Lamb Kabsa Family, 4x Soft Drinks",
-      note: "",
-      type: "pickup",
-      image: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFuZHklMjBmb29kfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    {
-      id: "#ORD-8826",
-      priority: "new",
-      amount: 65,
-      timeAgo: "2 mins ago",
-      customer: "Layla K.",
-      items: "3x Falafel Wrap Platter",
-      note: "",
-      type: "delivery",
-      image: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFuZHklMjBmb29kfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-  ];
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      setError("Please log in to view your chef orders.");
+      return;
+    }
+
+    async function loadChefOrders() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const result = await ordersService.getChefOrders();
+
+        setOrders(Array.isArray(result.data) ? result.data : []);
+      } catch (err) {
+        console.error("Chef orders load failed:", err);
+        setError(err?.message || "Failed to fetch orders.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadChefOrders();
+  }, [token]);
 
   return (
     <div className="p-8">
       <OrdersTabs />
 
       <div className="mt-6">
-        <OrdersList orders={orders} />
+        {loading ? (
+          <div className="rounded-[20px] border border-[#EDE6E3] bg-white p-8 text-center text-sm text-[#7A6560]">
+            Loading your chef orders...
+          </div>
+        ) : error ? (
+          <div className="rounded-[20px] border border-red-200 bg-red-50 p-8 text-center text-sm text-red-700">
+            {error}
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="rounded-[20px] border border-[#EDE6E3] bg-white p-8 text-center text-sm text-[#7A6560]">
+            No orders found for your kitchen yet.
+          </div>
+        ) : (
+          <OrdersList orders={orders} />
+        )}
       </div>
 
       <div className="mt-16">
