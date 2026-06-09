@@ -11,6 +11,15 @@ import { useRouter } from "next/navigation";
 import { authService, verificationService, tokenService } from "@/services";
 
 export const AuthContext = createContext(null);
+
+function getResponseData(response) {
+  return response?.data?.data || response?.data || response;
+}
+
+function getVerificationStatus(response) {
+  return getResponseData(response)?.status;
+}
+
 export function AuthProvider({ children }) {
   const router = useRouter();
   const [user, setUser] = useState(null);
@@ -22,11 +31,34 @@ export function AuthProvider({ children }) {
   const isCustomer = user?.role === "customer";
   const isAdmin = user?.role === "admin";
 
+  const redirectChefByVerification = useCallback(async () => {
+    try {
+      const verification = await verificationService.getVerificationStatus();
+      const status = getVerificationStatus(verification);
+
+      switch (status) {
+        case "approved":
+          router.replace("/chef/dashboard");
+          break;
+        case "pending":
+          router.replace("/chef/waitingVerify");
+          break;
+        case "failed":
+        default:
+          router.replace("/chef/onboarding");
+          break;
+      }
+    } catch (error) {
+      router.replace("/chef/onboarding");
+    }
+  }, [router]);
+
   const refreshUser = useCallback(async () => {
     try {
       const currentUser = await authService.me();
-      setUser(currentUser.data);
-      return currentUser.data;
+      const restoredUser = getResponseData(currentUser);
+      setUser(restoredUser);
+      return restoredUser;
     } catch (error) {
       tokenService.remove();
       setToken(null);
@@ -59,20 +91,28 @@ export function AuthProvider({ children }) {
 
       try {
         const response = await authService.register(data);
-        const user = response.data.user;
-        const token = response.data.token;
-        tokenService.save(token);
-        setToken(token);
-        setUser(user);
-        if (user.role === "chef") {
+        const authData = getResponseData(response);
+        const registeredUser = authData.user;
+        const accessToken = authData.token;
+
+        if (accessToken) {
+          tokenService.save(accessToken);
+        }
+
+        setToken(accessToken || null);
+        setUser(registeredUser);
+
+        if (registeredUser.role === "chef") {
           router.push("/chef/onboarding");
-        } else {
+        } else if (registeredUser.role === "customer") {
           router.push("/customer/dashboard");
+        } else if (registeredUser.role === "admin") {
+          router.push("/admin/dashboard");
         }
 
         return {
           success: true,
-          user,
+          user: registeredUser,
         };
       } catch (error) {
         return {
@@ -93,40 +133,19 @@ export function AuthProvider({ children }) {
       try {
         const response = await authService.login(credentials);
 
-        const loggedUser = response.data.user;
-        const accessToken = response.data.token;
+        const authData = getResponseData(response);
+        const loggedUser = authData.user;
+        const accessToken = authData.token;
 
-        tokenService.save(accessToken);
+        if (accessToken) {
+          tokenService.save(accessToken);
+        }
 
-        setToken(accessToken);
+        setToken(accessToken || null);
         setUser(loggedUser);
 
         if (loggedUser.role === "chef") {
-          try {
-            const verification =
-              await verificationService.getVerificationStatus();
-
-            const status = verification.data.data.status;
-
-            switch (status) {
-              case "approved":
-                router.replace("/chef/dashboard");
-                break;
-
-              case "pending":
-                router.replace("/chef/waiting");
-                break;
-
-              case "failed":
-                router.replace("/chef/onboarding");
-                break;
-
-              default:
-                router.replace("/chef/onboarding");
-            }
-          } catch (error) {
-            router.replace("/chef/onboarding");
-          }
+          await redirectChefByVerification();
         } else if (loggedUser.role === "customer") {
           router.push("/customer/dashboard");
         } else if (loggedUser.role === "admin") {
@@ -147,7 +166,7 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     },
-    [router],
+    [redirectChefByVerification, router],
   );
 
   const logout = useCallback(() => {
@@ -171,6 +190,7 @@ export function AuthProvider({ children }) {
       login,
       logout,
       refreshUser,
+      redirectChefByVerification,
     }),
     [
       user,
@@ -184,6 +204,7 @@ export function AuthProvider({ children }) {
       login,
       logout,
       refreshUser,
+      redirectChefByVerification,
     ],
   );
 

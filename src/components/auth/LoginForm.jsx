@@ -22,7 +22,7 @@ import { toast } from "react-hot-toast";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const { login, loading, user } = useAuth();
+  const { login, loading } = useAuth();
   const roleParam = searchParams.get("role");
   const isChefOnlyLogin = roleParam === "chef";
   const [selectedRole, setSelectedRole] = useState(
@@ -53,8 +53,7 @@ export default function LoginForm() {
       return;
     }
 
-    toast.success(`Welcome back, ${user?.firstName}`);
-    console.log(user)
+    toast.success(`Welcome back, ${result.user?.firstName || "again"}`);
   };
 
   return (

@@ -1,4 +1,6 @@
 "use client";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleCheck, faSpinner, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 
 export default function UploadZone({
   label,
@@ -23,7 +25,7 @@ export default function UploadZone({
         <span
           className={`material-symbols-outlined ${size === "lg" ? "text-4xl mb-sm" : "text-3xl"} ${isUploaded ? "text-primary" : "text-outline"} group-hover:text-primary transition-colors`}
         >
-          {isUploaded ? "check_circle" : icon}
+          {isUploaded ? <FontAwesomeIcon icon={faCircleCheck}/> : icon}
         </span>
         <p className="font-label-md text-label-md text-text-primary mt-2">
           {label}

@@ -1,11 +1,10 @@
 "use client";
 
-import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 
 export default function AppProviders({ children }) {
   return (
-    <AuthProvider>
+    <>
       {children}
       <Toaster
         position="top-center"
@@ -34,6 +33,6 @@ export default function AppProviders({ children }) {
           },
         }}
       />
-    </AuthProvider>
+    </>
   );
 }
