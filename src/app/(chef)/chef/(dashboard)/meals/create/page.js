@@ -119,7 +119,7 @@ export default function CreatePage() {
         if (response.ok && result.success) {
           setCategories(result.data || []);
           if (result.data && result.data.length > 0) {
-            setSelectedCategory(result.data[0]._id); // Fallback to initial ID entry
+            setSelectedCategory(result.data[0]._id); 
           }
         }
       } catch (err) {
@@ -223,14 +223,12 @@ export default function CreatePage() {
       formData.append("name", mealName.trim());
       formData.append("description", description.trim());
       formData.append("price", parseFloat(price));
-      formData.append("category", selectedCategory); // passes standard database _id mapping
+      formData.append("category", selectedCategory); 
 
-      // Structure ingredients array into independent items
       ingredients.forEach((ing) => {
         formData.append("ingredients", ing);
       });
 
-      // Filter active dietary flags into plain array collection strings
       const activeAllergens = Object.keys(allergens).filter(
         (key) => allergens[key],
       );
@@ -238,12 +236,10 @@ export default function CreatePage() {
         formData.append("allergens", allergen);
       });
 
-      // Append Main Image file binary payload
       if (mainImage) {
         formData.append("mealImages", mainImage);
       }
 
-      // Append available secondary images slots safely
       if (secondaryImages.slot1.file) {
         formData.append("mealImages", secondaryImages.slot1.file);
       }
@@ -251,13 +247,11 @@ export default function CreatePage() {
         formData.append("mealImages", secondaryImages.slot2.file);
       }
 
-      // Execute POST fetch with multi-part headers left to browser computation
       const response = await fetch(`${baseUrl}/meals`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          // CRITICAL: Do NOT set Content-Type header manually here.
-          // The browser needs to inject boundary delimiters for FormData multi-part uploads automatically.
+         
         },
         body: formData,
       });
@@ -272,7 +266,7 @@ export default function CreatePage() {
       }
 
       if (response.ok && result.success) {
-        router.push("/chef/meals"); // Redirect to table overview listing dashboard on success
+        router.push("/chef/meals"); 
       } else {
         throw new Error(
           result.message || "Failed to finalize new menu catalog listing.",
@@ -289,7 +283,6 @@ export default function CreatePage() {
     }
   };
 
-  // Find active displaying category name
   const currentCategoryObj = categories.find((c) => c._id === selectedCategory);
   const activeCategoryLabel = currentCategoryObj
     ? currentCategoryObj.name
@@ -373,7 +366,6 @@ export default function CreatePage() {
             )}
           </label>
 
-          {/* Right Column: Tips & Secondary Images */}
           <div className="flex flex-col gap-4">
             <div className="rounded-2xl border border-[#f0dfd5] bg-[#fff3e9] p-5">
               <div className="flex gap-3">
@@ -453,7 +445,7 @@ export default function CreatePage() {
               />
             </div>
 
-            {/* Dynamic Category Selector Component */}
+            {/*  Category Selector Component */}
             <div className="mt-5 relative">
               <FieldLabel>Category *</FieldLabel>
               <button

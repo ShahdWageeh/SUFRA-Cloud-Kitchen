@@ -71,7 +71,6 @@ function SecondaryPhotoSlot({ id, label, imageSrc, onFileSelect, onRemove }) {
 }
 
 export default function EditPage({ params: paramsPromise }) {
-  // ✅ Safely unwrap params and match your exact folder token name: mealId
   const params = use(paramsPromise);
   const mealId = params.mealId;
 
@@ -116,7 +115,6 @@ export default function EditPage({ params: paramsPromise }) {
         setPageLoading(true);
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-        // 1. Fetch categories
         const catRes = await fetch(`${baseUrl}/categories`);
         const catResult = await catRes.json();
         let currentCategories = [];
@@ -125,7 +123,6 @@ export default function EditPage({ params: paramsPromise }) {
           currentCategories = catResult.data || [];
         }
 
-        // 2. Fetch specific target meal details via dynamic parameter
         const mealRes = await fetch(`${baseUrl}/meals/${mealId}`);
         const mealResult = await mealRes.json();
 
@@ -154,7 +151,6 @@ export default function EditPage({ params: paramsPromise }) {
             });
           }
 
-          // Pre-populate existing images securely
           const serverImages = meal.mealImages || [];
           if (serverImages[0]) {
             setMainImagePreview(serverImages[0]);
@@ -258,7 +254,6 @@ export default function EditPage({ params: paramsPromise }) {
         .filter((key) => allergens[key])
         .forEach((all) => formData.append("allergens", all));
 
-      // Append binary files or maintain references to what exists on server
       if (mainImage) {
         formData.append("mealImages", mainImage);
       } else if (mainImagePreview) {
