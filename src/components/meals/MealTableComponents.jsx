@@ -5,7 +5,7 @@ import { ChevronDown, SlidersHorizontal, Pencil, Trash2 } from "lucide-react";
 
 // Helper utilities for pricing
 export function formatPrice(price) {
-  return `$${(price || 0).toFixed(2)}`;
+  return `EGP ${(price || 0).toFixed(2)}`;
 }
 
 //DYNAMIC ANALYTICS COUNTERS COMPONENT

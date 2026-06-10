@@ -39,7 +39,6 @@ function SecondaryPhotoSlot({ id, label, imageSrc, onFileSelect, onRemove }) {
         onChange={onFileSelect}
         className="hidden"
       />
-
       {imageSrc ? (
         <div className="group relative h-full w-full overflow-hidden rounded-xl border border-[#eee2dd]">
           <img
@@ -70,6 +69,69 @@ function SecondaryPhotoSlot({ id, label, imageSrc, onFileSelect, onRemove }) {
   );
 }
 
+async function parseResponse(response) {
+  let raw = "";
+  try {
+    raw = await response.text();
+  } catch {
+    return {
+      ok: false,
+      status: response.status,
+      data: null,
+      errorMessage: `Could not read server response (status ${response.status})`,
+    };
+  }
+
+  const trimmed = raw.trim();
+
+  if (!trimmed) {
+    return {
+      ok: response.ok,
+      status: response.status,
+      data: {},
+      errorMessage: response.ok
+        ? null
+        : `Server returned ${response.status} with no body`,
+    };
+  }
+
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    try {
+      const data = JSON.parse(trimmed);
+      return {
+        ok: response.ok,
+        status: response.status,
+        data,
+        errorMessage: response.ok
+          ? null
+          : data?.message || `Request failed (${response.status})`,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        status: response.status,
+        data: null,
+        errorMessage: `Unexpected server response (${response.status})`,
+      };
+    }
+  }
+
+  const readable = trimmed
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 300);
+
+  return {
+    ok: false,
+    status: response.status,
+    data: null,
+    errorMessage: readable || `Server error (${response.status})`,
+  };
+}
+
 export default function EditPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
   const mealId = params.mealId;
@@ -77,7 +139,6 @@ export default function EditPage({ params: paramsPromise }) {
   const { token, logout } = useAuth();
   const router = useRouter();
 
-  // Core Form State
   const [mealName, setMealName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -90,12 +151,10 @@ export default function EditPage({ params: paramsPromise }) {
     "Dairy Free": false,
   });
 
-  // Category Configuration
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Image Handles
   const [mainImage, setMainImage] = useState(null);
   const [mainImagePreview, setMainImagePreview] = useState(null);
   const [secondaryImages, setSecondaryImages] = useState({
@@ -103,78 +162,78 @@ export default function EditPage({ params: paramsPromise }) {
     slot2: { file: null, preview: null, isExisting: false },
   });
 
-  // UI Processing States
   const [pageLoading, setPageLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // Load category types and individual meal data on mount
   useEffect(() => {
     async function loadMealAndCategories() {
       try {
         setPageLoading(true);
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-        const catRes = await fetch(`${baseUrl}/categories`);
-        const catResult = await catRes.json();
-        let currentCategories = [];
-        if (catRes.ok && catResult.success) {
-          setCategories(catResult.data || []);
-          currentCategories = catResult.data || [];
+        const catRes = await fetch(`${baseUrl}/categories/active`);
+        const catParsed = await parseResponse(catRes);
+        let loadedCategories = [];
+
+        if (catParsed.ok && catParsed.data?.success) {
+          setCategories(catParsed.data.data || []);
+          loadedCategories = catParsed.data.data || [];
         }
 
         const mealRes = await fetch(`${baseUrl}/meals/${mealId}`);
-        const mealResult = await mealRes.json();
+        const mealParsed = await parseResponse(mealRes);
 
-        if (mealRes.ok && mealResult.success) {
-          const meal = mealResult.data;
-
-          setMealName(meal.name || "");
-          setDescription(meal.description || "");
-          setPrice(meal.price || "");
-          setIngredients(meal.ingredients || []);
-
-          // Map category object ID cleanly
-          if (meal.category) {
-            setSelectedCategory(meal.category._id || meal.category);
-          } else if (currentCategories.length > 0) {
-            setSelectedCategory(currentCategories[0]._id);
-          }
-
-          // Map existing allergen checkboxes
-          if (meal.allergens) {
-            setAllergens({
-              "Gluten Free": meal.allergens.includes("Gluten Free"),
-              "Contains Nuts": meal.allergens.includes("Contains Nuts"),
-              Vegetarian: meal.allergens.includes("Vegetarian"),
-              "Dairy Free": meal.allergens.includes("Dairy Free"),
-            });
-          }
-
-          const serverImages = meal.mealImages || [];
-          if (serverImages[0]) {
-            setMainImagePreview(serverImages[0]);
-          }
-          if (serverImages[1]) {
-            setSecondaryImages((prev) => ({
-              ...prev,
-              slot1: { file: null, preview: serverImages[1], isExisting: true },
-            }));
-          }
-          if (serverImages[2]) {
-            setSecondaryImages((prev) => ({
-              ...prev,
-              slot2: { file: null, preview: serverImages[2], isExisting: true },
-            }));
-          }
-        } else {
+        if (!mealParsed.ok || !mealParsed.data?.success) {
           throw new Error(
-            mealResult.message ||
-              "Could not retrieve the requested meal details.",
+            mealParsed.errorMessage || "Could not retrieve meal details.",
           );
         }
+
+        const meal = mealParsed.data.data;
+
+        setMealName(meal.name || "");
+        setDescription(meal.description || "");
+        setPrice(meal.price || "");
+        setIngredients(Array.isArray(meal.ingredients) ? meal.ingredients : []);
+
+        if (meal.categories?.length > 0) {
+          const t = meal.categories[0];
+          setSelectedCategory(typeof t === "object" ? t._id : t);
+        } else if (meal.category) {
+          const id =
+            typeof meal.category === "object"
+              ? meal.category._id
+              : meal.category;
+          setSelectedCategory(id || "");
+        } else if (loadedCategories.length > 0) {
+          setSelectedCategory(loadedCategories[0]._id);
+        }
+
+        if (meal.allergens) {
+          setAllergens({
+            "Gluten Free": meal.allergens.includes("Gluten Free"),
+            "Contains Nuts": meal.allergens.includes("Contains Nuts"),
+            Vegetarian: meal.allergens.includes("Vegetarian"),
+            "Dairy Free": meal.allergens.includes("Dairy Free"),
+          });
+        }
+
+        const serverImages = meal.mealImages || [];
+        if (serverImages[0]) setMainImagePreview(serverImages[0]);
+        if (serverImages[1]) {
+          setSecondaryImages((p) => ({
+            ...p,
+            slot1: { file: null, preview: serverImages[1], isExisting: true },
+          }));
+        }
+        if (serverImages[2]) {
+          setSecondaryImages((p) => ({
+            ...p,
+            slot2: { file: null, preview: serverImages[2], isExisting: true },
+          }));
+        }
       } catch (err) {
-        console.error("Initialization Failed:", err);
         setFormError(err.message);
       } finally {
         setPageLoading(false);
@@ -184,9 +243,8 @@ export default function EditPage({ params: paramsPromise }) {
     if (mealId) loadMealAndCategories();
   }, [mealId]);
 
-  // Image Processing Helpers
-  const handleMainImageChange = (event) => {
-    const file = event.target.files?.[0];
+  const handleMainImageChange = (e) => {
+    const file = e.target.files?.[0];
     if (file) {
       setMainImage(file);
       setMainImagePreview(URL.createObjectURL(file));
@@ -199,36 +257,33 @@ export default function EditPage({ params: paramsPromise }) {
     setMainImagePreview(null);
   };
 
-  const handleSecondaryImageChange = (slot, event) => {
-    const file = event.target.files?.[0];
+  const handleSecondaryImageChange = (slot, e) => {
+    const file = e.target.files?.[0];
     if (file) {
-      setSecondaryImages((prev) => ({
-        ...prev,
+      setSecondaryImages((p) => ({
+        ...p,
         [slot]: { file, preview: URL.createObjectURL(file), isExisting: false },
       }));
     }
   };
 
   const removeSecondaryImage = (slot) => {
-    setSecondaryImages((prev) => ({
-      ...prev,
+    setSecondaryImages((p) => ({
+      ...p,
       [slot]: { file: null, preview: null, isExisting: false },
     }));
   };
 
-  // Ingredient Helpers
   const addIngredient = (value) => {
     const clean = value.trim().replace(/,$/, "");
     if (!clean || ingredients.includes(clean)) return;
-    setIngredients((prev) => [...prev, clean]);
+    setIngredients((p) => [...p, clean]);
     setIngredientInput("");
   };
 
-  const removeIngredient = (target) => {
-    setIngredients((prev) => prev.filter((i) => i !== target));
-  };
+  const removeIngredient = (target) =>
+    setIngredients((p) => p.filter((i) => i !== target));
 
-  // Submit modifications via PUT endpoint
   const handleSubmit = async (event) => {
     event.preventDefault();
     setFormError(null);
@@ -241,18 +296,18 @@ export default function EditPage({ params: paramsPromise }) {
     try {
       setIsSubmitting(true);
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const formData = new FormData();
 
+      const formData = new FormData();
       formData.append("name", mealName.trim());
       formData.append("description", description.trim());
       formData.append("price", parseFloat(price));
-      formData.append("category", selectedCategory);
+      formData.append("categories", JSON.stringify([selectedCategory]));
+      formData.append("ingredients", JSON.stringify(ingredients));
 
-      ingredients.forEach((ing) => formData.append("ingredients", ing));
-
-      Object.keys(allergens)
-        .filter((key) => allergens[key])
-        .forEach((all) => formData.append("allergens", all));
+      const selectedAllergens = Object.keys(allergens).filter(
+        (k) => allergens[k],
+      );
+      formData.append("allergens", JSON.stringify(selectedAllergens));
 
       if (mainImage) {
         formData.append("mealImages", mainImage);
@@ -280,26 +335,24 @@ export default function EditPage({ params: paramsPromise }) {
 
       const response = await fetch(`${baseUrl}/meals/${mealId}`, {
         method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
-      const result = await response.json();
+      const parsed = await parseResponse(response);
 
-      if (response.status === 401) {
+      if (parsed.status === 401) {
         logout();
         return;
       }
 
-      if (response.ok && result.success) {
+      if (parsed.ok && parsed.data?.success) {
         router.push("/chef/meals");
-      } else {
-        throw new Error(result.message || "Failed to save menu changes.");
+        return;
       }
+
+      throw new Error(parsed.errorMessage || "Failed to save menu changes.");
     } catch (err) {
-      console.error("Form transmission failed:", err);
       setFormError(err.message || "Network exception encountered.");
     } finally {
       setIsSubmitting(false);
@@ -406,7 +459,7 @@ export default function EditPage({ params: paramsPromise }) {
         </div>
       </section>
 
-      {/* Core Meta Details Card */}
+      {/* Core Details */}
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
         <div className="grid gap-7 lg:grid-cols-2">
           <div>
@@ -475,6 +528,7 @@ export default function EditPage({ params: paramsPromise }) {
                 </div>
               )}
             </div>
+
             <div className="mt-5 flex gap-3 rounded-xl bg-[#fff7ef] p-4 text-sm text-[#6f554a] border border-[#f0dfd5]">
               <Info className="text-[#964326] shrink-0" />
               Updating parameters takes effect immediately on buyer dashboards.
@@ -483,7 +537,7 @@ export default function EditPage({ params: paramsPromise }) {
         </div>
       </section>
 
-      {/* Ingredients Section */}
+      {/* Ingredients & Dietary */}
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
         <div className="grid gap-7 lg:grid-cols-2">
           <div>
@@ -541,7 +595,7 @@ export default function EditPage({ params: paramsPromise }) {
         </div>
       </section>
 
-      {/* Submission Actions Footer */}
+      {/* Footer */}
       <footer className="flex justify-end gap-4 pt-2">
         <Link
           href="/chef/meals"

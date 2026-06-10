@@ -6,7 +6,7 @@ import useAuth from "@/hooks/useAuth";
 import { DollarSign, ShoppingBag, Clock, Star } from "lucide-react";
 
 function formatCurrency(value) {
-  return `$${(value || 0).toFixed(2)}`;
+  return `EGP ${(value || 0).toFixed(2)}`;
 }
 
 function statusClassName(status) {
@@ -36,7 +36,7 @@ export default function DashboardPage() {
 
   // Pagination Controller Configuration
   const [currentPage, setCurrentPage] = useState(1);
-  const ORDERS_PER_PAGE = 5; // Strict limit per view window page
+  const ORDERS_PER_PAGE = 5; 
 
   useEffect(() => {
     if (!token) {

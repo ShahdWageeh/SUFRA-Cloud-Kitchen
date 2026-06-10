@@ -4,8 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import useAuth from "@/hooks/useAuth";
 import { Plus, ChevronLeft, ChevronRight, UtensilsCrossed } from "lucide-react";
-import { AnalyticsGrid, MealTableRow, TableFilterBar } from "@/components/meals/MealTableComponents";
-
+import {
+  AnalyticsGrid,
+  MealTableRow,
+  TableFilterBar,
+} from "@/components/meals/MealTableComponents";
 
 export default function MealsPage() {
   const { token, user, logout } = useAuth();

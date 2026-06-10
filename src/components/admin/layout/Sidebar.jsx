@@ -20,7 +20,7 @@ const navItems = [
   { id: "chefs",      label: "Chefs",       icon: ChefHat,         href: "/admin/chefs" },
   { id: "users",      label: "Users",       icon: Users,           href: "/admin/users" },
   { id: "orders",     label: "Orders",      icon: ShoppingBag,     href: "/admin/orders" },
-  { id: "moderation",  label: "Moderation",   icon: ShieldIcon,       href: "/admin/meals" },
+  { id: "verifications",  label: "Verifications",   icon: ShieldIcon,       href: "/admin/verifications" },
 ];
 
 function SidebarContent({ pathname, setMobileOpen }) {

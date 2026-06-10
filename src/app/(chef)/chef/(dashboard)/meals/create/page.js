@@ -40,7 +40,6 @@ function SecondaryPhotoSlot({ id, label, imageSrc, onFileSelect, onRemove }) {
         onChange={onFileSelect}
         className="hidden"
       />
-
       {imageSrc ? (
         <div className="group relative h-full w-full overflow-hidden rounded-xl border border-[#eee2dd]">
           <img
@@ -74,11 +73,74 @@ function SecondaryPhotoSlot({ id, label, imageSrc, onFileSelect, onRemove }) {
   );
 }
 
+// Safe response parser — never throws on non-JSON bodies
+async function parseResponse(response) {
+  let raw = "";
+  try {
+    raw = await response.text();
+  } catch {
+    return {
+      ok: false,
+      status: response.status,
+      data: null,
+      errorMessage: `Could not read server response (status ${response.status})`,
+    };
+  }
+
+  const trimmed = raw.trim();
+
+  if (!trimmed) {
+    return {
+      ok: response.ok,
+      status: response.status,
+      data: {},
+      errorMessage: response.ok
+        ? null
+        : `Server returned ${response.status} with no body`,
+    };
+  }
+
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    try {
+      const data = JSON.parse(trimmed);
+      return {
+        ok: response.ok,
+        status: response.status,
+        data,
+        errorMessage: response.ok
+          ? null
+          : data?.message || `Request failed (${response.status})`,
+      };
+    } catch {
+      return {
+        ok: false,
+        status: response.status,
+        data: null,
+        errorMessage: `Unexpected server response (${response.status})`,
+      };
+    }
+  }
+
+  const readable = trimmed
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 300);
+
+  return {
+    ok: false,
+    status: response.status,
+    data: null,
+    errorMessage: readable || `Server error (${response.status})`,
+  };
+}
+
 export default function CreatePage() {
   const { token, logout } = useAuth();
   const router = useRouter();
 
-  // Core Form Inputs
   const [mealName, setMealName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -91,12 +153,10 @@ export default function CreatePage() {
     "Dairy Free": false,
   });
 
-  // Dynamic Backend Categories States
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Image Upload States
   const [mainImage, setMainImage] = useState(null);
   const [mainImagePreview, setMainImagePreview] = useState(null);
   const [secondaryImages, setSecondaryImages] = useState({
@@ -104,32 +164,27 @@ export default function CreatePage() {
     slot2: { file: null, preview: null },
   });
 
-  // UI Processing Submittion States
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // 1. Fetch System Categories on Mount
   useEffect(() => {
     async function fetchCategories() {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        const response = await fetch(`${baseUrl}/categories`);
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          setCategories(result.data || []);
-          if (result.data && result.data.length > 0) {
-            setSelectedCategory(result.data[0]._id); 
+        const response = await fetch(`${baseUrl}/categories/active`);
+        const parsed = await parseResponse(response);
+        if (parsed.ok && parsed.data?.success) {
+          setCategories(parsed.data.data || []);
+          if (parsed.data.data?.length > 0) {
+            setSelectedCategory(parsed.data.data[0]._id);
           }
         }
-      } catch (err) {
-        console.error("Failed loading backend categories mapping:", err);
+      } catch {
       }
     }
     fetchCategories();
   }, []);
 
-  // Image Event Handlers
   const handleMainImageChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -143,8 +198,8 @@ export default function CreatePage() {
     e.stopPropagation();
     setMainImage(null);
     setMainImagePreview(null);
-    const inputElement = document.getElementById("main-image-upload");
-    if (inputElement) inputElement.value = "";
+    const el = document.getElementById("main-image-upload");
+    if (el) el.value = "";
   };
 
   const handleSecondaryImageChange = (slot, event) => {
@@ -162,23 +217,21 @@ export default function CreatePage() {
       ...prev,
       [slot]: { file: null, preview: null },
     }));
-    const inputElement = document.getElementById(
+    const el = document.getElementById(
       slot === "slot1" ? "secondary-1" : "secondary-2",
     );
-    if (inputElement) inputElement.value = "";
+    if (el) el.value = "";
   };
 
-  // Ingredient Handlers
   const addIngredient = (value) => {
-    const nextIngredient = value.trim().replace(/,$/, "");
-    if (!nextIngredient || ingredients.includes(nextIngredient)) return;
-    setIngredients((current) => [...current, nextIngredient]);
+    const clean = value.trim().replace(/,$/, "");
+    if (!clean || ingredients.includes(clean)) return;
+    setIngredients((prev) => [...prev, clean]);
     setIngredientInput("");
   };
 
-  const removeIngredient = (ingredient) => {
-    setIngredients((current) => current.filter((item) => item !== ingredient));
-  };
+  const removeIngredient = (ingredient) =>
+    setIngredients((prev) => prev.filter((i) => i !== ingredient));
 
   const handleIngredientKeyDown = (event) => {
     if (event.key === "Enter" || event.key === ",") {
@@ -187,14 +240,9 @@ export default function CreatePage() {
     }
   };
 
-  const toggleAllergen = (option) => {
-    setAllergens((current) => ({
-      ...current,
-      [option]: !current[option],
-    }));
-  };
+  const toggleAllergen = (option) =>
+    setAllergens((prev) => ({ ...prev, [option]: !prev[option] }));
 
-  // 2. Submit Multipart FormData to Backend
   const handleSubmit = async (event) => {
     event.preventDefault();
     setFormError(null);
@@ -210,7 +258,7 @@ export default function CreatePage() {
       !price ||
       !selectedCategory
     ) {
-      setFormError("Please fill out all required foundational fields.");
+      setFormError("Please fill out all required fields.");
       return;
     }
 
@@ -219,74 +267,54 @@ export default function CreatePage() {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const formData = new FormData();
 
-      // Append core text values
       formData.append("name", mealName.trim());
       formData.append("description", description.trim());
       formData.append("price", parseFloat(price));
-      formData.append("category", selectedCategory); 
 
-      ingredients.forEach((ing) => {
-        formData.append("ingredients", ing);
-      });
+      // API expects JSON-stringified arrays for these fields
+      formData.append("categories", JSON.stringify([selectedCategory]));
+      formData.append("ingredients", JSON.stringify(ingredients));
 
       const activeAllergens = Object.keys(allergens).filter(
-        (key) => allergens[key],
+        (k) => allergens[k],
       );
-      activeAllergens.forEach((allergen) => {
-        formData.append("allergens", allergen);
-      });
+      formData.append("allergens", JSON.stringify(activeAllergens));
 
-      if (mainImage) {
-        formData.append("mealImages", mainImage);
-      }
-
-      if (secondaryImages.slot1.file) {
+      if (mainImage) formData.append("mealImages", mainImage);
+      if (secondaryImages.slot1.file)
         formData.append("mealImages", secondaryImages.slot1.file);
-      }
-      if (secondaryImages.slot2.file) {
+      if (secondaryImages.slot2.file)
         formData.append("mealImages", secondaryImages.slot2.file);
-      }
 
       const response = await fetch(`${baseUrl}/meals`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-         
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
-      const result = await response.json();
+      const parsed = await parseResponse(response);
 
-      if (response.status === 401) {
+      if (parsed.status === 401) {
         logout();
-        throw new Error(
-          "Session expired. Please re-authenticate your profile dashboard.",
-        );
+        return;
       }
 
-      if (response.ok && result.success) {
-        router.push("/chef/meals"); 
-      } else {
-        throw new Error(
-          result.message || "Failed to finalize new menu catalog listing.",
-        );
+      if (parsed.ok && parsed.data?.success) {
+        router.push("/chef/meals");
+        return;
       }
+
+      throw new Error(parsed.errorMessage || "Failed to create meal listing.");
     } catch (err) {
-      console.error("Form creation execution failed:", err);
-      setFormError(
-        err.message ||
-          "Network exceptions processing content validation framework.",
-      );
+      setFormError(err.message || "Network error. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const currentCategoryObj = categories.find((c) => c._id === selectedCategory);
-  const activeCategoryLabel = currentCategoryObj
-    ? currentCategoryObj.name
-    : "Select Category";
+  const activeCategoryLabel =
+    categories.find((c) => c._id === selectedCategory)?.name ||
+    "Select Category";
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-6xl space-y-6 p-4">
@@ -301,11 +329,9 @@ export default function CreatePage() {
           <span className="text-[#c7b7b0]">&gt;</span>
           <span className="text-[#964326]">Add New Meal</span>
         </nav>
-
         <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight text-[#1f1511] md:text-[42px]">
           Create New Culinary Masterpiece
         </h1>
-
         <p className="mt-2 text-sm text-[#7e6a63] md:text-base">
           Fill in the details below to list your home-cooked meal on the
           marketplace.
@@ -318,10 +344,9 @@ export default function CreatePage() {
         </div>
       )}
 
-      {/* Section 1: Photography Card */}
+      {/* Photography */}
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
         <div className="grid gap-5 lg:grid-cols-[1.85fr_1fr]">
-          {/* Main Photo Field Component */}
           <label
             htmlFor="main-image-upload"
             className="relative block aspect-[3/2] min-h-72 w-full overflow-hidden rounded-2xl border-2 border-dashed border-[#b96a4d] bg-[#fffdfb] cursor-pointer"
@@ -333,7 +358,6 @@ export default function CreatePage() {
               onChange={handleMainImageChange}
               className="hidden"
             />
-
             {mainImagePreview ? (
               <div className="relative h-full w-full">
                 <img
@@ -354,11 +378,9 @@ export default function CreatePage() {
                 <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f7e9e2] text-[#964326]">
                   <CloudUpload size={30} strokeWidth={1.8} />
                 </span>
-
                 <span className="mt-5 text-base font-extrabold text-[#2a1f1a]">
                   Click to upload main photo
                 </span>
-
                 <span className="mt-2 text-sm text-[#8a766f]">
                   High quality 3:2 landscape recommended
                 </span>
@@ -372,13 +394,11 @@ export default function CreatePage() {
                 <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#964326] shadow-sm">
                   <Lightbulb size={18} strokeWidth={1.8} />
                 </span>
-
                 <p className="text-sm font-semibold leading-6 text-[#5f463b]">
                   Tip: Natural lighting makes food look more appetizing!
                 </p>
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <SecondaryPhotoSlot
                 id="secondary-1"
@@ -399,7 +419,7 @@ export default function CreatePage() {
         </div>
       </section>
 
-      {/* Section 2: Core Details Card */}
+      {/* Core Details */}
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
         <div className="grid gap-7 lg:grid-cols-2">
           <div>
@@ -408,17 +428,16 @@ export default function CreatePage() {
               type="text"
               required
               value={mealName}
-              onChange={(event) => setMealName(event.target.value)}
+              onChange={(e) => setMealName(e.target.value)}
               placeholder="e.g. Traditional Saudi Kabsa"
               className="h-12 w-full rounded-xl border border-[#eaded8] bg-white px-4 text-sm text-[#2f221d] outline-none transition placeholder:text-[#b0a09a] focus:border-[#964326] focus:ring-4 focus:ring-[#964326]/10"
             />
-
             <div className="mt-5">
               <FieldLabel>Description *</FieldLabel>
               <textarea
                 required
                 value={description}
-                onChange={(event) => setDescription(event.target.value)}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Tell the story behind this dish, its flavors, and special ingredients..."
                 rows={6}
                 className="min-h-40 w-full resize-none rounded-xl border border-[#eaded8] bg-white px-4 py-3 text-sm leading-6 text-[#2f221d] outline-none transition placeholder:text-[#b0a09a] focus:border-[#964326] focus:ring-4 focus:ring-[#964326]/10"
@@ -432,20 +451,18 @@ export default function CreatePage() {
               <span className="flex items-center border-r border-[#eaded8] bg-[#fbf6f3] px-4 text-sm font-extrabold text-[#964326]">
                 EGP
               </span>
-
               <input
                 type="number"
                 required
                 min="0"
                 step="0.01"
                 value={price}
-                onChange={(event) => setPrice(event.target.value)}
+                onChange={(e) => setPrice(e.target.value)}
                 placeholder="0.00"
                 className="min-w-0 flex-1 px-4 text-sm text-[#2f221d] outline-none placeholder:text-[#b0a09a]"
               />
             </div>
 
-            {/*  Category Selector Component */}
             <div className="mt-5 relative">
               <FieldLabel>Category *</FieldLabel>
               <button
@@ -456,7 +473,6 @@ export default function CreatePage() {
                 <span>{activeCategoryLabel}</span>
                 <ChevronDown size={18} className="text-[#8b766f]" />
               </button>
-
               {dropdownOpen && (
                 <div className="absolute left-0 z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-[#eaded8] bg-white shadow-lg py-1">
                   {categories.length === 0 ? (
@@ -497,7 +513,7 @@ export default function CreatePage() {
         </div>
       </section>
 
-      {/* Section 3: Ingredients & Allergens Card */}
+      {/* Ingredients & Allergens */}
       <section className="rounded-2xl border border-[#eee2dd] bg-white p-5 shadow-sm md:p-7">
         <div className="grid gap-7 lg:grid-cols-2">
           <div>
@@ -519,11 +535,10 @@ export default function CreatePage() {
                   </button>
                 </span>
               ))}
-
               <input
                 type="text"
                 value={ingredientInput}
-                onChange={(event) => setIngredientInput(event.target.value)}
+                onChange={(e) => setIngredientInput(e.target.value)}
                 onBlur={() => addIngredient(ingredientInput)}
                 onKeyDown={handleIngredientKeyDown}
                 placeholder="Add ingredient..."
@@ -554,7 +569,7 @@ export default function CreatePage() {
         </div>
       </section>
 
-      {/* Actions Footer */}
+      {/* Footer */}
       <footer className="flex justify-end gap-4 pt-2">
         <Link
           href="/chef/meals"
@@ -562,7 +577,6 @@ export default function CreatePage() {
         >
           Cancel
         </Link>
-
         <button
           type="submit"
           disabled={isSubmitting}
