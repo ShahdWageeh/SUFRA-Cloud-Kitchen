@@ -7,7 +7,7 @@ export default function ProfileFooter({ onDiscard, onSave, saving }) {
                 className="max-w-7xl mx-auto px-8 py-2 flex justify-between items-center"
             >
                 <span className="text-text-secondary">
-                    Last saved today at 10:45 AM
+                    {/* last saved at . . . . . */}
                 </span>
 
                 <div className="flex gap-4">

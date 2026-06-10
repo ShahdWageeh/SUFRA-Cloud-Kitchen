@@ -10,8 +10,30 @@ import { ordersService } from "@/services";
 export default function OrdersPage() {
   const { token } = useAuth();
   const [orders, setOrders] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState("preparing");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const handleStatusChange = (orderId, nextStatus) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        (order._id || order.id) === orderId
+          ? { ...order, status: nextStatus }
+          : order,
+      ),
+    );
+  };
+
+  const preparingOrders = orders.filter((o) => o.status === "preparing");
+  const readyOrders = orders.filter((o) => o.status === "ready");
+  const completedOrders = orders.filter((o) => o.status === "completed");
+
+  const visibleOrders =
+    selectedStatus === "ready"
+      ? readyOrders
+      : selectedStatus === "completed"
+      ? completedOrders
+      : preparingOrders;
 
   useEffect(() => {
     if (!token) {
@@ -41,29 +63,23 @@ export default function OrdersPage() {
 
   return (
     <div className="p-8">
-      <OrdersTabs incomingOrders={orders.length} />
+      <OrdersTabs
+        selectedStatus={selectedStatus}
+        onSelectStatus={setSelectedStatus}
+        counts={{
+          preparing: preparingOrders.length,
+          ready: readyOrders.length,
+          completed: completedOrders.length,
+        }}
+      />
 
       <div className="mt-6">
-        {loading ? (
-          <div className="rounded-[20px] border border-[#EDE6E3] bg-white p-8 text-center text-sm text-[#7A6560]">
-            Loading your chef orders...
-          </div>
-        ) : error ? (
-          <div className="rounded-[20px] border border-red-200 bg-red-50 p-8 text-center text-sm text-red-700">
-            {error}
-          </div>
-        ) : orders.length === 0 ? (
-          <div className="rounded-[20px] border border-[#EDE6E3] bg-white p-8 text-center text-sm text-[#7A6560]">
-            No orders found for your kitchen yet.
-          </div>
-        ) : (
-          <OrdersList orders={orders} />
-        )}
+          <OrdersList orders={visibleOrders} onStatusChange={handleStatusChange} />
       </div>
 
-      <div className="mt-16">
+      {/* <div className="mt-16">
         <StatsSection />
-      </div>
+      </div> */}
     </div>
   );
 }

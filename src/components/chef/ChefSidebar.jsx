@@ -33,8 +33,8 @@ const navItems = [
     icon: Wallet,
   },
   {
-    label: "Onboarding",
-    href: "/chef/onboarding",
+    label: "Branding",
+    href: "/chef/branding",
     icon: BadgeCheck,
   },
 ];
