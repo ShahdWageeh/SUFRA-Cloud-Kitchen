@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import useAuth from "@/hooks/useAuth";
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -44,6 +45,18 @@ function isNavItemActive(pathname, href) {
 
 export default function ChefSidebar({ isOpen, onClose }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const chefName = user?.firstName ? `${user.firstName} ${user.lastName || ""}` : "Chef";
+  const chefTitle = user?.kitchenName || user?.role || "Chef";
+  const initials = user?.firstName
+    ? `${user.firstName[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
+    : "CH";
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
 
   return (
     <>
@@ -117,21 +130,38 @@ export default function ChefSidebar({ isOpen, onClose }) {
             Create New Listing
           </Link>
 
-          <div className="rounded-2xl bg-[#f2ece9] p-3">
+          <Link
+            href="/chef/profile"
+            onClick={onClose}
+            className="rounded-2xl bg-[#f2ece9] p-3 block hover:bg-[#e9e1dd] transition"
+          >
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#d7a27f] to-[#8f4e32] text-xs font-semibold text-white">
-                CA
+                {initials}
               </div>
 
               <div>
                 <p className="text-sm font-semibold text-[#352822]">
-                  Chef Amina
+                  {chefName}
                 </p>
 
-                <p className="text-xs text-[#7e6a63]">Master Baker</p>
+                <p className="text-xs text-[#7e6a63]">
+                  {chefTitle}
+                </p>
               </div>
             </div>
-          </div>
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              handleLogout();
+            }}
+            className="mt-4 w-full rounded-xl border border-[#d6c3b8] bg-white py-3 text-sm font-semibold text-[#5f5652] transition hover:bg-[#f3ece9]"
+          >
+            Log Out
+          </button>
         </div>
       </aside>
     </>
