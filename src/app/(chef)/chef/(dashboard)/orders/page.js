@@ -41,7 +41,7 @@ export default function OrdersPage() {
 
   return (
     <div className="p-8">
-      <OrdersTabs />
+      <OrdersTabs incomingOrders={orders.length} />
 
       <div className="mt-6">
         {loading ? (

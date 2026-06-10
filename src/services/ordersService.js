@@ -3,7 +3,7 @@ import api from "./api";
 class OrdersService {
   async getChefOrders() {
     const response = await api.get("/orders/chef/orders");
-    console.log("Orders response:", response.data);
+    // console.log("Orders response:", response.data);
     return response.data;
   }
 }
