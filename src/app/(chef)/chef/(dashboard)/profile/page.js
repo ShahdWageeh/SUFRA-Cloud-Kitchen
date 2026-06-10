@@ -2,60 +2,53 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import useAuth from "@/hooks/useAuth";
 import ProfileHeader from "@/components/chef/profile/ProfileHeader";
 import BrandIdentitySection from "@/components/chef/profile/BrandIdentitySection";
 import ContactSection from "@/components/chef/profile/ContactSection";
 import ProfileFooter from "@/components/chef/profile/ProfileFooter";
 import { profileService } from "@/services";
 
-const profile = {
-  name: "The Saffron Spoon",
-  slogan: "Authentic flavors from our home to yours",
-  bio: `With over 15 years of family tradition, The Saffron Spoon
-specializes in authentic Levantine cuisine. Every dish is prepared daily
-using locally sourced organic ingredients and time-honored recipes passed
-down through generations.`,
-
-  cuisine: "Middle Eastern",
-
-  specialties: ["Organic", "Gluten-Free", "Levantine"],
-
-  phone: "+971 50 123 4567",
-  instagram: "@thesaffronspoon_ae",
-
-  address: "Dubai Marina, Building 4, Unit 202",
-
-  logo: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-
-  mapImage: "https://images.unsplash.com/photo-1524661135-423995f22d0b",
-};
-
 export default function KitchenProfilePage() {
   const router = useRouter();
+  const { user } = useAuth();
+  console.log(user);
+  const [profile, setProfile] = useState({});
   const [brandIdentity, setBrandIdentity] = useState({
-    name: profile.name,
-    slogan: profile.slogan,
-    bio: profile.bio,
+    name: "",
+    slogan: "",
+    bio: "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const sessionBrand =
-      typeof window !== "undefined"
-        ? window.sessionStorage.getItem("brandingResponse")
-        : null;
+    async function loadProfile() {
+      if (!user?._id) {
+        setError("Unable to load profile data for the logged in user.");
+        return;
+      }
 
-    const parsedBrand = sessionBrand ? JSON.parse(sessionBrand) : null;
+      try {
+        const result = await profileService.getProfile(user._id);
+        const chef = result.data;
 
-    if (parsedBrand) {
-      setBrandIdentity({
-        name: parsedBrand.kitchenName || profile.name,
-        slogan: parsedBrand.slogan || profile.slogan,
-        bio: parsedBrand.description || profile.bio,
-      });
+        setProfile(chef);
+        setBrandIdentity({
+          name: chef.kitchenName || "",
+          slogan: chef.slogan || "",
+          bio: chef.description || "",
+        });
+      } catch (err) {
+        setError(
+          err?.response?.data?.message ||
+            "Unable to load profile data. Please refresh the page.",
+        );
+      }
     }
-  }, []);
+
+    loadProfile();
+  }, [user]);
 
   const handleChange = (field, value) => {
     setBrandIdentity((prev) => ({
@@ -88,9 +81,9 @@ export default function KitchenProfilePage() {
 
   const handleDiscard = () => {
     setBrandIdentity({
-      name: profile.name,
-      slogan: profile.slogan,
-      bio: profile.bio,
+      name: profile.kitchenName || "",
+      slogan: profile.slogan || "",
+      bio: profile.description || "",
     });
   };
 

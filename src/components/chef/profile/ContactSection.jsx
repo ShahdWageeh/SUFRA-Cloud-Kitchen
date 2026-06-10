@@ -1,5 +1,5 @@
 import SectionCard from "./SectionCard";
-import { Phone, MessageSquare, Star } from "lucide-react";
+import { ChefHat, Phone, MessageSquare, Mail } from "lucide-react";
 
 export default function ContactSection({ profile }) {
   return (
@@ -15,6 +15,29 @@ export default function ContactSection({ profile }) {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
+
+        {/* Name */}
+        <div>
+          <label className="block mb-2 font-medium text-text-secondary">
+            Chef Name
+          </label>
+
+          <div
+            className="
+            border border-surface-low
+            rounded-xl
+            px-4 py-4
+            flex items-center gap-3
+            "
+          >
+            <ChefHat
+              size={18}
+              className="text-text-secondary"
+            />
+
+            <span>{profile.firstName} {profile.lastName}</span>
+          </div>
+        </div>
 
         {/* Phone */}
         <div>
@@ -62,10 +85,10 @@ export default function ContactSection({ profile }) {
           </div>
         </div>
 
-        {/* Instagram */}
+        {/* Email */}
         <div>
           <label className="block mb-2 font-medium text-text-secondary">
-            Instagram Username
+            Email
           </label>
 
           <div
@@ -74,14 +97,15 @@ export default function ContactSection({ profile }) {
             rounded-xl
             px-4 py-4
             flex items-center gap-3
+            w-fit
             "
           >
-            <Star
+            <Mail
               size={18}
               className="text-text-secondary"
             />
 
-            <span>{profile.instagram}</span>
+            <span>{profile.email}</span>
           </div>
         </div>
 
