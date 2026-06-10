@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faApple, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import {
+  faChevronRight,
   faEnvelope,
   faLock,
   faQuoteLeft,
@@ -59,7 +60,13 @@ export default function LoginForm() {
   };
 
   return (
-    <section className="min-h-dvh bg-background">
+    <section className="min-h-dvh relative bg-background">
+      <Link
+        href="/"
+        className="mt-6 z-10 cursor-pointer hover:text-primary-container absolute top-0 right-2.5 rounded-full text-primary px-6 py-3 text-xs font-bold"
+      >
+        Back to Home <FontAwesomeIcon icon={faChevronRight} /> 
+      </Link>
       <div className="mx-auto grid min-h-dvh max-w-7xl grid-cols-1 lg:grid-cols-[0.92fr_1fr]">
         <aside className="relative hidden min-h-dvh overflow-hidden lg:block">
           <Image
