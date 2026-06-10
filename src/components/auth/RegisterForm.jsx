@@ -12,6 +12,7 @@ import {
   faUser,
   faUserCheck,
   faUtensils,
+  faChevronLeft
 } from "@fortawesome/free-solid-svg-icons";
 import { faFacebook, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { registerSchema } from "@/schemas/authSchemas";
@@ -71,6 +72,12 @@ export default function RegisterForm({ accountType, endpoint }) {
         className="absolute top-4 left-4 right-4 bottom-4 bg-white/50 backdrop-blur-[1px]"
         aria-hidden="true"
       />
+      <Link
+        href="/"
+        className="mt-6 z-10 cursor-pointer hover:text-primary-container absolute top-0 left-2.5 rounded-full text-primary px-6 py-3 text-xs font-bold"
+      >
+       <FontAwesomeIcon icon={faChevronLeft}/> Back to Home
+      </Link>
       <div className="relative flex min-h-dvh flex-col px-5 py-8 sm:px-8 lg:px-12">
         <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-7">
           <div className="text-center">
