@@ -1,4 +1,5 @@
 import axios from "axios";
+import { buildLoginUrl } from "@/utils/authRedirects";
 import tokenService from "./tokenService";
 
 const api = axios.create({
@@ -32,7 +33,9 @@ api.interceptors.response.use(
       tokenService.remove();
 
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        window.location.href = buildLoginUrl(
+          `${window.location.pathname}${window.location.search}`,
+        );
       }
     }
 

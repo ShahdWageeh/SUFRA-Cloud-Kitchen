@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { authService, verificationService, tokenService } from "@/services";
+import { getSafeRedirectPath } from "@/utils/authRedirects";
 
 export const AuthContext = createContext(null);
 
@@ -131,11 +132,13 @@ export function AuthProvider({ children }) {
       setLoading(true);
 
       try {
-        const response = await authService.login(credentials);
+        const { redirect, ...loginCredentials } = credentials;
+        const response = await authService.login(loginCredentials);
 
         const authData = getResponseData(response);
         const loggedUser = authData.user;
         const accessToken = authData.token;
+        const safeRedirect = getSafeRedirectPath(redirect);
 
         if (accessToken) {
           tokenService.save(accessToken);
@@ -147,9 +150,9 @@ export function AuthProvider({ children }) {
         if (loggedUser.role === "chef") {
           await redirectChefByVerification();
         } else if (loggedUser.role === "customer") {
-          router.push("/customer/dashboard");
+          router.push(safeRedirect || "/customer/dashboard");
         } else if (loggedUser.role === "admin") {
-          router.push("/admin/dashboard");
+          router.push(safeRedirect || "/admin/dashboard");
         }
 
         return {

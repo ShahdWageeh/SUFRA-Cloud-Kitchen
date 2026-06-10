@@ -13,6 +13,7 @@ import {
   faStar,
   faTruckFast,
 } from "@fortawesome/free-solid-svg-icons";
+import AddToCartButton from "@/components/public/AddToCartButton";
 import { mealService } from "@/services";
 import { normalizePublicMeal } from "@/utils/mealUtils";
 
@@ -172,10 +173,10 @@ export default async function MealDetailPage({ params }) {
                   <FontAwesomeIcon icon={faPlus} className="h-3 w-3" />
                 </button>
               </div>
-              <button className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white transition hover:bg-primary-container">
+              <AddToCartButton className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white transition hover:bg-primary-container">
                 <FontAwesomeIcon icon={faCartShopping} className="h-4 w-4" />
                 Add to Cart
-              </button>
+              </AddToCartButton>
             </div>
           </article>
         </div>

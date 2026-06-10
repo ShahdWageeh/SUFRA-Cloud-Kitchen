@@ -24,6 +24,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const { login, loading } = useAuth();
   const roleParam = searchParams.get("role");
+  const redirectParam = searchParams.get("redirect");
   const isChefOnlyLogin = roleParam === "chef";
   const [selectedRole, setSelectedRole] = useState(
     isChefOnlyLogin ? "chef" : "customer",
@@ -45,6 +46,7 @@ export default function LoginForm() {
       email: values.email,
       password: values.password,
       role: selectedRole,
+      redirect: redirectParam || undefined,
     });
 
     if (!result.success) {

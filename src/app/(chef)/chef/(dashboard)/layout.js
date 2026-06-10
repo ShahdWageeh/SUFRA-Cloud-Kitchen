@@ -3,11 +3,13 @@
 import { useState } from "react";
 import ChefSidebar from "@/components/chef/ChefSidebar";
 import ChefTopbar from "@/components/chef/ChefTopbar";
+import { ChefDashboardGuard } from "@/guards";
 
 export default function ChefLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
+    <ChefDashboardGuard>
     <div className="flex min-h-screen bg-[#faf8f6]">
       <ChefSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -17,5 +19,6 @@ export default function ChefLayout({ children }) {
         <main className="flex-1 p-4 md:p-8">{children}</main>
       </div>
     </div>
+    </ChefDashboardGuard>
   );
 }

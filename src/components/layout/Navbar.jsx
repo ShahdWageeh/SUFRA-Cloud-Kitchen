@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { buildLoginUrl } from "@/utils/authRedirects";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -20,6 +22,8 @@ import useAuth from "@/hooks/useAuth";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const pathname = usePathname();
+  const loginHref = buildLoginUrl(pathname);
   const { user, isCustomer, logout } = useAuth();
 
   const customerName =
@@ -157,7 +161,7 @@ export default function Navbar() {
             </div>
           ) : (
             <Link
-              href="/login"
+              href={loginHref}
               className="hidden ml-3 sm:block bg-primary text-white px-8 py-2 rounded-full hover:opacity-90 transition"
             >
               Sign In
@@ -209,7 +213,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link
-                href="/login"
+                href={loginHref}
                 className="bg-primary text-center text-white py-3 rounded-full"
               >
                 Sign In
