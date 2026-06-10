@@ -6,6 +6,7 @@ import BrandCard from "@/components/chef/branding/BrandCard";
 import BrandPaletteCard from "@/components/chef/branding/BrandPaletteCard";
 import MarketEdgeCard from "@/components/chef/branding/MarketEdgeCard";
 import { RefreshCw } from "lucide-react";
+import { profileService } from "@/services";
 
 export default function BrandRevealPage() {
     const router = useRouter();
@@ -133,7 +134,18 @@ export default function BrandRevealPage() {
                 </button>
 
                 <button
-                    onClick={() => router.push("/chef/profile")}
+                    onClick={async () => {
+                        try {
+                            await profileService.updateProfile({
+                                kitchenName: brandData.brandName,
+                                slogan: brandData.slogan,
+                                description: brandData.description,
+                            });
+                            router.push("/chef/profile");
+                        } catch (error) {
+                            console.error("Unable to update chef profile:", error);
+                        }
+                    }}
                     className="px-8 py-3 rounded-full bg-primary text-white hover:opacity-90"
                 >
                     Confirm & Continue
