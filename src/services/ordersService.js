@@ -3,6 +3,15 @@ import api from "./api";
 class OrdersService {
   async getChefOrders() {
     const response = await api.get("/orders/chef/orders");
+    console.log("Orders response:", response.data);
+    return response.data;
+  }
+
+  async updateOrderItemStatus(orderId, mealId, status) {
+    const response = await api.patch(`/orders/${orderId}/items/status`, {
+      mealId,
+      status,
+    });
     return response.data;
   }
 

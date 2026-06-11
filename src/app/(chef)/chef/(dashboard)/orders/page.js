@@ -14,19 +14,44 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleStatusChange = (orderId, nextStatus) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        (order._id || order.id) === orderId
-          ? { ...order, status: nextStatus }
-          : order,
-      ),
-    );
+  const normalizeStatus = (status) => {
+    if (!status) return "preparing";
+    if (status === "ready") return "out_for_delivery";
+    return status;
   };
 
-  const preparingOrders = orders.filter((o) => o.status === "preparing");
-  const readyOrders = orders.filter((o) => o.status === "ready");
-  const completedOrders = orders.filter((o) => o.status === "completed");
+  const loadChefOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await ordersService.getChefOrders();
+      setOrders(Array.isArray(result.data) ? result.data : []);
+    } catch (err) {
+      console.error("Chef orders load failed:", err);
+      setError(err?.message || "Failed to fetch orders.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (orderId, nextStatus, mealId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await ordersService.updateOrderItemStatus(orderId, mealId, nextStatus);
+      await loadChefOrders();
+    } catch (err) {
+      console.error("Failed to update order item status:", err);
+      setError(err?.response?.data?.message || "Unable to update order status.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const preparingOrders = orders.filter((o) => normalizeStatus(o.status) === "preparing");
+  const readyOrders = orders.filter((o) => normalizeStatus(o.status) === "out_for_delivery");
+  const completedOrders = orders.filter((o) => normalizeStatus(o.status) === "completed");
 
   const visibleOrders =
     selectedStatus === "ready"
@@ -40,22 +65,6 @@ export default function OrdersPage() {
       setLoading(false);
       setError("Please log in to view your chef orders.");
       return;
-    }
-
-    async function loadChefOrders() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const result = await ordersService.getChefOrders();
-
-        setOrders(Array.isArray(result.data) ? result.data : []);
-      } catch (err) {
-        console.error("Chef orders load failed:", err);
-        setError(err?.message || "Failed to fetch orders.");
-      } finally {
-        setLoading(false);
-      }
     }
 
     loadChefOrders();

@@ -205,6 +205,7 @@ export default function MealsPage() {
       </div>
     );
   }
+  // console.log("meals:", meals);
 
   return (
     <div className="space-y-6 md:space-y-8">
