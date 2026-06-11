@@ -13,6 +13,7 @@ class OrdersService {
 
   async getOrderById(id) {
     const response = await api.get(`/orders/${id}`);
+    console.log("Orders response:", response.data);
     return response.data;
   }
 }

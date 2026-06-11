@@ -1,7 +1,7 @@
 import SectionCard from "./SectionCard";
 import { ChefHat, Phone, MessageSquare, Mail } from "lucide-react";
 
-export default function ContactSection({ profile }) {
+export default function ContactSection({ profile, contactInfo, onChange }) {
   return (
     <SectionCard>
       <div className="flex items-center gap-4 mb-8">
@@ -22,20 +22,17 @@ export default function ContactSection({ profile }) {
             Chef Name
           </label>
 
-          <div
-            className="
-            border border-surface-low
-            rounded-xl
-            px-4 py-4
-            flex items-center gap-3
-            "
-          >
-            <ChefHat
-              size={18}
-              className="text-text-secondary"
-            />
-
-            <span>{profile.firstName} {profile.lastName}</span>
+          <div className="border border-surface-low rounded-xl px-4 py-4">
+            <div className="flex items-center gap-3">
+              <ChefHat size={18} className="text-text-secondary" />
+              <input
+                type="text"
+                value={contactInfo.chefName}
+                onChange={(event) => onChange("chefName", event.target.value)}
+                className="w-full border-none bg-transparent outline-none text-text-primary"
+                placeholder="Enter chef name"
+              />
+            </div>
           </div>
         </div>
 
@@ -45,20 +42,17 @@ export default function ContactSection({ profile }) {
             Phone Number
           </label>
 
-          <div
-            className="
-            border border-surface-low
-            rounded-xl
-            px-4 py-4
-            flex items-center gap-3
-            "
-          >
-            <Phone
-              size={18}
-              className="text-text-secondary"
-            />
-
-            <span>{profile.phone}</span>
+          <div className="border border-surface-low rounded-xl px-4 py-4">
+            <div className="flex items-center gap-3">
+              <Phone size={18} className="text-text-secondary" />
+              <input
+                type="tel"
+                value={contactInfo.phone}
+                onChange={(event) => onChange("phone", event.target.value)}
+                className="w-full border-none bg-transparent outline-none text-text-primary"
+                placeholder="Enter phone number"
+              />
+            </div>
           </div>
         </div>
 
@@ -81,7 +75,7 @@ export default function ContactSection({ profile }) {
               className="text-text-secondary"
             />
 
-            <span>{profile.phone}</span>
+            <span>{contactInfo.phone}</span>
           </div>
         </div>
 

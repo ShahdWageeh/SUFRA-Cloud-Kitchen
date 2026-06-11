@@ -32,14 +32,44 @@ function getTimeAgo(dateString) {
     return `${days}d ago`;
 }
 
-export default function OrderCard({ order, orderNumber }) {
-    // console.log(order);
+export default function OrderCard({ order, orderNumber, onStatusChange }) {
     const amount = order.totalAmount;
-    const customerName = order.customerId.firstName + " " + order.customerId.lastName;
+    const customerName = `${order.customerId.firstName} ${order.customerId.lastName}`;
     const itemsSummary = formatOrderItems(order.items);
     const createdAt = order.createdAt;
     const timeAgo = getTimeAgo(createdAt);
     const imageSrc = order.items?.[0]?.image;
+    const status = order.status || "preparing";
+
+    const badgeText =
+        status === "preparing"
+            ? "NEW ORDER"
+            : status === "ready"
+            ? "READY"
+            : "COMPLETED";
+
+    const badgeClass =
+        status === "preparing"
+            ? "bg-orange-100 text-primary"
+            : status === "ready"
+            ? "bg-blue-100 text-blue-700"
+            : "bg-emerald-100 text-emerald-800";
+
+    const buttonLabel =
+        status === "preparing"
+            ? "Ready To Pick Up"
+            : status === "ready"
+            ? "Complete"
+            : "Completed";
+
+    const isButtonDisabled = status === "completed";
+    const nextStatus = status === "preparing" ? "ready" : status === "ready" ? "completed" : null;
+
+    const handleAction = () => {
+        if (!isButtonDisabled && nextStatus && onStatusChange) {
+            onStatusChange(order._id || order.id, nextStatus);
+        }
+    };
 
     return (
         <div className="bg-white rounded-card border border-[#EAD3CB] p-5 shadow-sm flex flex-col h-full">
@@ -47,8 +77,8 @@ export default function OrderCard({ order, orderNumber }) {
             <div className="flex justify-between items-start">
 
                 <div>
-                    <span className={`px-3 py-1 rounded-full text-xs bg-orange-100 text-primary`}>
-                        NEW ORDER
+                    <span className={`px-3 py-1 rounded-full text-xs ${badgeClass}`}>
+                        {badgeText}
                     </span>
 
                     <h3 className="mt-3 text-lg font-bold">
@@ -92,22 +122,19 @@ export default function OrderCard({ order, orderNumber }) {
             <div className="border-b border-gray-300 my-3" />
 
             <div className="mt-2 text-sm text-text-secondary">
-
                 <div className="flex items-center gap-2">
                     <Clock3 size={14} /> Delivery requested
                 </div>
             </div>
 
             <div className="flex gap-3 mt-auto pt-6">
-
-                <button className="flex-1 bg-primary text-white py-3 rounded-xl font-medium hover:opacity-90">
-                    Accept
+                <button
+                    onClick={handleAction}
+                    disabled={isButtonDisabled}
+                    className={`flex-1 py-3 rounded-xl font-medium ${isButtonDisabled ? "bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed" : "bg-primary text-white hover:opacity-90"}`}
+                >
+                    {buttonLabel}
                 </button>
-
-                <button className="px-6 py-3 bg-secondary-container rounded-xl text-text-secondary hover:opacity-90">
-                    Reject
-                </button>
-
             </div>
         </div>
     );

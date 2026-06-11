@@ -19,6 +19,10 @@ export default function KitchenProfilePage() {
     slogan: "",
     bio: "",
   });
+  const [contactInfo, setContactInfo] = useState({
+    chefName: "",
+    phone: "",
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -39,6 +43,10 @@ export default function KitchenProfilePage() {
           slogan: chef.slogan || "",
           bio: chef.description || "",
         });
+        setContactInfo({
+          chefName: `${chef.firstName || ""} ${chef.lastName || ""}`.trim(),
+          phone: chef.phone || "",
+        });
       } catch (err) {
         setError(
           err?.response?.data?.message ||
@@ -50,8 +58,15 @@ export default function KitchenProfilePage() {
     loadProfile();
   }, [user]);
 
-  const handleChange = (field, value) => {
+  const handleBrandChange = (field, value) => {
     setBrandIdentity((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleContactChange = (field, value) => {
+    setContactInfo((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -62,10 +77,17 @@ export default function KitchenProfilePage() {
     setError("");
 
     try {
+      const fullName = contactInfo.chefName.trim();
+      const [firstName, ...rest] = fullName.split(" ");
+      const lastName = rest.join(" ");
+
       await profileService.updateProfile({
         kitchenName: brandIdentity.name,
         slogan: brandIdentity.slogan,
         description: brandIdentity.bio,
+        firstName: firstName || "",
+        lastName: lastName || "",
+        phone: contactInfo.phone,
       });
 
       router.push("/chef/dashboard");
@@ -85,6 +107,10 @@ export default function KitchenProfilePage() {
       slogan: profile.slogan || "",
       bio: profile.description || "",
     });
+    setContactInfo({
+      chefName: `${profile.firstName || ""} ${profile.lastName || ""}`.trim(),
+      phone: profile.phone || "",
+    });
   };
 
   return (
@@ -97,10 +123,14 @@ export default function KitchenProfilePage() {
           <BrandIdentitySection
             profile={profile}
             brandIdentity={brandIdentity}
-            onChange={handleChange}
+            onChange={handleBrandChange}
           />
           {/* <KitchenSettingsSection profile={profile} /> */}
-          <ContactSection profile={profile} />
+          <ContactSection
+            profile={profile}
+            contactInfo={contactInfo}
+            onChange={handleContactChange}
+          />
         </div>
       </div>
 
