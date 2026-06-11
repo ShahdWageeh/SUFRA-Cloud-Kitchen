@@ -68,6 +68,9 @@ export default function CheckoutPage() {
       if (result.success) {
         toast.success("Order placed successfully!");
         
+        // Update global cart state
+        await fetchCart();
+        
         // If paymobUrl is provided, redirect to it
         if (result.data.paymobUrl) {
           window.location.href = result.data.paymobUrl;
@@ -75,9 +78,6 @@ export default function CheckoutPage() {
           // If cash or no redirect needed, go to orders
           router.push("/customer/orders");
         }
-        
-        // Clear local cart if necessary (backend likely clears it on checkout success)
-        // fetchCart() in CartContext will update the state automatically on redirect back or dashboard visit
       }
     } catch (error) {
       const message = error.response?.data?.message || "Failed to place order";

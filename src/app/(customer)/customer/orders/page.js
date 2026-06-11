@@ -84,7 +84,7 @@ export default function MyOrdersPage() {
           No orders yet
         </h1>
         <p className="mt-4 text-lg text-text-secondary">
-          You haven't placed any orders yet. Start exploring our delicious home-cooked meals!
+          You haven’t placed any orders yet. Start exploring our delicious home-cooked meals!
         </p>
         <div className="mt-10">
           <Link href="/meals">

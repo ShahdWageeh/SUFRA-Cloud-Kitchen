@@ -43,6 +43,9 @@ export function normalizePublicMeal(meal) {
   const { slug: category, label: categoryLabel } = getCategoryInfo(meal);
   const images = getMealImages(meal);
 
+  const reviews = (meal.reviews?.length > 0) ? meal.reviews : (meal.recentReviews || meal.reviews || []);
+  const reviewsCount = meal.reviewsCount ?? reviews.length;
+
   return {
     id: meal._id || meal.id,
     name: meal.name || meal.title,
@@ -52,8 +55,9 @@ export function normalizePublicMeal(meal) {
     categoryLabel,
     cuisine: meal.cuisine || categoryLabel,
     price: meal.price,
-    rating: meal.rating || meal.averageRating || meal.ratingAverage || 4.8,
-    reviews: meal.reviews || meal.reviewCount || 0,
+    rating: typeof meal.averageRating === "number" ? meal.averageRating : (meal.rating || meal.ratingAverage || 4.8),
+    reviews,
+    reviewsCount,
     image: images[0],
     images,
     badge: meal.badge,

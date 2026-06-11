@@ -11,8 +11,8 @@ class OrdersService {
     return response.data;
   }
 
-  async checkout(orderData) {
-    const response = await api.post("/orders/checkout", orderData);
+  async getOrderById(id) {
+    const response = await api.get(`/orders/${id}`);
     return response.data;
   }
 }

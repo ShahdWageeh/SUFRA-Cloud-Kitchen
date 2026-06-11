@@ -121,7 +121,7 @@ export default async function MealDetailPage({ params }) {
             <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-text-secondary">
               <span className="rounded-full bg-secondary-container px-3 py-2">
                 <FontAwesomeIcon icon={faStar} className="mr-1 h-3 w-3 text-primary" />
-                {meal.rating} ({meal.reviews} reviews)
+                {meal.rating} ({meal.reviewsCount} reviews)
               </span>
               <span className="rounded-full bg-secondary-container px-3 py-2">
                 <FontAwesomeIcon icon={faClock} className="mr-1 h-3 w-3 text-primary" />
@@ -167,16 +167,23 @@ export default async function MealDetailPage({ params }) {
         <section className="mt-12 rounded-xl bg-white p-6 shadow-sm ring-1 ring-primary/10">
           <h2 className="text-xl font-bold">Community Reviews</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {["Amazing flavor and generous portions.", "Tasted like a meal from home."].map((review) => (
-              <article key={review} className="rounded-lg bg-background p-4">
-                <div className="mb-2 text-primary">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <FontAwesomeIcon key={index} icon={faStar} className="mr-0.5 h-3 w-3" />
-                  ))}
-                </div>
-                <p className="text-sm text-text-secondary">{review}</p>
-              </article>
-            ))}
+            {meal.reviews.length > 0 ? (
+              meal.reviews.map((review, index) => (
+                <article key={review._id || index} className="rounded-lg bg-background p-4">
+                  <div className="mb-2 text-primary">
+                    {Array.from({ length: review.rating }).map((_, i) => (
+                      <FontAwesomeIcon key={i} icon={faStar} className="mr-0.5 h-3 w-3" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-text-secondary">{review.comment}</p>
+                  <p className="mt-2 text-[10px] font-bold text-text-tertiary">
+                    {review.customerId?.firstName || "Verified Customer"} • {new Date(review.createdAt).toLocaleDateString()}
+                  </p>
+                </article>
+              ))
+            ) : (
+              <p className="py-4 text-sm text-text-secondary">No reviews yet for this meal. Be the first to try it!</p>
+            )}
           </div>
         </section>
 
