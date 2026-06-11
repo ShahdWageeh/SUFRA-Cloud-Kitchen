@@ -6,12 +6,15 @@ import BrandCard from "@/components/chef/branding/BrandCard";
 import BrandPaletteCard from "@/components/chef/branding/BrandPaletteCard";
 import MarketEdgeCard from "@/components/chef/branding/MarketEdgeCard";
 import { RefreshCw } from "lucide-react";
-import { profileService } from "@/services";
+import { brandingService } from "@/services";
 
 export default function BrandRevealPage() {
     const router = useRouter();
     const [brandData, setBrandData] = useState(null);
     const [isUsingFallback, setIsUsingFallback] = useState(false);
+    const [brandingForm, setBrandingForm] = useState(null);
+    const [isRegenerating, setIsRegenerating] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -23,6 +26,8 @@ export default function BrandRevealPage() {
             try {
                 const parsed = JSON.parse(resp);
                 const parsedForm = form ? JSON.parse(form) : null;
+
+                setBrandingForm(parsedForm);
 
                 const mapped = {
                     brandName: parsed.kitchenName || "Your Kitchen",
@@ -127,30 +132,86 @@ export default function BrandRevealPage() {
             </div>
 
             <div className="mt-10 border-t border-gray-300 pt-8 flex flex-wrap gap-4 justify-end">
-                <button className="px-6 py-3 rounded-full border border-gray-300  hover:bg-[#FFDBD0]">
+                <button
+                    type="button"
+                    disabled={!brandingForm || isRegenerating}
+                    onClick={async () => {
+                        if (!brandingForm) return;
+
+                        setIsRegenerating(true);
+                        setError("");
+
+                        try {
+                            const result = await brandingService.generateKitchenBranding(brandingForm);
+                            const responsePayload = result?.data ?? result;
+                            const brandingResponse = responsePayload?.data ?? responsePayload;
+
+                            if (typeof window !== "undefined") {
+                                window.sessionStorage.setItem(
+                                    "brandingResponse",
+                                    JSON.stringify(brandingResponse),
+                                );
+                            }
+
+                            const updatedData = {
+                                brandName: brandingResponse?.kitchenName || "Your Kitchen",
+                                slogan: brandingResponse?.slogan || "",
+                                description: brandingResponse?.description || "",
+                                tags: brandingForm?.cookingStyles || [],
+                                colors: [
+                                    { name: "Terracotta Red", value: "#964326" },
+                                    { name: "Sage Green", value: "#0F766E" },
+                                    { name: "Creamy Linen", value: "#F5EBDD" },
+                                    { name: "Charcoal Ash", value: "#4A4A4A" },
+                                ],
+                                marketEdge: [
+                                    "Appeals to urban professionals",
+                                    "Strong local identity",
+                                    "High social media potential",
+                                ],
+                            };
+
+                            setBrandData(updatedData);
+                        } catch (err) {
+                            setError(
+                                err?.response?.data?.message ||
+                                    "Unable to regenerate branding. Please try again.",
+                            );
+                        } finally {
+                            setIsRegenerating(false);
+                        }
+                    }}
+                    className="px-6 py-3 rounded-full border border-gray-300 hover:bg-[#FFDBD0] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                     <span className="flex items-center gap-2">
-                        <RefreshCw /> Regenerate Options
+                        <RefreshCw /> {isRegenerating ? "Regenerating..." : "Regenerate Options"}
                     </span>
                 </button>
 
                 <button
-                    onClick={async () => {
-                        try {
-                            await profileService.updateProfile({
-                                kitchenName: brandData.brandName,
-                                slogan: brandData.slogan,
-                                description: brandData.description,
-                            });
-                            router.push("/chef/profile");
-                        } catch (error) {
-                            console.error("Unable to update chef profile:", error);
+                    onClick={() => {
+                        if (typeof window !== "undefined") {
+                            window.sessionStorage.setItem(
+                                "brandIdentityDraft",
+                                JSON.stringify({
+                                    name: brandData.brandName,
+                                    slogan: brandData.slogan,
+                                    bio: brandData.description,
+                                }),
+                            );
                         }
+                        router.push("/chef/profile");
                     }}
                     className="px-8 py-3 rounded-full bg-primary text-white hover:opacity-90"
                 >
                     Confirm & Continue
                 </button>
             </div>
+            {error && (
+                <div className="mt-4 text-sm text-red-600">
+                    {error}
+                </div>
+            )}
         </div>
     );
 }
