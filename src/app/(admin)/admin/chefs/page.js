@@ -123,7 +123,7 @@ export default function ChefsManagement() {
 
   const getAuthHeaders = () => {
     const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : "";
+      typeof window !== "undefined" ? localStorage.getItem("Sufra_token") : "";
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,

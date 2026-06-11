@@ -32,7 +32,7 @@ export default function ChefVerificationModeration() {
     let activeToken = contextToken;
     if (!activeToken && typeof window !== "undefined") {
       activeToken =
-        localStorage.getItem("token") ||
+        localStorage.getItem("Sufra_token") ||
         localStorage.getItem("jwt") ||
         localStorage.getItem("admin_token");
     }

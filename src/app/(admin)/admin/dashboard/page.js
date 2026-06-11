@@ -34,7 +34,7 @@ const EMPTY_SNAPSHOT = {
 function getStoredToken() {
   if (typeof window === "undefined") return "";
   return (
-    localStorage.getItem("token") ||
+    localStorage.getItem("Sufra_token") ||
     localStorage.getItem("jwt") ||
     localStorage.getItem("admin_token") ||
     ""
