@@ -135,6 +135,7 @@ function DashboardMealCard({ meal }) {
         <div className="mt-3 flex items-center justify-between">
           <span className="text-xs font-semibold text-text-secondary">{meal.chef}</span>
           <AddToCartButton
+            mealId={meal.id}
             aria-label={`Order ${meal.name}`}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white transition hover:bg-primary-container"
           >
@@ -285,7 +286,10 @@ export default function CustomerDashboard() {
                   {featuredMeal.description}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <AddToCartButton className="rounded-full bg-primary px-5 py-3 text-xs font-bold text-white transition hover:bg-primary-container">
+                  <AddToCartButton
+                    mealId={featuredMeal.id}
+                    className="rounded-full bg-primary px-5 py-3 text-xs font-bold text-white transition hover:bg-primary-container"
+                  >
                     {featuredMeal.primaryCta}
                   </AddToCartButton>
                   <Link

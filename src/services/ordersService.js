@@ -3,6 +3,16 @@ import api from "./api";
 class OrdersService {
   async getChefOrders() {
     const response = await api.get("/orders/chef/orders");
+    return response.data;
+  }
+
+  async getMyOrders() {
+    const response = await api.get("/orders/my-orders");
+    return response.data;
+  }
+
+  async getOrderById(id) {
+    const response = await api.get(`/orders/${id}`);
     console.log("Orders response:", response.data);
     return response.data;
   }

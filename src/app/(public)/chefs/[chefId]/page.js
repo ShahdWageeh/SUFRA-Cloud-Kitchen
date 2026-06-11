@@ -2,13 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowRight,
   faStar,
   faTruckFast,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import MealsGrid from "@/components/public/MealsGrid";
-import { chefProfileResponse } from "@/data/chefProfileData";
 import { chefService, mealService } from "@/services";
 import { isVerifiedChef, normalizeChefProfile } from "@/utils/chefUtils";
 import { normalizePublicMeal } from "@/utils/mealUtils";
@@ -20,42 +18,6 @@ const statIconMap = {
 };
 
 const OFFERING_FILTERS = ["All Items", "Main Course", "Sides", "Desserts"];
-
-function TestimonialCard({ review }) {
-  return (
-    <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-primary/10">
-      <div className="flex gap-4">
-        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md">
-          <Image
-            src={review.image}
-            alt={review.author}
-            fill
-            sizes="56px"
-            className="object-cover"
-          />
-        </div>
-        <div>
-          <div className="mb-1 flex gap-0.5 text-primary">
-            {Array.from({ length: review.rating }).map((_, index) => (
-              <FontAwesomeIcon
-                key={index}
-                icon={faStar}
-                className="h-2.5 w-2.5"
-              />
-            ))}
-          </div>
-          <p className="text-xs leading-5 text-text-secondary">
-            {review.quote}
-          </p>
-          <p className="mt-3 text-xs font-bold text-text-primary">
-            {review.author}
-          </p>
-          <p className="text-[10px] text-text-secondary">{review.role}</p>
-        </div>
-      </div>
-    </article>
-  );
-}
 
 async function getChefProfileData(chefId) {
   const state = {
@@ -97,7 +59,6 @@ export default async function ChefProfilePage({ params }) {
   const { chefId } = await params;
   const { data, error } = await getChefProfileData(chefId);
   const chef = data.chef;
-  const reviews = chefProfileResponse.data.reviews;
 
   if (error || !chef) {
     return (
@@ -216,28 +177,6 @@ export default async function ChefProfilePage({ params }) {
             buttonLabel="Load More Meals"
           />
         )}
-      </section>
-
-      <section className="bg-secondary-container/45">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-bold">{reviews.title}</h2>
-              <p className="mt-1 text-sm text-text-secondary">
-                {reviews.subtitle}
-              </p>
-            </div>
-            <button className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/25 bg-white px-4 py-2 text-xs font-semibold text-text-secondary transition hover:border-primary hover:text-primary">
-              {reviews.cta}
-              <FontAwesomeIcon icon={faArrowRight} className="h-3 w-3" />
-            </button>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2">
-            {reviews.items.map((review) => (
-              <TestimonialCard key={review.id} review={review} />
-            ))}
-          </div>
-        </div>
       </section>
     </main>
   );

@@ -3,17 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCartShopping,
   faChevronLeft,
   faClock,
   faHeart,
-  faMinus,
-  faPlus,
   faShieldHeart,
   faStar,
   faTruckFast,
 } from "@fortawesome/free-solid-svg-icons";
-import AddToCartButton from "@/components/public/AddToCartButton";
+import MealActions from "@/components/public/MealActions";
 import { mealService } from "@/services";
 import { normalizePublicMeal } from "@/utils/mealUtils";
 
@@ -124,7 +121,7 @@ export default async function MealDetailPage({ params }) {
             <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-text-secondary">
               <span className="rounded-full bg-secondary-container px-3 py-2">
                 <FontAwesomeIcon icon={faStar} className="mr-1 h-3 w-3 text-primary" />
-                {meal.rating} ({meal.reviews} reviews)
+                {meal.rating} ({meal.reviewsCount} reviews)
               </span>
               <span className="rounded-full bg-secondary-container px-3 py-2">
                 <FontAwesomeIcon icon={faClock} className="mr-1 h-3 w-3 text-primary" />
@@ -163,37 +160,30 @@ export default async function MealDetailPage({ params }) {
               </Link>
             )}
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex h-12 w-36 items-center justify-between rounded-full border border-primary/20 px-4">
-                <button aria-label="Decrease quantity" className="text-primary">
-                  <FontAwesomeIcon icon={faMinus} className="h-3 w-3" />
-                </button>
-                <span className="font-bold">1</span>
-                <button aria-label="Increase quantity" className="text-primary">
-                  <FontAwesomeIcon icon={faPlus} className="h-3 w-3" />
-                </button>
-              </div>
-              <AddToCartButton className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white transition hover:bg-primary-container">
-                <FontAwesomeIcon icon={faCartShopping} className="h-4 w-4" />
-                Add to Cart
-              </AddToCartButton>
-            </div>
+            <MealActions mealId={meal.id} />
           </article>
         </div>
 
         <section className="mt-12 rounded-xl bg-white p-6 shadow-sm ring-1 ring-primary/10">
           <h2 className="text-xl font-bold">Community Reviews</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {["Amazing flavor and generous portions.", "Tasted like a meal from home."].map((review) => (
-              <article key={review} className="rounded-lg bg-background p-4">
-                <div className="mb-2 text-primary">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <FontAwesomeIcon key={index} icon={faStar} className="mr-0.5 h-3 w-3" />
-                  ))}
-                </div>
-                <p className="text-sm text-text-secondary">{review}</p>
-              </article>
-            ))}
+            {meal.reviews.length > 0 ? (
+              meal.reviews.map((review, index) => (
+                <article key={review._id || index} className="rounded-lg bg-background p-4">
+                  <div className="mb-2 text-primary">
+                    {Array.from({ length: review.rating }).map((_, i) => (
+                      <FontAwesomeIcon key={i} icon={faStar} className="mr-0.5 h-3 w-3" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-text-secondary">{review.comment}</p>
+                  <p className="mt-2 text-[10px] font-bold text-text-tertiary">
+                    {review.customerId?.firstName || "Verified Customer"} • {new Date(review.createdAt).toLocaleDateString()}
+                  </p>
+                </article>
+              ))
+            ) : (
+              <p className="py-4 text-sm text-text-secondary">No reviews yet for this meal. Be the first to try it!</p>
+            )}
           </div>
         </section>
 

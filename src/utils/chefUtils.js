@@ -24,7 +24,7 @@ export function normalizeChef(chef) {
     brandName,
     chefName,
     specialty: chef.slogan || chef.cuisine || "Home Chef",
-    rating: chef.rating || chef.averageRating || 4.8,
+    rating: chef.averageRating || chef.rating || 4.8,
     reviews: chef.reviewsCount || chef.reviews || 0,
     distance: chef.distance || "Nearby",
     image: chef.profileImage || chef.avatar || chef.image || "/chef1.jpg",
