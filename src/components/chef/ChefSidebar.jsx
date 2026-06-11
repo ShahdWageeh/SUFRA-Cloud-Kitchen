@@ -47,7 +47,9 @@ export default function ChefSidebar({ isOpen, onClose }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const chefName = user?.firstName ? `${user.firstName} ${user.lastName || ""}` : "Chef";
+  const chefName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ""}`
+    : "Chef";
   const chefTitle = user?.kitchenName || user?.role || "Chef";
   const initials = user?.firstName
     ? `${user.firstName[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
@@ -145,9 +147,7 @@ export default function ChefSidebar({ isOpen, onClose }) {
                   {chefName}
                 </p>
 
-                <p className="text-xs text-[#7e6a63]">
-                  {chefTitle}
-                </p>
+                <p className="text-xs text-[#7e6a63]">{chefTitle}</p>
               </div>
             </div>
           </Link>

@@ -3,11 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import useAuth from "@/hooks/useAuth";
 import { RefreshCw, ShieldAlert } from "lucide-react";
-import AcquisitionChart from "@/components/admin/charts/AcquisitionChart";
 import StatsCard from "@/components/admin/ui/StatsCard";
 import OrdersChart from "@/components/admin/charts/OrdersChart";
 import TopChefsCard from "@/components/admin/sections/TopChefsCard";
+import AcquisitionChart from "@/components/admin/charts/AcquisitionChart";
 import Footer from "@/components/admin/layout/Footer";
+
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api";
+
+const AVATAR_COLORS = ["#A55632", "#1E429F", "#03543F", "#723B10", "#9B1C1C"];
 
 export default function DashboardPage() {
   const { token } = useAuth();
@@ -15,14 +20,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [topChefsData, setTopChefsData] = useState([]);
 
-  // Stats cards initial state set to 0. No hardcoded fake percentages or numbers.
   const [stats, setStats] = useState([
     {
       id: "total-users",
       label: "Total Users",
       metric: "0",
-      sublabel: "Database Records",
+      sublabel: "Registered customers",
       icon: "Users",
       iconBg: "#EBF5FF",
       iconColor: "#1E429F",
@@ -49,22 +54,28 @@ export default function DashboardPage() {
       growth: null,
     },
     {
-      id: "total-orders",
-      label: "Total Orders",
+      id: "pending-verifications",
+      label: "Pending Verifications",
       metric: "0",
-      sublabel: "Processed volumes",
-      icon: "ShoppingBag",
+      sublabel: "Awaiting admin review",
+      icon: "ShieldCheck",
       iconBg: "#EDFDF6",
       iconColor: "#03543F",
       growth: null,
     },
   ]);
 
-  const [topChefsData, setTopChefsData] = useState([]);
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const getAuthHeaders = useCallback(
+    (activeToken) => ({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${activeToken}`,
+    }),
+    [],
+  );
 
   const fetchDashboardInsights = useCallback(async () => {
     let activeToken = token;
@@ -75,7 +86,7 @@ export default function DashboardPage() {
 
     if (!activeToken) {
       setError(
-        "No administrative authentication token discovered. Please verify session state.",
+        "No administrative authentication token found. Please verify your session.",
       );
       setLoading(false);
       return;
@@ -85,68 +96,80 @@ export default function DashboardPage() {
     setError(null);
 
     try {
-      const baseUrl = "https://sufra-cloud-kitchen.vercel.app/api";
+      const headers = getAuthHeaders(activeToken);
 
-      // Querying ONLY the authentic available data streams from your documentation
-      const [chefsRes, mealsRes] = await Promise.all([
-        fetch(`${baseUrl}/chefs`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${activeToken}`,
-          },
-        }),
-        fetch(`${baseUrl}/meals`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${activeToken}`,
-          },
-        }),
-      ]);
+      const [customersRes, chefsRes, mealsRes, pendingVerifRes] =
+        await Promise.all([
+          fetch(`${BASE_URL}/users/customers`, { method: "GET", headers }),
+          fetch(`${BASE_URL}/chefs`, { method: "GET", headers }),
+          fetch(`${BASE_URL}/meals`, { method: "GET", headers }),
+          fetch(`${BASE_URL}/verification-request/pending`, {
+            method: "GET",
+            headers,
+          }),
+        ]);
 
+      // ── Customers ──────────────────────────────────────────────────────────
+      let customerCount = 0;
+      if (customersRes.ok) {
+        const json = await customersRes.json();
+        const arr = json.data || (Array.isArray(json) ? json : []);
+        customerCount = arr.length;
+      }
+
+      // ── Chefs ──────────────────────────────────────────────────────────────
       let chefCount = 0;
-      let mealCount = 0;
       let calculatedTopChefs = [];
-
-      // Process real chef data from API response
       if (chefsRes.ok) {
-        const chefsJson = await chefsRes.json();
-        const chefsArray =
-          chefsJson.data || (Array.isArray(chefsJson) ? chefsJson : []);
-        chefCount = chefsArray.length;
+        const json = await chefsRes.json();
+        const arr = json.data || (Array.isArray(json) ? json : []);
+        chefCount = arr.length;
 
-        // Map through your real chefs array to show actual names/kitchens from database
-        calculatedTopChefs = chefsArray.map((chef, idx) => ({
-          id: chef._id || String(idx),
-          name: chef.kitchenName || `${chef.firstName} ${chef.lastName}`,
-          orders: 0, // Left at 0 since no order metric exists on the base /chefs list
-          category: chef.isVerified
-            ? "Verified Partner"
-            : "Pending Verification",
-          progress: chef.isVerified ? 100 : 20,
-          color: "#A55632",
-          initials: chef.firstName
-            ? chef.firstName.charAt(0) + (chef.lastName?.charAt(0) || "")
-            : "CK",
-        }));
+        calculatedTopChefs = arr.slice(0, 5).map((chef, idx) => {
+          const name =
+            chef.kitchenName ||
+            `${chef.firstName ?? ""} ${chef.lastName ?? ""}`.trim() ||
+            "Unknown Kitchen";
+          const initials = chef.firstName
+            ? chef.firstName.charAt(0).toUpperCase() +
+              (chef.lastName?.charAt(0).toUpperCase() ?? "")
+            : "CK";
+
+          return {
+            id: chef._id || String(idx),
+            name,
+            orders: chef.totalOrders || 0, // Fallback to 0 if not provided
+            category: chef.isVerified ? "Verified Partner" : "Pending Review",
+            progress: chef.isVerified ? 100 : 40,
+            color: AVATAR_COLORS[idx % AVATAR_COLORS.length],
+            initials,
+          };
+        });
       }
 
-      // Process real meals data from API response
+      // ── Meals ──────────────────────────────────────────────────────────────
+      let mealCount = 0;
       if (mealsRes.ok) {
-        const mealsJson = await mealsRes.json();
-        const mealsArray =
-          mealsJson.data || (Array.isArray(mealsJson) ? mealsJson : []);
-        mealCount = mealsArray.length;
+        const json = await mealsRes.json();
+        const arr = json.data || (Array.isArray(json) ? json : []);
+        mealCount = arr.length;
       }
 
-      // Update metrics with pure live database counts only
+      // ── Pending Verifications ──────────────────────────────────────────────
+      let pendingVerifCount = 0;
+      if (pendingVerifRes.ok) {
+        const json = await pendingVerifRes.json();
+        const arr = json.data || (Array.isArray(json) ? json : []);
+        pendingVerifCount = arr.length;
+      }
+
+      // ── Update State Metrics ───────────────────────────────────────────────
       setStats([
         {
           id: "total-users",
           label: "Total Users",
-          metric: "0",
-          sublabel: "Endpoint Pending",
+          metric: String(customerCount),
+          sublabel: "Registered customers",
           icon: "Users",
           iconBg: "#EBF5FF",
           iconColor: "#1E429F",
@@ -173,11 +196,11 @@ export default function DashboardPage() {
           growth: null,
         },
         {
-          id: "total-orders",
-          label: "Total Orders",
-          metric: "0",
-          sublabel: "Endpoint Pending",
-          icon: "ShoppingBag",
+          id: "pending-verifications",
+          label: "Pending Verifications",
+          metric: String(pendingVerifCount),
+          sublabel: "Awaiting admin review",
+          icon: "ShieldCheck",
           iconBg: "#EDFDF6",
           iconColor: "#03543F",
           growth: null,
@@ -186,14 +209,14 @@ export default function DashboardPage() {
 
       setTopChefsData(calculatedTopChefs);
     } catch (err) {
-      console.error("Dashboard Fetch Fault:", err);
+      console.error("Dashboard statistics breakdown failure:", err);
       setError(
-        "An unexpected network exception occurred synchronizing platform collections.",
+        "An unexpected network error occurred while loading indicators.",
       );
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, getAuthHeaders]);
 
   useEffect(() => {
     if (isMounted) {
@@ -205,10 +228,10 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 py-6">
-      {/* Page Heading */}
+      {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
             Platform Overview
           </h1>
           <p className="text-sm mt-1" style={{ color: "#8A8A8A" }}>
@@ -218,7 +241,7 @@ export default function DashboardPage() {
         <button
           onClick={fetchDashboardInsights}
           disabled={loading}
-          className="inline-flex items-center gap-2 text-xs font-semibold border rounded-xl bg-white px-4 py-2 text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
+          className="inline-flex items-center gap-2 text-xs font-semibold border rounded-xl bg-white px-4 py-2 text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 shadow-sm"
           style={{ borderColor: "#ECE8E5" }}
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -226,7 +249,7 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* Error Alert Display */}
+      {/* Error Alert Box */}
       {error && (
         <div className="mb-6 flex gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 font-medium items-center">
           <ShieldAlert className="shrink-0 text-red-600" size={18} />
@@ -243,28 +266,26 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          {/* Stats Cards */}
+          {/* Metrics Grid Layout */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
             {stats.map((card) => (
               <StatsCard key={card.id} {...card} />
             ))}
           </div>
 
-          {/* Orders Overview + Top Chefs */}
+          {/* Performance Summary Charts & Sections */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 mb-6">
-            {/* Charts will render empty states naturally or rely on database values when ready */}
             <OrdersChart />
             <TopChefsCard chefs={topChefsData} />
           </div>
 
-          {/* User Acquisition Growth */}
+          {/* Acquisition Line Data Graph */}
           <div className="mb-6">
             <AcquisitionChart />
           </div>
         </>
       )}
 
-      {/* Footer */}
       <Footer />
     </div>
   );

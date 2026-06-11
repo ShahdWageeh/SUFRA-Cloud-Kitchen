@@ -3,12 +3,14 @@
 import { useState } from "react";
 import Sidebar from "@/components/admin/layout/Sidebar";
 import TopHeader from "@/components/admin/layout/TopHeader";
+// import { RoleGuard } from "@/guards";
 
 export default function DashboardLayout({ children }) {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
+    // <RoleGuard allowedRoles={["admin"]}>
     <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
       <Sidebar
         activeNav={activeNav}
@@ -25,5 +27,6 @@ export default function DashboardLayout({ children }) {
         </main>
       </div>
     </div>
+    // </RoleGuard>
   );
 }

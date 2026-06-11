@@ -12,15 +12,31 @@ import {
   BarChart2,
   Plus,
   X,
-  ShieldIcon
+  ShieldIcon,
 } from "lucide-react";
 
 const navItems = [
-  { id: "dashboard",  label: "Dashboard",  icon: LayoutDashboard, href: "/admin/dashboard" },
-  { id: "chefs",      label: "Chefs",       icon: ChefHat,         href: "/admin/chefs" },
-  { id: "users",      label: "Users",       icon: Users,           href: "/admin/users" },
-  { id: "orders",     label: "Orders",      icon: ShoppingBag,     href: "/admin/orders" },
-  { id: "verifications",  label: "Verifications",   icon: ShieldIcon,       href: "/admin/verifications" },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    href: "/admin/dashboard",
+  },
+  { id: "chefs", label: "Chefs", icon: ChefHat, href: "/admin/chefs" },
+  { id: "users", label: "Users", icon: Users, href: "/admin/users" },
+  { id: "contacts", label: "Contacts", icon: ShoppingBag, href: "/admin/contacts" },
+  {
+    id: "categories",
+    label: "Categories",
+    icon: UtensilsCrossed,
+    href: "/admin/categories",
+  },
+  {
+    id: "verifications",
+    label: "Verifications",
+    icon: ShieldIcon,
+    href: "/admin/verifications",
+  },
 ];
 
 function SidebarContent({ pathname, setMobileOpen }) {
@@ -34,14 +50,14 @@ function SidebarContent({ pathname, setMobileOpen }) {
               className="text-4xl font-bold tracking-tight"
               style={{ color: "#A55632", fontFamily: "Georgia, serif" }}
             >
-              Matbak
+              Sufra
             </div>
-            <div
+            {/* <div
               className="text-4xl font-bold tracking-tight"
               style={{ color: "#A55632", fontFamily: "Georgia, serif" }}
             >
-              hna
-            </div>
+              Ra
+            </div> */}
           </div>
           <div className="text-xs text-gray-400 mt-2 font-medium tracking-widest uppercase">
             Admin Console
@@ -49,13 +65,17 @@ function SidebarContent({ pathname, setMobileOpen }) {
         </div>
 
         {/* Divider */}
-        <div className="mx-6 mb-6 border-t" style={{ borderColor: "#ECE8E5" }} />
+        <div
+          className="mx-6 mb-6 border-t"
+          style={{ borderColor: "#ECE8E5" }}
+        />
 
         {/* Nav */}
         <nav className="px-4 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isActive =
+              pathname === item.href || pathname.startsWith(item.href + "/");
 
             return (
               <Link

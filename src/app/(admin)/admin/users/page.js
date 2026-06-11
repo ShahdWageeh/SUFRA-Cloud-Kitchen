@@ -15,11 +15,17 @@ import {
   ChevronRight,
   RefreshCw,
   Loader2,
+  ShieldOff,
+  ShieldCheck,
+  Search,
 } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PAGE_SIZE = 10;
+
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api";
 
 const STATUS_CONFIG = {
   Active: {
@@ -36,111 +42,16 @@ const STATUS_CONFIG = {
   },
 };
 
-// ─── API Layer ────────────────────────────────────────────────────────────────
-// Replace these functions with your real API calls.
-// Expected shapes are documented inline.
+// ─── Auth helper ──────────────────────────────────────────────────────────────
 
-async function fetchUsers({ page, pageSize, status, sortBy }) {
-  // TODO: replace with real endpoint, :
-  // const res = await fetch(
-  //   `/api/admin/users?page=${page}&pageSize=${pageSize}&status=${status}&sortBy=${sortBy}`
-  // );
-  // if (!res.ok) throw new Error('Failed to fetch users');
-  // return res.json();
-  //
-  // Expected response shape:
-  // {
-  //   users: [
-  //     {
-  //       id: string | number,
-  //       name: string,
-  //       location: string,
-  //       email: string,
-  //       joinDate: string,        // ISO date string or pre-formatted
-  //       totalOrders: number,
-  //       status: 'Active' | 'Banned' | 'Inactive',
-  //       avatarUrl?: string,      // optional — falls back to initials
-  //     }
-  //   ],
-  //   total: number,               // total records for pagination
-  //   totalPages: number,
-  // }
-
-  // ── Fallback mock data (remove once API is wired up) ──
-  await new Promise((r) => setTimeout(r, 600));
-  const mock = [
-    {
-      id: 1,
-      name: "Ahmed Khalil",
-      location: "Cairo, EG",
-      email: "ahmed.k@example.com",
-      joinDate: "Oct 12, 2023",
-      totalOrders: 24,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Laila Mansour",
-      location: "Alexandria, EG",
-      email: "laila.m@domain.com",
-      joinDate: "Nov 05, 2023",
-      totalOrders: 8,
-      status: "Active",
-      avatarUrl: "https://api.dicebear.com/7.x/thumbs/svg?seed=Laila",
-    },
-    {
-      id: 3,
-      name: "Omar Mahmoud",
-      location: "Giza, EG",
-      email: "omar88@webmail.net",
-      joinDate: "Dec 01, 2023",
-      totalOrders: 0,
-      status: "Banned",
-    },
-    {
-      id: 4,
-      name: "Sarah Younis",
-      location: "Mansoura, EG",
-      email: "sarah.y@gmail.com",
-      joinDate: "Jan 15, 2024",
-      totalOrders: 15,
-      status: "Active",
-      avatarUrl: "https://api.dicebear.com/7.x/thumbs/svg?seed=Sarah",
-    },
-  ];
-  return { users: mock, total: 128422, totalPages: 1284 };
-}
-
-async function fetchStats() {
-  // TODO: replace with real endpoint, e.g.:
-  // const res = await fetch('/api/admin/users/stats');
-  // if (!res.ok) throw new Error('Failed to fetch stats');
-  // return res.json();
-  //
-  // Expected response shape:
-  // {
-  //   totalUsers:    number,
-  //   totalGrowth:   string,   // e.g. "+12%"
-  //   activeToday:   number,
-  //   newJoins24h:   number,
-  //   newJoinExtra:  number,   // the "+N" overflow badge
-  //   recentAvatars: string[], // array of avatar URLs for overlap stack
-  //   reportsBans:   number,
-  // }
-
-  await new Promise((r) => setTimeout(r, 400));
+function getAuthHeaders() {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token") || localStorage.getItem("jwt")
+      : "";
   return {
-    totalUsers: 12842,
-    totalGrowth: "+12%",
-    activeToday: 3205,
-    newJoins24h: 48,
-    newJoinExtra: 45,
-    recentAvatars: [
-      "https://api.dicebear.com/7.x/thumbs/svg?seed=Felix",
-      "https://api.dicebear.com/7.x/thumbs/svg?seed=Mia",
-      "https://api.dicebear.com/7.x/thumbs/svg?seed=Leo",
-    ],
-    reportsBans: 14,
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
   };
 }
 
@@ -154,6 +65,23 @@ function getInitials(name = "") {
     .join("");
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/** Derive a display status from the customer object based on API docs */
+function resolveStatus(customer) {
+  if (customer.isBlocked === 1 || customer.status === "blocked")
+    return "Banned";
+  if (customer.status === "inactive") return "Inactive";
+  return "Active";
+}
+
 const AVATAR_COLORS = [
   { bg: "bg-amber-100", text: "text-amber-700" },
   { bg: "bg-violet-100", text: "text-violet-700" },
@@ -163,7 +91,10 @@ const AVATAR_COLORS = [
 ];
 
 function getAvatarColor(id) {
-  return AVATAR_COLORS[id % AVATAR_COLORS.length];
+  const hash = String(id)
+    .split("")
+    .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -191,7 +122,7 @@ function Avatar({ user }) {
 function SkeletonRow() {
   return (
     <tr className="border-b border-slate-100">
-      {[...Array(8)].map((_, i) => (
+      {[...Array(6)].map((_, i) => (
         <td key={i} className="px-4 py-4">
           <div className="h-4 bg-slate-100 rounded animate-pulse w-full" />
         </td>
@@ -199,6 +130,8 @@ function SkeletonRow() {
     </tr>
   );
 }
+
+// ─── Analytics Cards Component ─────────────────────────────────────────────────
 
 function SkeletonCard() {
   return (
@@ -210,7 +143,7 @@ function SkeletonCard() {
   );
 }
 
-function AnalyticsCards({ stats, loading }) {
+function AnalyticsCards({ customers, loading }) {
   if (loading) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -221,80 +154,135 @@ function AnalyticsCards({ stats, loading }) {
     );
   }
 
-  if (!stats) return null;
+  const total = customers.length;
+  const active = customers.filter((c) => resolveStatus(c) === "Active").length;
+  const banned = customers.filter((c) => resolveStatus(c) === "Banned").length;
+
+  const now = Date.now();
+  const newToday = customers.filter((c) => {
+    if (!c.createdAt) return false;
+    return now - new Date(c.createdAt).getTime() < 86400000;
+  }).length;
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {/* Total Users */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
           Total Users
         </p>
         <p className="text-3xl font-bold text-slate-900 leading-none">
-          {stats.totalUsers.toLocaleString()}
+          {total.toLocaleString()}
         </p>
         <div className="flex items-center gap-1.5">
           <TrendingUp size={13} className="text-emerald-500" />
           <span className="text-xs text-emerald-600 font-medium">
-            {stats.totalGrowth} from last month
+            All registered customers
           </span>
         </div>
       </div>
 
-      {/* Active Today */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-          Active Today
+          Active Users
         </p>
         <p className="text-3xl font-bold text-slate-900 leading-none">
-          {stats.activeToday.toLocaleString()}
+          {active.toLocaleString()}
         </p>
         <div className="flex items-center gap-1.5">
           <CheckCircle size={13} className="text-emerald-500" />
           <span className="text-xs text-emerald-600 font-medium">
-            All systems operational
+            Not blocked
           </span>
         </div>
       </div>
 
-      {/* New Joins 24h */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
           New Joins (24h)
         </p>
         <p className="text-3xl font-bold text-slate-900 leading-none">
-          {stats.newJoins24h}
+          {newToday}
         </p>
-        <div className="flex items-center gap-2">
-          <div className="flex -space-x-2">
-            {stats.recentAvatars.map((url, i) => (
-              <img
-                key={i}
-                src={url}
-                alt=""
-                className="w-6 h-6 rounded-full border-2 border-white bg-slate-100"
-              />
-            ))}
-          </div>
-          <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-            +{stats.newJoinExtra}
+        <div className="flex items-center gap-1.5">
+          <CheckCircle size={13} className="text-teal-500" />
+          <span className="text-xs text-teal-600 font-medium">
+            Joined in the last 24 hours
           </span>
         </div>
       </div>
 
-      {/* Reports / Bans */}
       <div className="bg-rose-50 rounded-2xl border border-rose-100 shadow-sm p-5 flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-widest text-rose-400">
-          Reports / Bans
+          Banned Users
         </p>
         <p className="text-3xl font-bold text-rose-600 leading-none">
-          {stats.reportsBans}
+          {banned}
         </p>
         <div className="flex items-center gap-1.5">
           <AlertTriangle size={13} className="text-rose-400" />
           <span className="text-xs text-rose-500 font-medium">
-            Pending moderation review
+            Blocked accounts
           </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Confirm Modal ────────────────────────────────────────────────────────────
+
+function ConfirmModal({
+  open,
+  isBanning,
+  count,
+  onConfirm,
+  onCancel,
+  loading,
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+        <div className="flex items-center gap-3 mb-4">
+          {isBanning ? (
+            <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
+              <Ban size={20} className="text-rose-500" />
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+              <ShieldCheck size={20} className="text-emerald-500" />
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-bold text-slate-800">
+              {isBanning ? "Ban" : "Unban"} {count} user{count !== 1 ? "s" : ""}
+              ?
+            </p>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {isBanning
+                ? "They will lose access to the platform immediately."
+                : "They will regain access to the platform."}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end mt-2">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center gap-2 ${
+              isBanning ? "bg-rose-500" : "bg-emerald-500"
+            }`}
+          >
+            {loading && <Loader2 size={13} className="animate-spin" />}
+            {isBanning ? "Yes, Ban" : "Yes, Unban"}
+          </button>
         </div>
       </div>
     </div>
@@ -304,104 +292,201 @@ function AnalyticsCards({ stats, loading }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function UsersManagement() {
-  // ── Table state ──
-  const [users, setUsers] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [allCustomers, setAllCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ── Stats state ──
-  const [stats, setStats] = useState(null);
-  const [statsLoading, setStatsLoading] = useState(true);
+  // Guard against hydration mismatch state differences
+  const [mounted, setMounted] = useState(false);
 
-  // ── Filter / pagination state ──
   const [activePage, setActivePage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("joinDate");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // ── Selection state ──
   const [selected, setSelected] = useState(new Set());
 
-  // ── Fetch users ──
-  const loadUsers = useCallback(async () => {
+  const [modal, setModal] = useState({
+    open: false,
+    userIds: [],
+    isBanning: true,
+  });
+  const [banLoading, setBanLoading] = useState(false);
+
+  // ── Fetch all customers ───────────────────────────────────────────────────
+  const loadCustomers = useCallback(async () => {
     setLoading(true);
     setError(null);
     setSelected(new Set());
     try {
-      const data = await fetchUsers({
-        page: activePage,
-        pageSize: PAGE_SIZE,
-        status: statusFilter,
-        sortBy,
+      const res = await fetch(`${BASE_URL}/users/customers`, {
+        headers: getAuthHeaders(),
       });
-      setUsers(data.users);
-      setTotal(data.total);
-      setTotalPages(data.totalPages);
+      const json = await res.json();
+      if (json.success) {
+        setAllCustomers(json.data || []);
+      } else {
+        setError(json.message || "Failed to load customers.");
+      }
     } catch (err) {
-      setError(err.message || "Something went wrong.");
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
-    }
-  }, [activePage, statusFilter, sortBy]);
-
-  // ── Fetch stats ──
-  const loadStats = useCallback(async () => {
-    setStatsLoading(true);
-    try {
-      const data = await fetchStats();
-      setStats(data);
-    } catch {
-    } finally {
-      setStatsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
-  useEffect(() => {
-    loadStats();
-  }, [loadStats]);
+    setMounted(true);
+    loadCustomers();
+  }, [loadCustomers]);
 
-  // ── Selection helpers ──
-  const allIds = users.map((u) => u.id);
-  const allChecked =
-    allIds.length > 0 && allIds.every((id) => selected.has(id));
-  const someChecked = allIds.some((id) => selected.has(id));
-
-  const toggleAll = () => {
-    setSelected(allChecked ? new Set() : new Set(allIds));
+  // ── Toggle block for ONE user via API ─────────────────────────────────────
+  const toggleBlockUser = async (userId) => {
+    const res = await fetch(
+      `${BASE_URL}/users/customers/${userId}/toggle-block`,
+      { method: "PATCH", headers: getAuthHeaders() },
+    );
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || "Action failed.");
+    return json.data;
   };
 
-  const toggleRow = (id) => {
+  // ── Open ban modal for single user ───────────────────────────────────────
+  const openSingleBanModal = (user, e) => {
+    e.stopPropagation();
+    const isBanning = resolveStatus(user) !== "Banned";
+    setModal({ open: true, userIds: [user._id], isBanning });
+  };
+
+  // ── Open ban modal for bulk selection ────────────────────────────────────
+  const openBulkBanModal = () => {
+    const ids = [...selected];
+    const anyActive = ids.some((id) => {
+      const u = allCustomers.find((c) => c._id === id);
+      return u && resolveStatus(u) !== "Banned";
+    });
+    setModal({ open: true, userIds: ids, isBanning: anyActive });
+  };
+
+  // ── Confirm ban/unban ─────────────────────────────────────────────────────
+  const handleConfirmBan = async () => {
+    setBanLoading(true);
+    try {
+      const results = await Promise.allSettled(
+        modal.userIds.map((id) => toggleBlockUser(id)),
+      );
+
+      setAllCustomers((prev) => {
+        const updated = [...prev];
+        results.forEach((result, i) => {
+          if (result.status === "fulfilled") {
+            const idx = updated.findIndex((c) => c._id === modal.userIds[i]);
+            if (idx !== -1) updated[idx] = result.value;
+          }
+        });
+        return updated;
+      });
+
+      setSelected(new Set());
+      setModal({ open: false, userIds: [], isBanning: true });
+    } catch (err) {
+      alert("An unexpected error occurred.");
+    } finally {
+      setBanLoading(false);
+    }
+  };
+
+  // ── Client-side filter + search + sort ────────────────────────────────────
+  const filteredCustomers = allCustomers
+    .filter((c) => {
+      if (statusFilter !== "all" && resolveStatus(c) !== statusFilter) {
+        return false;
+      }
+
+      if (searchQuery.trim() !== "") {
+        const query = searchQuery.toLowerCase();
+        const firstName = (c.firstName || "").toLowerCase();
+        const lastName = (c.lastName || "").toLowerCase();
+        const email = (c.email || "").toLowerCase();
+        const phone = (c.phone || "").toLowerCase();
+        const fullName = `${firstName} ${lastName}`;
+
+        return (
+          firstName.includes(query) ||
+          lastName.includes(query) ||
+          fullName.includes(query) ||
+          email.includes(query) ||
+          phone.includes(query)
+        );
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "name") {
+        return `${a.firstName} ${a.lastName}`.localeCompare(
+          `${b.firstName} ${b.lastName}`,
+        );
+      }
+      if (sortBy === "joinDate") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return 0;
+    });
+
+  // ── Pagination ────────────────────────────────────────────────────────────
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredCustomers.length / PAGE_SIZE),
+  );
+  const safePage = Math.min(activePage, totalPages);
+  const pageCustomers = filteredCustomers.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
+
+  const goToPage = (n) => setActivePage(Math.max(1, Math.min(totalPages, n)));
+
+  const visiblePages = () => {
+    if (totalPages <= 5)
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (safePage <= 3) return [1, 2, 3];
+    if (safePage >= totalPages - 2)
+      return [totalPages - 2, totalPages - 1, totalPages];
+    return [safePage - 1, safePage, safePage + 1];
+  };
+
+  const showStartEllipsis = safePage > 4 && totalPages > 5;
+  const showEndEllipsis = safePage < totalPages - 3 && totalPages > 5;
+
+  // ── Selection ─────────────────────────────────────────────────────────────
+  const pageIds = pageCustomers.map((u) => u._id);
+  const allChecked =
+    pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+  const someChecked = pageIds.some((id) => selected.has(id));
+
+  const toggleAll = () =>
+    setSelected(allChecked ? new Set() : new Set(pageIds));
+
+  const toggleRow = (id) =>
     setSelected((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  };
-
-  // ── Pagination helpers ──
-  const goToPage = (n) => {
-    const clamped = Math.max(1, Math.min(totalPages, n));
-    setActivePage(clamped);
-  };
-
-  const visiblePages = () => {
-    if (totalPages <= 5)
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    if (activePage <= 3) return [1, 2, 3];
-    if (activePage >= totalPages - 2)
-      return [totalPages - 2, totalPages - 1, totalPages];
-    return [activePage - 1, activePage, activePage + 1];
-  };
-
-  const showStartEllipsis = activePage > 4 && totalPages > 5;
-  const showEndEllipsis = activePage < totalPages - 3 && totalPages > 5;
 
   return (
     <div className="w-full">
+      {/* ── Confirm Modal ── */}
+      <ConfirmModal
+        open={modal.open}
+        isBanning={modal.isBanning}
+        count={modal.userIds.length}
+        onConfirm={handleConfirmBan}
+        onCancel={() => setModal({ open: false, userIds: [], isBanning: true })}
+        loading={banLoading}
+      />
+
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
         <div>
@@ -413,7 +498,7 @@ export default function UsersManagement() {
             platform.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        {/* <div className="flex items-center gap-2 shrink-0">
           <button className="flex items-center gap-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg px-4 py-2 hover:bg-slate-50 transition-colors shadow-sm">
             <Download size={15} />
             Export CSV
@@ -425,16 +510,33 @@ export default function UsersManagement() {
             <UserPlus size={15} />
             Manual Registration
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* ── Analytics Cards ── */}
-      <AnalyticsCards stats={stats} loading={statsLoading} />
+      <AnalyticsCards customers={allCustomers} loading={loading} />
 
-      {/* ── Filter Bar ── */}
-      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          {/* Status filter */}
+      {/* ── Filter & Search Bar ── */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+          {/* Search Input */}
+          <div className="relative w-full max-w-xs shrink-0">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder="Search by name, email, phone..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setActivePage(1);
+              }}
+              className="w-full text-sm text-slate-700 bg-white border border-slate-200 rounded-lg pl-9 pr-4 py-2 placeholder-slate-400 focus:outline-none focus:border-slate-300 transition-colors shadow-sm"
+            />
+          </div>
+
           <div className="relative">
             <select
               value={statusFilter}
@@ -442,9 +544,9 @@ export default function UsersManagement() {
                 setStatusFilter(e.target.value);
                 setActivePage(1);
               }}
-              className="appearance-none flex items-center gap-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-2 hover:border-slate-300 transition-colors shadow-sm cursor-pointer focus:outline-none"
+              className="appearance-none text-sm text-slate-600 bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-2 hover:border-slate-300 transition-colors shadow-sm cursor-pointer focus:outline-none"
             >
-              <option value="all">Status: All Users</option>
+              <option value="all">Status: All</option>
               <option value="Active">Active</option>
               <option value="Banned">Banned</option>
               <option value="Inactive">Inactive</option>
@@ -455,7 +557,6 @@ export default function UsersManagement() {
             />
           </div>
 
-          {/* Sort filter */}
           <div className="relative">
             <select
               value={sortBy}
@@ -463,11 +564,10 @@ export default function UsersManagement() {
                 setSortBy(e.target.value);
                 setActivePage(1);
               }}
-              className="appearance-none flex items-center gap-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-2 hover:border-slate-300 transition-colors shadow-sm cursor-pointer focus:outline-none"
+              className="appearance-none text-sm text-slate-600 bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-2 hover:border-slate-300 transition-colors shadow-sm cursor-pointer focus:outline-none"
             >
-              <option value="joinDate">Sorted by: Join Date</option>
-              <option value="name">Sorted by: Name</option>
-              <option value="orders">Sorted by: Orders</option>
+              <option value="joinDate">Sort: Join Date</option>
+              <option value="name">Sort: Name</option>
             </select>
             <ChevronDown
               size={14}
@@ -476,27 +576,25 @@ export default function UsersManagement() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Retry button shown on error */}
+        <div className="flex items-center gap-3 self-end md:self-auto shrink-0">
           {error && (
             <button
-              onClick={loadUsers}
+              onClick={loadCustomers}
               className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
             >
-              <RefreshCw size={14} />
-              Retry
+              <RefreshCw size={14} /> Retry
             </button>
           )}
-
-          {/* Bulk actions */}
           {selected.size > 0 && (
             <>
               <span className="text-sm font-medium text-slate-500">
                 {selected.size} Selected
               </span>
-              <button className="flex items-center gap-1.5 text-sm font-semibold text-rose-500 hover:text-rose-700 transition-colors">
-                <Ban size={14} />
-                Bulk Ban
+              <button
+                onClick={openBulkBanModal}
+                className="flex items-center gap-1.5 text-sm font-semibold text-rose-500 hover:text-rose-700 transition-colors"
+              >
+                <Ban size={14} /> Bulk Ban / Unban
               </button>
             </>
           )}
@@ -521,14 +619,7 @@ export default function UsersManagement() {
                     className="w-4 h-4 rounded accent-amber-800 cursor-pointer disabled:opacity-40"
                   />
                 </th>
-                {[
-                  "User Name",
-                  "Email",
-                  "Join Date",
-                  "Total Orders",
-                  "Status",
-                  "Actions",
-                ].map((h) => (
+                {["User", "Email", "Joined", "Status", "Actions"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400"
@@ -540,59 +631,62 @@ export default function UsersManagement() {
             </thead>
 
             <tbody className="divide-y divide-slate-100">
-              {/* Loading skeletons */}
               {loading &&
                 [...Array(PAGE_SIZE)].map((_, i) => <SkeletonRow key={i} />)}
 
-              {/* Error state */}
               {!loading && error && (
                 <tr>
-                  <td colSpan={8} className="px-5 py-16 text-center">
+                  <td colSpan={6} className="px-5 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <AlertTriangle size={28} className="text-rose-400" />
                       <p className="text-sm font-medium text-slate-600">
                         {error}
                       </p>
                       <button
-                        onClick={loadUsers}
-                        className="flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-opacity hover:opacity-90"
+                        onClick={loadCustomers}
+                        className="flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90"
                         style={{ background: "#7c4a2d" }}
                       >
-                        <RefreshCw size={14} />
-                        Try again
+                        <RefreshCw size={14} /> Try again
                       </button>
                     </div>
                   </td>
                 </tr>
               )}
 
-              {/* Empty state */}
-              {!loading && !error && users.length === 0 && (
+              {!loading && !error && filteredCustomers.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-5 py-16 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <p className="text-sm font-medium text-slate-500">
-                        No users found
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        Try adjusting your filters.
-                      </p>
-                    </div>
+                  <td colSpan={6} className="px-5 py-16 text-center">
+                    <p className="text-sm font-medium text-slate-500">
+                      No users found
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Try adjusting your search criteria or filters.
+                    </p>
                   </td>
                 </tr>
               )}
 
-              {/* Data rows */}
               {!loading &&
                 !error &&
-                users.map((user) => {
-                  const isChecked = selected.has(user.id);
-                  const sc =
-                    STATUS_CONFIG[user.status] ?? STATUS_CONFIG["Inactive"];
+                pageCustomers.map((customer) => {
+                  const status = resolveStatus(customer);
+                  const sc = STATUS_CONFIG[status] ?? STATUS_CONFIG["Inactive"];
+                  const isChecked = selected.has(customer._id);
+                  const isBanned = status === "Banned";
+                  const displayName =
+                    `${customer.firstName || ""} ${customer.lastName || ""}`.trim();
+
+                  const user = {
+                    id: customer._id,
+                    name: displayName,
+                    avatarUrl: customer.avatarUrl || null,
+                  };
+
                   return (
                     <tr
-                      key={user.id}
-                      onClick={() => toggleRow(user.id)}
+                      key={customer._id}
+                      onClick={() => toggleRow(customer._id)}
                       className={`transition-colors cursor-pointer ${
                         isChecked ? "bg-amber-50/60" : "hover:bg-slate-50/60"
                       }`}
@@ -604,7 +698,7 @@ export default function UsersManagement() {
                         <input
                           type="checkbox"
                           checked={isChecked}
-                          onChange={() => toggleRow(user.id)}
+                          onChange={() => toggleRow(customer._id)}
                           className="w-4 h-4 rounded accent-amber-800 cursor-pointer"
                         />
                       </td>
@@ -614,23 +708,21 @@ export default function UsersManagement() {
                           <Avatar user={user} />
                           <div>
                             <p className="text-sm font-semibold text-slate-800">
-                              {user.name}
+                              {displayName || "—"}
                             </p>
                             <p className="text-xs text-slate-400 mt-0.5">
-                              {user.location}
+                              {customer.phone || "No phone"}
                             </p>
                           </div>
                         </div>
                       </td>
 
                       <td className="px-4 py-4 text-sm text-slate-500">
-                        {user.email}
+                        {customer.email || "—"}
                       </td>
+
                       <td className="px-4 py-4 text-sm text-slate-500">
-                        {user.joinDate}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-slate-600 font-medium">
-                        {user.totalOrders} Orders
+                        {formatDate(customer.createdAt)}
                       </td>
 
                       <td className="px-4 py-4">
@@ -640,7 +732,7 @@ export default function UsersManagement() {
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}
                           />
-                          {user.status}
+                          {status}
                         </span>
                       </td>
 
@@ -655,12 +747,24 @@ export default function UsersManagement() {
                           >
                             <Eye size={15} />
                           </button>
+
                           <button
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"
-                            aria-label="Ban user"
+                            onClick={(e) => openSingleBanModal(customer, e)}
+                            className={`p-1.5 rounded-lg transition-colors ${
+                              isBanned
+                                ? "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50"
+                                : "text-slate-400 hover:text-rose-500 hover:bg-rose-50"
+                            }`}
+                            aria-label={isBanned ? "Unban user" : "Ban user"}
+                            title={isBanned ? "Unban user" : "Ban user"}
                           >
-                            <Ban size={15} />
+                            {isBanned ? (
+                              <ShieldCheck size={15} />
+                            ) : (
+                              <ShieldOff size={15} />
+                            )}
                           </button>
+
                           <button
                             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                             aria-label="More options"
@@ -686,13 +790,17 @@ export default function UsersManagement() {
             ) : (
               <>
                 Showing{" "}
+                {filteredCustomers.length === 0
+                  ? 0
+                  : ((safePage - 1) * PAGE_SIZE + 1).toLocaleString()}{" "}
+                –{" "}
                 {Math.min(
-                  (activePage - 1) * PAGE_SIZE + 1,
-                  total,
+                  safePage * PAGE_SIZE,
+                  filteredCustomers.length,
                 ).toLocaleString()}{" "}
-                to {Math.min(activePage * PAGE_SIZE, total).toLocaleString()} of{" "}
+                of{" "}
                 <span className="font-medium text-slate-600">
-                  {total.toLocaleString()}
+                  {filteredCustomers.length.toLocaleString()}
                 </span>{" "}
                 users
               </>
@@ -701,14 +809,13 @@ export default function UsersManagement() {
 
           <div className="flex items-center gap-1">
             <button
-              disabled={activePage === 1 || loading}
-              onClick={() => goToPage(activePage - 1)}
+              disabled={!mounted || safePage === 1 || loading}
+              onClick={() => goToPage(safePage - 1)}
               className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-30"
             >
               <ChevronLeft size={15} />
             </button>
 
-            {/* First page when not in visible range */}
             {showStartEllipsis && (
               <>
                 <button
@@ -729,17 +836,16 @@ export default function UsersManagement() {
                 onClick={() => goToPage(n)}
                 disabled={loading}
                 className={`w-7 h-7 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 ${
-                  activePage === n
+                  safePage === n
                     ? "text-white"
                     : "text-slate-500 hover:bg-slate-100"
                 }`}
-                style={activePage === n ? { background: "#7c4a2d" } : {}}
+                style={safePage === n ? { background: "#7c4a2d" } : {}}
               >
                 {n}
               </button>
             ))}
 
-            {/* Last page when not in visible range */}
             {showEndEllipsis && (
               <>
                 <span className="w-7 h-7 flex items-center justify-center text-xs text-slate-400">
@@ -747,23 +853,23 @@ export default function UsersManagement() {
                 </span>
                 <button
                   onClick={() => goToPage(totalPages)}
-                  className={`w-14 h-7 rounded-lg text-xs font-semibold transition-colors ${
-                    activePage === totalPages
+                  className={`w-10 h-7 rounded-lg text-xs font-semibold transition-colors ${
+                    safePage === totalPages
                       ? "text-white"
                       : "text-slate-500 hover:bg-slate-100"
                   }`}
                   style={
-                    activePage === totalPages ? { background: "#7c4a2d" } : {}
+                    safePage === totalPages ? { background: "#7c4a2d" } : {}
                   }
                 >
-                  {totalPages.toLocaleString()}
+                  {totalPages}
                 </button>
               </>
             )}
 
             <button
-              disabled={activePage === totalPages || loading}
-              onClick={() => goToPage(activePage + 1)}
+              disabled={!mounted || safePage === totalPages || loading}
+              onClick={() => goToPage(safePage + 1)}
               className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-30"
             >
               <ChevronRight size={15} />

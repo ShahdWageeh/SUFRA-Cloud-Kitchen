@@ -11,4 +11,5 @@ export {default as ordersService} from "./ordersService"
 export {default as cartService} from "./cartService"
 export { default as reviewService } from "./reviewService";
 export { default as contactService } from "./contactService";
+export {default as adminCategoryService} from "./adminCategoryService"
 

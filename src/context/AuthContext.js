@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { authService, verificationService, tokenService } from "@/services";
 import { getSafeRedirectPath } from "@/utils/authRedirects";
+import { isBanMessage, isCustomerBlocked } from "@/utils/userStatus";
 
 export const AuthContext = createContext(null);
 
@@ -61,6 +62,18 @@ export function AuthProvider({ children }) {
       setUser(restoredUser);
       return restoredUser;
     } catch (error) {
+      const message = error?.response?.data?.message || "";
+
+      if (isBanMessage(message)) {
+        const blockedProfile = {
+          role: "customer",
+          isBlocked: 1,
+          status: "blocked",
+        };
+        setUser(blockedProfile);
+        return blockedProfile;
+      }
+
       tokenService.remove();
       setToken(null);
       setUser(null);
@@ -103,10 +116,26 @@ export function AuthProvider({ children }) {
         setToken(accessToken || null);
         setUser(registeredUser);
 
+        if (registeredUser.role === "customer") {
+          const profile = (await refreshUser()) || registeredUser;
+
+          if (isCustomerBlocked(profile)) {
+            router.replace("/banned");
+            return {
+              success: true,
+              user: profile,
+            };
+          }
+
+          router.push("/customer/dashboard");
+          return {
+            success: true,
+            user: profile,
+          };
+        }
+
         if (registeredUser.role === "chef") {
           router.push("/chef/onboarding");
-        } else if (registeredUser.role === "customer") {
-          router.push("/customer/dashboard");
         } else if (registeredUser.role === "admin") {
           router.push("/admin/dashboard");
         }
@@ -124,7 +153,7 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     },
-    [router],
+    [router, refreshUser],
   );
 
   const login = useCallback(
@@ -134,11 +163,22 @@ export function AuthProvider({ children }) {
       try {
         const { redirect, ...loginCredentials } = credentials;
         const response = await authService.login(loginCredentials);
+        const safeRedirect = getSafeRedirectPath(redirect);
+
+        if (response?.success === false) {
+          const message = response.message || "Login failed.";
+
+          if (isBanMessage(message)) {
+            router.replace("/banned");
+            return { success: false, banned: true, message };
+          }
+
+          return { success: false, message };
+        }
 
         const authData = getResponseData(response);
         const loggedUser = authData.user;
         const accessToken = authData.token;
-        const safeRedirect = getSafeRedirectPath(redirect);
 
         if (accessToken) {
           tokenService.save(accessToken);
@@ -147,11 +187,28 @@ export function AuthProvider({ children }) {
         setToken(accessToken || null);
         setUser(loggedUser);
 
-        if (loggedUser.role === "chef") {
-          await redirectChefByVerification();
-        } else if (loggedUser.role === "customer") {
+        if (loggedUser?.role === "customer") {
+          const profile = (await refreshUser()) || loggedUser;
+
+          if (isCustomerBlocked(profile)) {
+            router.replace("/banned");
+            return {
+              success: true,
+              banned: true,
+              user: profile,
+            };
+          }
+
           router.push(safeRedirect || "/customer/dashboard");
-        } else if (loggedUser.role === "admin") {
+          return {
+            success: true,
+            user: profile,
+          };
+        }
+
+        if (loggedUser?.role === "chef") {
+          await redirectChefByVerification();
+        } else if (loggedUser?.role === "admin") {
           router.push(safeRedirect || "/admin/dashboard");
         }
 
@@ -160,16 +217,23 @@ export function AuthProvider({ children }) {
           user: loggedUser,
         };
       } catch (error) {
+        const message =
+          error?.response?.data?.message || "Invalid email or password.";
+
+        if (isBanMessage(message)) {
+          router.replace("/banned");
+          return { success: false, banned: true, message };
+        }
+
         return {
           success: false,
-          message:
-            error?.response?.data?.message || "Invalid email or password.",
+          message,
         };
       } finally {
         setLoading(false);
       }
     },
-    [redirectChefByVerification, router],
+    [redirectChefByVerification, router, refreshUser],
   );
 
   const logout = useCallback(() => {
@@ -179,6 +243,12 @@ export function AuthProvider({ children }) {
 
     router.replace("/login");
   }, [router]);
+
+  const clearSession = useCallback(() => {
+    tokenService.remove();
+    setUser(null);
+    setToken(null);
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -192,6 +262,7 @@ export function AuthProvider({ children }) {
       register,
       login,
       logout,
+      clearSession,
       refreshUser,
       redirectChefByVerification,
     }),
@@ -206,6 +277,7 @@ export function AuthProvider({ children }) {
       register,
       login,
       logout,
+      clearSession,
       refreshUser,
       redirectChefByVerification,
     ],
