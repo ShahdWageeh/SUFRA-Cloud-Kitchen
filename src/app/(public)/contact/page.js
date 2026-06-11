@@ -1,13 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowRight,
   faClock,
   faEnvelope,
   faLocationDot,
   faMessage,
   faPaperPlane,
-  faPhone,
   faQuestionCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -16,6 +18,9 @@ import {
   faLinkedinIn,
   faXTwitter,
 } from "@fortawesome/free-brands-svg-icons";
+import toast from "react-hot-toast";
+import useAuth from "@/hooks/useAuth";
+import { contactService } from "@/services";
 
 const helpItems = [
   {
@@ -41,18 +46,77 @@ const helpItems = [
 ];
 
 export default function ContactPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!user) {
+      toast.error("Please login to send a message");
+      router.push("/login");
+      return;
+    }
+
+    if (!formData.fullName || !formData.email || !formData.subject || !formData.message) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const result = await contactService.submitMessage(formData);
+      if (result.success) {
+        toast.success("Message sent successfully!");
+        setFormData({
+          fullName: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to send message";
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="bg-background text-text-primary">
       <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-t-xl">
           <div className="relative h-52 sm:h-64 lg:h-72">
-            <Image src="/contact.jpg" alt="Fresh ingredients on a kitchen table" fill priority sizes="100vw" className="object-cover" />
+            <Image
+              src="/contact.jpg"
+              alt="Fresh ingredients on a kitchen table"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
             <div className="absolute inset-0 bg-primary/35" />
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-white">
-            <h1 className="text-4xl font-extrabold sm:text-5xl">Get in Touch</h1>
+            <h1 className="text-4xl font-extrabold sm:text-5xl">
+              Get in Touch
+            </h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-white/90">
-              Questions, partnerships, or support? Our community team is here to help.
+              Questions, partnerships, or support? Our community team is here to
+              help.
             </p>
           </div>
         </div>
@@ -68,9 +132,13 @@ export default function ContactPage() {
               <div>
                 <h2 className="text-lg font-bold">Chat with Us</h2>
                 <p className="mt-1 text-sm leading-6 text-text-secondary">
-                  Need help navigating Matbakhna or managing an order? Send us a message.
+                  Need help navigating Matbakhna or managing an order? Send us a
+                  message.
                 </p>
-                <a href="tel:+201000000000" className="mt-2 inline-block text-sm font-bold text-primary">
+                <a
+                  href="tel:+201000000000"
+                  className="mt-2 inline-block text-sm font-bold text-primary"
+                >
                   +20 100 000 0000
                 </a>
               </div>
@@ -85,9 +153,13 @@ export default function ContactPage() {
               <div>
                 <h2 className="text-lg font-bold">Email Support</h2>
                 <p className="mt-1 text-sm leading-6 text-text-secondary">
-                  Questions about chef partnerships, feedback, or general inquiries.
+                  Questions about chef partnerships, feedback, or general
+                  inquiries.
                 </p>
-                <a href="mailto:hello@matbakhna.com" className="mt-2 inline-block text-sm font-bold text-primary">
+                <a
+                  href="mailto:hello@matbakhna.com"
+                  className="mt-2 inline-block text-sm font-bold text-primary"
+                >
                   hello@sufra.com
                 </a>
               </div>
@@ -97,11 +169,18 @@ export default function ContactPage() {
           <article className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-primary/10">
             <h2 className="text-lg font-bold">Join the Community</h2>
             <div className="mt-4 flex gap-3">
-              {[faFacebookF, faInstagram, faXTwitter, faLinkedinIn].map((icon, index) => (
-                <a key={index} href="#" aria-label="Matbakhna social channel" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-container text-text-secondary transition hover:bg-primary hover:text-white">
-                  <FontAwesomeIcon icon={icon} className="h-3.5 w-3.5" />
-                </a>
-              ))}
+              {[faFacebookF, faInstagram, faXTwitter, faLinkedinIn].map(
+                (icon, index) => (
+                  <a
+                    key={index}
+                    href="#"
+                    aria-label="Matbakhna social channel"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-container text-text-secondary transition hover:bg-primary hover:text-white"
+                  >
+                    <FontAwesomeIcon icon={icon} className="h-3.5 w-3.5" />
+                  </a>
+                ),
+              )}
             </div>
           </article>
 
@@ -120,31 +199,73 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <form className="-mt-12 grid gap-4 rounded-lg bg-white p-5 shadow-[0_12px_32px_rgba(27,28,28,0.12)] ring-1 ring-primary/10 sm:grid-cols-2 lg:z-10">
+        <form 
+          onSubmit={handleSubmit}
+          className="-mt-12 grid gap-4 rounded-lg bg-white p-5 shadow-[0_12px_32px_rgba(27,28,28,0.12)] ring-1 ring-primary/10 sm:grid-cols-2 lg:z-10"
+        >
           <label className="space-y-2">
-            <span className="text-xs font-bold text-text-secondary">Full Name</span>
-            <input type="text" name="name" placeholder="Sarah Chen" className="h-11 w-full rounded-md border border-primary/15 bg-background px-2 text-sm outline-none transition focus:border-primary focus:bg-white" />
+            <span className="text-xs font-bold text-text-secondary">
+              Full Name
+            </span>
+            <input
+              type="text"
+              name="fullName"
+              placeholder="Sarah Chen"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+              className="h-11 w-full rounded-md border border-primary/15 bg-background px-2 text-sm outline-none transition focus:border-primary focus:bg-white"
+            />
           </label>
           <label className="space-y-2">
-            <span className="text-xs font-bold text-text-secondary">Email Address</span>
-            <input type="email" name="email" placeholder="you@example.com" className="h-11 w-full rounded-md border border-primary/15 bg-background px-2 text-sm outline-none transition focus:border-primary focus:bg-white" />
+            <span className="text-xs font-bold text-text-secondary">
+              Email Address
+            </span>
+            <input
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="h-11 w-full rounded-md border border-primary/15 bg-background px-2 text-sm outline-none transition focus:border-primary focus:bg-white"
+            />
           </label>
           <label className="space-y-2 sm:col-span-2">
-            <span className="text-xs font-bold text-text-secondary">Subject</span>
-            <select name="subject" className="h-11 w-full rounded-md border border-primary/15 bg-background px-1 text-sm outline-none transition focus:border-primary focus:bg-white">
-              <option>General Inquiry</option>
-              <option>Chef Partnership</option>
-              <option>Order Support</option>
-              <option>Press & Partnerships</option>
-            </select>
+            <span className="text-xs font-bold text-text-secondary">
+              Subject
+            </span>
+            <input
+              type="text"
+              name="subject"
+              placeholder="Subject of your message"
+              value={formData.subject}
+              onChange={handleChange}
+              required
+              className="h-11 w-full rounded-md border border-primary/15 bg-background px-2 text-sm outline-none transition focus:border-primary focus:bg-white"
+            />
           </label>
           <label className="space-y-2 sm:col-span-2">
-            <span className="text-xs font-bold text-text-secondary">Message</span>
-            <textarea name="message" rows={7} placeholder="How can we help you today?" className="w-full resize-none rounded-md border border-primary/15 bg-background px-2 py-3 text-sm outline-none transition focus:border-primary focus:bg-white" />
+            <span className="text-xs font-bold text-text-secondary">
+              Message
+            </span>
+            <textarea
+              name="message"
+              rows={7}
+              placeholder="How can we help you today?"
+              value={formData.message}
+              onChange={handleChange}
+              required
+              className="w-full resize-none rounded-md border border-primary/15 bg-background px-2 py-3 text-sm outline-none transition focus:border-primary focus:bg-white"
+            />
           </label>
           <div className="sm:col-span-2">
-            <button type="submit" className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-xs font-bold text-white transition hover:bg-primary-container">
-              Send Message
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-xs font-bold text-white transition hover:bg-primary-container disabled:opacity-50"
+            >
+              {loading ? "Sending..." : "Send Message"}
               <FontAwesomeIcon icon={faPaperPlane} className="h-3 w-3" />
             </button>
           </div>
@@ -159,14 +280,19 @@ export default function ContactPage() {
           </p>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {helpItems.map((item) => (
-              <article key={item.title} className="rounded-lg bg-white p-5 text-left shadow-sm ring-1 ring-primary/10">
+              <article
+                key={item.title}
+                className="rounded-lg bg-white p-5 text-left shadow-sm ring-1 ring-primary/10"
+              >
                 <div className="flex gap-4">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <FontAwesomeIcon icon={item.icon} className="h-3.5 w-3.5" />
                   </span>
                   <div>
                     <h3 className="text-sm font-bold">{item.title}</h3>
-                    <p className="mt-1 text-xs leading-5 text-text-secondary">{item.text}</p>
+                    <p className="mt-1 text-xs leading-5 text-text-secondary">
+                      {item.text}
+                    </p>
                   </div>
                 </div>
               </article>
