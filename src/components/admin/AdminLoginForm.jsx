@@ -138,7 +138,7 @@ export default function AdminLoginForm() {
             </button>
 
             <div className="mt-10 border-t border-primary/18 pt-6 text-center text-[10px] text-text-secondary uppercase tracking-widest">
-              Secure Environment • Matbakhna Platform
+              Secure Environment • Sufra Platform
             </div>
           </form>
         </div>
