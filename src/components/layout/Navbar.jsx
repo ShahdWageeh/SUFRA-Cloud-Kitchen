@@ -18,6 +18,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 import useAuth from "@/hooks/useAuth";
+import { useCart } from "@/context/CartContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const loginHref = buildLoginUrl(pathname);
   const { user, isCustomer, logout } = useAuth();
+  const { cartCount } = useCart();
 
   const customerName =
     user?.firstName || user?.name?.split(" ")?.[0] || user?.email || "Customer";
@@ -91,9 +93,14 @@ export default function Navbar() {
             <FontAwesomeIcon icon={faBell} className="text-lg" />
           </button>
 
-          <button>
+          <Link href={isCustomer ? "/customer/cart" : loginHref} className="relative">
             <FontAwesomeIcon icon={faCartShopping} className="text-lg" />
-          </button>
+            {isCustomer && cartCount > 0 && (
+              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
 
           {isCustomer ? (
             <div className="relative">

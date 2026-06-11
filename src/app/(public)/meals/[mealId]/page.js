@@ -3,17 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCartShopping,
   faChevronLeft,
   faClock,
   faHeart,
-  faMinus,
-  faPlus,
   faShieldHeart,
   faStar,
   faTruckFast,
 } from "@fortawesome/free-solid-svg-icons";
-import AddToCartButton from "@/components/public/AddToCartButton";
+import MealActions from "@/components/public/MealActions";
 import { mealService } from "@/services";
 import { normalizePublicMeal } from "@/utils/mealUtils";
 
@@ -163,21 +160,7 @@ export default async function MealDetailPage({ params }) {
               </Link>
             )}
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex h-12 w-36 items-center justify-between rounded-full border border-primary/20 px-4">
-                <button aria-label="Decrease quantity" className="text-primary">
-                  <FontAwesomeIcon icon={faMinus} className="h-3 w-3" />
-                </button>
-                <span className="font-bold">1</span>
-                <button aria-label="Increase quantity" className="text-primary">
-                  <FontAwesomeIcon icon={faPlus} className="h-3 w-3" />
-                </button>
-              </div>
-              <AddToCartButton className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white transition hover:bg-primary-container">
-                <FontAwesomeIcon icon={faCartShopping} className="h-4 w-4" />
-                Add to Cart
-              </AddToCartButton>
-            </div>
+            <MealActions mealId={meal.id} />
           </article>
         </div>
 
