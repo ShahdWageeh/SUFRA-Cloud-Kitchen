@@ -15,6 +15,7 @@ export default function MealCard({ meal, featured = false }) {
             sizes={featured ? "(max-width: 768px) 100vw, 44vw" : "(max-width: 768px) 100vw, 24vw"}
             className="object-cover"
             loading={featured ? "eager" : "lazy"}
+            unoptimized
           />
           <span className="absolute right-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold text-primary shadow-sm">
             ${meal.price}

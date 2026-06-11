@@ -1,8 +1,11 @@
+"use client"
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import useAuth from "@/hooks/useAuth";
 
 export default function Footer() {
+  const { isCustomer } = useAuth();
   return (
     <footer className="bg-secondary-container border-t border-outline/20 mt-20">
       <div className="container mx-auto px-4 lg:px-8 py-14">
@@ -33,10 +36,11 @@ export default function Footer() {
               <li>
                 <Link href="/how-it-works">How It Works</Link>
               </li>
-
-              <li>
-                <Link href="/become-chef">Become A Chef</Link>
-              </li>
+              {isCustomer ? null : (
+                <li>
+                  <Link href="/become-chef">Become A Chef</Link>
+                </li>
+              )}
 
               <li>
                 <Link href="/">Safety & Trust</Link>

@@ -53,6 +53,7 @@ export default function CategoriesSlider({ categories }) {
                     fill
                     sizes="(max-width: 1024px) 96px, 128px"
                     className="object-cover"
+                    unoptimized
                   />
                 ) : (
                   <FontAwesomeIcon
