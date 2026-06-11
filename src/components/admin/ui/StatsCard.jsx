@@ -1,15 +1,28 @@
-import { Users, ChefHat, UtensilsCrossed, ShoppingBag } from 'lucide-react'
-import { TrendingUp } from 'lucide-react'
+import {
+  Users,
+  ChefHat,
+  UtensilsCrossed,
+  ShoppingBag,
+  ShieldCheck,
+  MessageSquare,
+  Wallet,
+  Layers,
+  TrendingUp,
+} from 'lucide-react'
 
 const iconMap = {
   Users,
   ChefHat,
   UtensilsCrossed,
   ShoppingBag,
+  ShieldCheck,
+  MessageSquare,
+  Wallet,
+  Layers,
 }
 
 export default function StatsCard({ icon, iconBg, iconColor, metric, label, sublabel, growth, growthPositive }) {
-  const Icon = iconMap[icon]
+  const Icon = iconMap[icon] || ShoppingBag
 
   return (
     <div

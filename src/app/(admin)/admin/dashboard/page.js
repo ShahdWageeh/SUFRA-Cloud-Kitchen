@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useCallback, useEffect, useState } from "react";
 import useAuth from "@/hooks/useAuth";
-import { RefreshCw, ShieldAlert } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
+  EyeOff,
+  MessageSquare,
+  RefreshCw,
+  ShieldAlert,
+} from "lucide-react";
 import StatsCard from "@/components/admin/ui/StatsCard";
-import OrdersChart from "@/components/admin/charts/OrdersChart";
 import TopChefsCard from "@/components/admin/sections/TopChefsCard";
-import AcquisitionChart from "@/components/admin/charts/AcquisitionChart";
 import Footer from "@/components/admin/layout/Footer";
 
 const BASE_URL =
@@ -14,80 +22,193 @@ const BASE_URL =
 
 const AVATAR_COLORS = ["#A55632", "#1E429F", "#03543F", "#723B10", "#9B1C1C"];
 
-export default function DashboardPage() {
-  const { token } = useAuth();
+const EMPTY_SNAPSHOT = {
+  customers: [],
+  chefs: [],
+  meals: [],
+  categories: [],
+  verifications: [],
+  contacts: [],
+};
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isMounted, setIsMounted] = useState(false);
-  const [topChefsData, setTopChefsData] = useState([]);
+function getStoredToken() {
+  if (typeof window === "undefined") return "";
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("jwt") ||
+    localStorage.getItem("admin_token") ||
+    ""
+  );
+}
 
-  const [stats, setStats] = useState([
-    {
-      id: "total-users",
-      label: "Total Users",
-      metric: "0",
-      sublabel: "Registered customers",
-      icon: "Users",
-      iconBg: "#EBF5FF",
-      iconColor: "#1E429F",
-      growth: null,
-    },
-    {
-      id: "chef-partners",
-      label: "Chef Partners",
-      metric: "0",
-      sublabel: "Active storefronts",
-      icon: "ChefHat",
-      iconBg: "#FDF2F2",
-      iconColor: "#9B1C1C",
-      growth: null,
-    },
-    {
-      id: "total-meals",
-      label: "Total Meals",
-      metric: "0",
-      sublabel: "Dishes in catalog",
-      icon: "UtensilsCrossed",
-      iconBg: "#FDF6B2",
-      iconColor: "#723B10",
-      growth: null,
-    },
-    {
-      id: "pending-verifications",
-      label: "Pending Verifications",
-      metric: "0",
-      sublabel: "Awaiting admin review",
-      icon: "ShieldCheck",
-      iconBg: "#EDFDF6",
-      iconColor: "#03543F",
-      growth: null,
-    },
-  ]);
+function extractArray(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.data)) return payload.data.data;
+  return [];
+}
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+function normalizeStatus(value = "") {
+  return String(value).toLowerCase().replaceAll("_", " ");
+}
 
-  const getAuthHeaders = useCallback(
-    (activeToken) => ({
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${activeToken}`,
-    }),
-    [],
+function isBlocked(user) {
+  return user?.isBlocked === 1 || user?.isBlocked === true || user?.status === "blocked";
+}
+
+function isActiveRecord(record) {
+  return !record?.status || record.status === "active";
+}
+
+function getChefName(chef) {
+  return (
+    chef?.kitchenName ||
+    `${chef?.firstName ?? ""} ${chef?.lastName ?? ""}`.trim() ||
+    "Unnamed kitchen"
+  );
+}
+
+function getInitials(chef) {
+  const source = `${chef?.firstName ?? ""} ${chef?.lastName ?? ""}`.trim() || getChefName(chef);
+  return source
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "CK";
+}
+
+function formatDate(value) {
+  if (!value) return "No date";
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+async function fetchResource(path, headers) {
+  const response = await fetch(`${BASE_URL}${path}`, { method: "GET", headers });
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(payload?.message || `${path} returned ${response.status}`);
+  }
+
+  return extractArray(payload);
+}
+
+function QueueCard({ icon: Icon, label, value, tone, href }) {
+  const toneMap = {
+    amber: "bg-amber-50 text-amber-700 border-amber-100",
+    rose: "bg-rose-50 text-rose-700 border-rose-100",
+    teal: "bg-teal-50 text-teal-700 border-teal-100",
+    slate: "bg-slate-50 text-slate-700 border-slate-100",
+  };
+  const className = `rounded-2xl border p-5 transition hover:-translate-y-0.5 hover:shadow-sm ${toneMap[tone]}`;
+
+  const content = (
+    <>
+      <div className="flex items-center justify-between gap-4">
+        <Icon size={18} />
+        {href ? <ArrowRight size={16} /> : null}
+      </div>
+      <p className="mt-5 text-3xl font-bold leading-none">{value}</p>
+      <p className="mt-2 text-sm font-semibold">{label}</p>
+    </>
   );
 
+  if (!href) {
+    return <div className={className}>{content}</div>;
+  }
+
+  return (
+    <a href={href} className={className}>
+      {content}
+    </a>
+  );
+}
+
+function HealthRow({ label, active, total, color }) {
+  const percentage = total ? Math.round((active / total) * 100) : 0;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="font-semibold text-slate-700">{label}</span>
+        <span className="text-slate-500">
+          {active.toLocaleString()} of {total.toLocaleString()}
+        </span>
+      </div>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${percentage}%`, backgroundColor: color }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function RecentList({ title, description, items, emptyText, href, type }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-base font-bold text-slate-900">{title}</h3>
+          <p className="mt-0.5 text-xs text-slate-400">{description}</p>
+        </div>
+        <a href={href} className="text-sm font-semibold text-[#A55632]">
+          Open
+        </a>
+      </div>
+
+      <div className="mt-5 space-y-3">
+        {items.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+            {emptyText}
+          </div>
+        ) : (
+          items.map((item) => (
+            <div
+              key={item._id || item.id || `${type}-${item.email || item.subject}`}
+              className="rounded-xl border border-slate-100 px-4 py-3"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="truncate text-sm font-semibold text-slate-800">
+                  {type === "contact"
+                    ? item.subject || item.fullName || "Support message"
+                    : getChefName(item.chefId || item.chef || item)}
+                </p>
+                <span className="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700">
+                  {normalizeStatus(item.status || "pending")}
+                </span>
+              </div>
+              <p className="mt-1 truncate text-xs text-slate-400">
+                {type === "contact"
+                  ? item.email || item.fullName || "No sender"
+                  : formatDate(item.createdAt || item.updatedAt)}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  const { token } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [snapshot, setSnapshot] = useState(EMPTY_SNAPSHOT);
+  const [warnings, setWarnings] = useState([]);
+  const [error, setError] = useState(null);
+
   const fetchDashboardInsights = useCallback(async () => {
-    let activeToken = token;
-    if (!activeToken && typeof window !== "undefined") {
-      activeToken =
-        localStorage.getItem("token") || localStorage.getItem("jwt");
-    }
+    const activeToken = token || getStoredToken();
 
     if (!activeToken) {
-      setError(
-        "No administrative authentication token found. Please verify your session.",
-      );
+      setError("No admin token found. Please sign in again to load dashboard data.");
+      setWarnings([]);
       setLoading(false);
       return;
     }
@@ -95,193 +216,260 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
 
-    try {
-      const headers = getAuthHeaders(activeToken);
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${activeToken}`,
+    };
 
-      const [customersRes, chefsRes, mealsRes, pendingVerifRes] =
-        await Promise.all([
-          fetch(`${BASE_URL}/users/customers`, { method: "GET", headers }),
-          fetch(`${BASE_URL}/chefs`, { method: "GET", headers }),
-          fetch(`${BASE_URL}/meals`, { method: "GET", headers }),
-          fetch(`${BASE_URL}/verification-request/pending`, {
-            method: "GET",
-            headers,
-          }),
-        ]);
+    const endpoints = [
+      ["customers", "/users/customers"],
+      ["chefs", "/chefs"],
+      ["meals", "/meals"],
+      ["categories", "/categories"],
+      ["verifications", "/verification-request/pending"],
+      ["contacts", "/contact"],
+    ];
 
-      // ── Customers ──────────────────────────────────────────────────────────
-      let customerCount = 0;
-      if (customersRes.ok) {
-        const json = await customersRes.json();
-        const arr = json.data || (Array.isArray(json) ? json : []);
-        customerCount = arr.length;
+    const results = await Promise.allSettled(
+      endpoints.map(([key, path]) =>
+        fetchResource(path, headers).then((data) => ({ key, data })),
+      ),
+    );
+
+    const nextSnapshot = { ...EMPTY_SNAPSHOT };
+    const nextWarnings = [];
+
+    results.forEach((result, index) => {
+      const [key, path] = endpoints[index];
+      if (result.status === "fulfilled") {
+        nextSnapshot[key] = result.value.data;
+      } else {
+        nextWarnings.push(`${path}: ${result.reason.message}`);
       }
+    });
 
-      // ── Chefs ──────────────────────────────────────────────────────────────
-      let chefCount = 0;
-      let calculatedTopChefs = [];
-      if (chefsRes.ok) {
-        const json = await chefsRes.json();
-        const arr = json.data || (Array.isArray(json) ? json : []);
-        chefCount = arr.length;
-
-        calculatedTopChefs = arr.slice(0, 5).map((chef, idx) => {
-          const name =
-            chef.kitchenName ||
-            `${chef.firstName ?? ""} ${chef.lastName ?? ""}`.trim() ||
-            "Unknown Kitchen";
-          const initials = chef.firstName
-            ? chef.firstName.charAt(0).toUpperCase() +
-              (chef.lastName?.charAt(0).toUpperCase() ?? "")
-            : "CK";
-
-          return {
-            id: chef._id || String(idx),
-            name,
-            orders: chef.totalOrders || 0, // Fallback to 0 if not provided
-            category: chef.isVerified ? "Verified Partner" : "Pending Review",
-            progress: chef.isVerified ? 100 : 40,
-            color: AVATAR_COLORS[idx % AVATAR_COLORS.length],
-            initials,
-          };
-        });
-      }
-
-      // ── Meals ──────────────────────────────────────────────────────────────
-      let mealCount = 0;
-      if (mealsRes.ok) {
-        const json = await mealsRes.json();
-        const arr = json.data || (Array.isArray(json) ? json : []);
-        mealCount = arr.length;
-      }
-
-      // ── Pending Verifications ──────────────────────────────────────────────
-      let pendingVerifCount = 0;
-      if (pendingVerifRes.ok) {
-        const json = await pendingVerifRes.json();
-        const arr = json.data || (Array.isArray(json) ? json : []);
-        pendingVerifCount = arr.length;
-      }
-
-      // ── Update State Metrics ───────────────────────────────────────────────
-      setStats([
-        {
-          id: "total-users",
-          label: "Total Users",
-          metric: String(customerCount),
-          sublabel: "Registered customers",
-          icon: "Users",
-          iconBg: "#EBF5FF",
-          iconColor: "#1E429F",
-          growth: null,
-        },
-        {
-          id: "chef-partners",
-          label: "Chef Partners",
-          metric: String(chefCount),
-          sublabel: "Active storefronts",
-          icon: "ChefHat",
-          iconBg: "#FDF2F2",
-          iconColor: "#9B1C1C",
-          growth: null,
-        },
-        {
-          id: "total-meals",
-          label: "Total Meals",
-          metric: String(mealCount),
-          sublabel: "Dishes in catalog",
-          icon: "UtensilsCrossed",
-          iconBg: "#FDF6B2",
-          iconColor: "#723B10",
-          growth: null,
-        },
-        {
-          id: "pending-verifications",
-          label: "Pending Verifications",
-          metric: String(pendingVerifCount),
-          sublabel: "Awaiting admin review",
-          icon: "ShieldCheck",
-          iconBg: "#EDFDF6",
-          iconColor: "#03543F",
-          growth: null,
-        },
-      ]);
-
-      setTopChefsData(calculatedTopChefs);
-    } catch (err) {
-      console.error("Dashboard statistics breakdown failure:", err);
-      setError(
-        "An unexpected network error occurred while loading indicators.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [token, getAuthHeaders]);
+    setSnapshot(nextSnapshot);
+    setWarnings(nextWarnings);
+    setLoading(false);
+  }, [token]);
 
   useEffect(() => {
-    if (isMounted) {
-      fetchDashboardInsights();
-    }
-  }, [isMounted, fetchDashboardInsights]);
+    fetchDashboardInsights();
+  }, [fetchDashboardInsights]);
 
-  if (!isMounted) return null;
+  const customers = snapshot.customers;
+  const chefs = snapshot.chefs;
+  const meals = snapshot.meals;
+  const categories = snapshot.categories;
+  const contacts = snapshot.contacts;
+  const verifications = snapshot.verifications;
+
+  const activeCustomers = customers.filter((customer) => !isBlocked(customer)).length;
+  const verifiedChefs = chefs.filter((chef) => chef.isVerified).length;
+  const activeMeals = meals.filter(isActiveRecord).length;
+  const activeCategories = categories.filter(isActiveRecord).length;
+  const hiddenCatalogItems =
+    meals.length - activeMeals + categories.length - activeCategories;
+  const pendingContacts = contacts.filter((message) => message.status === "pending").length;
+
+  const stats = [
+    {
+      id: "customers",
+      label: "Customers",
+      metric: customers.length.toLocaleString(),
+      sublabel: `${activeCustomers.toLocaleString()} active accounts`,
+      icon: "Users",
+      iconBg: "#EBF5FF",
+      iconColor: "#1E429F",
+    },
+    {
+      id: "chefs",
+      label: "Chef Partners",
+      metric: chefs.length.toLocaleString(),
+      sublabel: `${verifiedChefs.toLocaleString()} verified kitchens`,
+      icon: "ChefHat",
+      iconBg: "#FDF2F2",
+      iconColor: "#9B1C1C",
+    },
+    {
+      id: "meals",
+      label: "Meal Catalog",
+      metric: meals.length.toLocaleString(),
+      sublabel: `${activeMeals.toLocaleString()} visible dishes`,
+      icon: "UtensilsCrossed",
+      iconBg: "#FDF6B2",
+      iconColor: "#723B10",
+    },
+    {
+      id: "support",
+      label: "Open Support",
+      metric: pendingContacts.toLocaleString(),
+      sublabel: "Pending contact messages",
+      icon: "MessageSquare",
+      iconBg: "#EDFDF6",
+      iconColor: "#03543F",
+    },
+  ];
+
+  const chefReadiness = chefs.slice(0, 5).map((chef, index) => ({
+    id: chef._id || chef.id || String(index),
+    name: getChefName(chef),
+    initials: getInitials(chef),
+    category: chef.email || chef.phone || "Partner profile",
+    statusText: chef.isVerified ? "Verified" : "Needs review",
+    progress: chef.isVerified ? 100 : 45,
+    color: AVATAR_COLORS[index % AVATAR_COLORS.length],
+  }));
+
+  const pendingVerificationItems = verifications.slice(0, 3);
+  const pendingContactItems = contacts
+    .filter((message) => message.status === "pending")
+    .slice(0, 3);
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 py-6">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div className="mx-auto max-w-[1400px] px-4 py-6">
+      <div className="mb-8 flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#A55632]">
+            Admin Command Center
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
             Platform Overview
           </h1>
-          <p className="text-sm mt-1" style={{ color: "#8A8A8A" }}>
-            Real-time insights into your culinary community.
+          <p className="mt-1 text-sm text-slate-500">
+            Snapshot of customers, chefs, meals, categories, payouts, and support work.
           </p>
         </div>
         <button
           onClick={fetchDashboardInsights}
           disabled={loading}
-          className="inline-flex items-center gap-2 text-xs font-semibold border rounded-xl bg-white px-4 py-2 text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 shadow-sm"
-          style={{ borderColor: "#ECE8E5" }}
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
         >
-          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          Refresh Metrics
+          <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+          Refresh
         </button>
       </div>
 
-      {/* Error Alert Box */}
       {error && (
-        <div className="mb-6 flex gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 font-medium items-center">
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
           <ShieldAlert className="shrink-0 text-red-600" size={18} />
           <div className="flex-1">{error}</div>
         </div>
       )}
 
+      {warnings.length > 0 && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <div className="flex items-center gap-2 font-semibold">
+            <AlertTriangle size={16} />
+            Some API sections could not be loaded.
+          </div>
+          <p className="mt-1 text-xs text-amber-700">
+            Showing the available data. Check backend support for: {warnings.join(" | ")}
+          </p>
+        </div>
+      )}
+
       {loading ? (
-        <div className="flex min-h-[400px] flex-col gap-3 items-center justify-center">
+        <div className="flex min-h-[420px] flex-col items-center justify-center gap-3">
           <RefreshCw size={36} className="animate-spin text-[#A55632]" />
-          <p className="text-sm font-medium text-gray-400 animate-pulse">
-            Synchronizing platform indicators...
+          <p className="text-sm font-medium text-slate-400">
+            Loading documented API surfaces...
           </p>
         </div>
       ) : (
         <>
-          {/* Metrics Grid Layout */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+          <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
             {stats.map((card) => (
               <StatsCard key={card.id} {...card} />
             ))}
           </div>
 
-          {/* Performance Summary Charts & Sections */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 mb-6">
-            <OrdersChart />
-            <TopChefsCard chefs={topChefsData} />
+          <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <QueueCard
+              icon={Clock3}
+              label="Chef verifications"
+              value={verifications.length.toLocaleString()}
+              tone="amber"
+              href="/admin/verifications"
+            />
+            <QueueCard
+              icon={MessageSquare}
+              label="Support messages"
+              value={pendingContacts.toLocaleString()}
+              tone="teal"
+              href="/admin/contacts"
+            />
+            <QueueCard
+              icon={EyeOff}
+              label="Hidden categories"
+              value={hiddenCatalogItems.toLocaleString()}
+              tone="rose"
+              href="/admin/categories"
+            />
           </div>
 
-          {/* Acquisition Line Data Graph */}
-          <div className="mb-6">
-            <AcquisitionChart />
+          <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Platform Health
+                  </h3>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    What is live, verified, and visible right now
+                  </p>
+                </div>
+                <CheckCircle2 size={20} className="text-teal-600" />
+              </div>
+
+              <div className="space-y-5">
+                <HealthRow
+                  label="Active customers"
+                  active={activeCustomers}
+                  total={customers.length}
+                  color="#1E429F"
+                />
+                <HealthRow
+                  label="Verified chefs"
+                  active={verifiedChefs}
+                  total={chefs.length}
+                  color="#A55632"
+                />
+                <HealthRow
+                  label="Visible meals"
+                  active={activeMeals}
+                  total={meals.length}
+                  color="#03543F"
+                />
+                <HealthRow
+                  label="Active categories"
+                  active={activeCategories}
+                  total={categories.length}
+                  color="#723B10"
+                />
+              </div>
+            </div>
+
+            <TopChefsCard chefs={chefReadiness} />
+          </div>
+
+          <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <RecentList
+              title="Verification Inbox"
+              description="Newest chefs waiting for document review"
+              items={pendingVerificationItems}
+              emptyText="No pending verification requests."
+              href="/admin/verifications"
+              type="verification"
+            />
+            <RecentList
+              title="Support Inbox"
+              description="Pending contact messages from customers and chefs"
+              items={pendingContactItems}
+              emptyText="No pending support messages."
+              href="/admin/contacts"
+              type="contact"
+            />
           </div>
         </>
       )}

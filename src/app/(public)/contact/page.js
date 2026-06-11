@@ -64,13 +64,18 @@ export default function ContactPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!user) {
-      toast.error("Please login to send a message");
-      router.push("/login");
-      return;
-    }
+    // if (!user) {
+    //   toast.error("Please login to send a message");
+    //   router.push("/login");
+    //   return;
+    // }
 
-    if (!formData.fullName || !formData.email || !formData.subject || !formData.message) {
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.subject ||
+      !formData.message
+    ) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -199,7 +204,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <form 
+        <form
           onSubmit={handleSubmit}
           className="-mt-12 grid gap-4 rounded-lg bg-white p-5 shadow-[0_12px_32px_rgba(27,28,28,0.12)] ring-1 ring-primary/10 sm:grid-cols-2 lg:z-10"
         >

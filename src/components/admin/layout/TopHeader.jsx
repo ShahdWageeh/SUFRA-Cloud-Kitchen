@@ -1,7 +1,29 @@
 'use client'
 import { Search, Bell, Settings, Menu } from 'lucide-react'
+import useAuth from '@/hooks/useAuth'
+
+function getAdminDisplayName(user) {
+  const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+  return fullName || user?.name || user?.email?.split('@')?.[0] || 'Admin'
+}
+
+function getInitials(name) {
+  return (
+    name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() || '')
+      .join('') || 'A'
+  )
+}
 
 export default function TopHeader({ setMobileOpen }) {
+  const { user } = useAuth()
+  const adminName = getAdminDisplayName(user)
+  const initials = getInitials(adminName)
+  const roleLabel = user?.role === 'admin' ? 'ADMIN' : 'ADMIN CONSOLE'
+
   return (
     <header
       className="h-16 md:h-[72px] flex items-center justify-between px-4 md:px-15 gap-4 border-b bg-white sticky top-0 z-20"
@@ -53,12 +75,14 @@ export default function TopHeader({ setMobileOpen }) {
             className="w-8 md:w-9 h-8 md:h-9 rounded-full flex items-center justify-center text-white text-xs md:text-sm font-semibold flex-shrink-0"
             style={{ backgroundColor: '#A55632' }}
           >
-            AS
+            {initials}
           </div>
           <div className="hidden md:block">
-            <div className="text-sm font-semibold text-gray-800 leading-tight">Admin Sarah</div>
+            <div className="text-sm font-semibold text-gray-800 leading-tight max-w-40 truncate">
+              {adminName}
+            </div>
             <div className="text-xs font-medium" style={{ color: '#A55632' }}>
-              SUPER ADMIN
+              {roleLabel}
             </div>
           </div>
         </div>

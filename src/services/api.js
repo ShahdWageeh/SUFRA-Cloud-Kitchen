@@ -3,9 +3,7 @@ import { buildLoginUrl } from "@/utils/authRedirects";
 import tokenService from "./tokenService";
 
 const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "https://sufra-cloud-kitchen.vercel.app/api",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",

@@ -6,13 +6,13 @@ import {
   LayoutDashboard,
   ChefHat,
   Users,
-  ShoppingBag,
   Shield,
   UtensilsCrossed,
   BarChart2,
   Plus,
   X,
   ShieldIcon,
+  MessageSquare,
 } from "lucide-react";
 
 const navItems = [
@@ -23,8 +23,8 @@ const navItems = [
     href: "/admin/dashboard",
   },
   { id: "chefs", label: "Chefs", icon: ChefHat, href: "/admin/chefs" },
-  { id: "users", label: "Users", icon: Users, href: "/admin/users" },
-  { id: "contacts", label: "Contacts", icon: ShoppingBag, href: "/admin/contacts" },
+  { id: "users", label: "Customers", icon: Users, href: "/admin/users" },
+  { id: "contacts", label: "Contacts", icon: MessageSquare, href: "/admin/contacts" },
   {
     id: "categories",
     label: "Categories",

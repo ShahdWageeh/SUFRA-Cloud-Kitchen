@@ -12,6 +12,10 @@ export default function BannedPage() {
     clearSession();
     router.replace("/");
   };
+  const handleGoContact = () => {
+    clearSession();
+    router.replace("/contact");
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -62,6 +66,7 @@ export default function BannedPage() {
             type="button"
             className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 shadow-sm cursor-default"
             style={{ background: "#B84A2E" }}
+            onClick={handleGoContact}
           >
             <Mail size={16} />
             Contact Us
