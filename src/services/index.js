@@ -9,4 +9,6 @@ export {default as chefService} from "./chefService"
 export {default as profileService} from "./profileService"
 export {default as ordersService} from "./ordersService"
 export {default as cartService} from "./cartService"
-export {default as reviewService} from "./reviewService"
+export { default as reviewService } from "./reviewService";
+export { default as contactService } from "./contactService";
+
