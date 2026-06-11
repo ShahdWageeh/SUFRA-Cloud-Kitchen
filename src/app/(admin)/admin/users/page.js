@@ -47,7 +47,7 @@ const STATUS_CONFIG = {
 function getAuthHeaders() {
   const token =
     typeof window !== "undefined"
-      ? localStorage.getItem("token") || localStorage.getItem("jwt")
+      ? localStorage.getItem("Sufra_token") || localStorage.getItem("jwt")
       : "";
   return {
     "Content-Type": "application/json",
