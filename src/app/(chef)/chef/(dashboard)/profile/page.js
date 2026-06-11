@@ -38,10 +38,23 @@ export default function KitchenProfilePage() {
         const chef = result.data;
 
         setProfile(chef);
+
+        let draft = null;
+        if (typeof window !== "undefined") {
+          const rawDraft = window.sessionStorage.getItem("brandIdentityDraft");
+          if (rawDraft) {
+            try {
+              draft = JSON.parse(rawDraft);
+            } catch (err) {
+              draft = null;
+            }
+          }
+        }
+
         setBrandIdentity({
-          name: chef.kitchenName || "",
-          slogan: chef.slogan || "",
-          bio: chef.description || "",
+          name: draft?.name ?? chef.kitchenName ?? "",
+          slogan: draft?.slogan ?? chef.slogan ?? "",
+          bio: draft?.bio ?? chef.description ?? "",
         });
         setContactInfo({
           chefName: `${chef.firstName || ""} ${chef.lastName || ""}`.trim(),
@@ -90,6 +103,10 @@ export default function KitchenProfilePage() {
         phone: contactInfo.phone,
       });
 
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem("brandIdentityDraft");
+      }
+
       router.push("/chef/dashboard");
     } catch (err) {
       setError(
@@ -102,6 +119,10 @@ export default function KitchenProfilePage() {
   };
 
   const handleDiscard = () => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem("brandIdentityDraft");
+    }
+
     setBrandIdentity({
       name: profile.kitchenName || "",
       slogan: profile.slogan || "",
