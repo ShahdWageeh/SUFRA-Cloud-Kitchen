@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buildLoginUrl } from "@/utils/authRedirects";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Brain } from 'lucide-react';
+
 import {
   faBars,
   faXmark,
@@ -147,6 +149,16 @@ export default function Navbar() {
                   >
                     <FontAwesomeIcon icon={faReceipt} className="h-4 w-4" />
                     Orders
+                  </Link>
+                  <Link
+                    href="/customer/meal-planner"
+                    onClick={closeMenus}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-primary transition hover:bg-secondary-container hover:text-primary"
+                    role="menuitem"
+                  >
+                    <Brain size={16}/>
+                    {/* <FontAwesomeIcon icon={faReceipt} className="h-4 w-4" /> */}
+                    Meal Planner
                   </Link>
                   <button
                     type="button"

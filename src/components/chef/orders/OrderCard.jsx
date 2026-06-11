@@ -1,4 +1,4 @@
-import { Clock3, MapPin } from "lucide-react";
+import { Clock3, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 
 function formatOrderItems(items) {
@@ -35,39 +35,57 @@ function getTimeAgo(dateString) {
 export default function OrderCard({ order, orderNumber, onStatusChange }) {
     const amount = order.totalAmount;
     const customerName = `${order.customerId.firstName} ${order.customerId.lastName}`;
+    const customerPhone = order.contactPhone
     const itemsSummary = formatOrderItems(order.items);
     const createdAt = order.createdAt;
     const timeAgo = getTimeAgo(createdAt);
     const imageSrc = order.items?.[0]?.image;
-    const status = order.status || "preparing";
+    const normalizeStatus = (status) => {
+        if (!status) return "preparing";
+        if (status === "ready") return "out_for_delivery";
+        return status;
+    };
+
+    const status = normalizeStatus(order.status);
 
     const badgeText =
         status === "preparing"
             ? "NEW ORDER"
-            : status === "ready"
-            ? "READY"
-            : "COMPLETED";
+            : status === "out_for_delivery"
+                ? "READY"
+                : "COMPLETED";
 
     const badgeClass =
         status === "preparing"
             ? "bg-orange-100 text-primary"
-            : status === "ready"
-            ? "bg-blue-100 text-blue-700"
-            : "bg-emerald-100 text-emerald-800";
+            : status === "out_for_delivery"
+                ? "bg-blue-100 text-blue-700"
+                : "bg-emerald-100 text-emerald-800";
 
     const buttonLabel =
         status === "preparing"
             ? "Ready To Pick Up"
-            : status === "ready"
-            ? "Complete"
-            : "Completed";
+            : status === "out_for_delivery"
+                ? "Complete"
+                : "Completed";
 
     const isButtonDisabled = status === "completed";
-    const nextStatus = status === "preparing" ? "ready" : status === "ready" ? "completed" : null;
+    const nextStatus =
+        status === "preparing"
+            ? "ready"
+            : status === "out_for_delivery"
+                ? "delivered"
+                : null;
+
+    const mealId =
+        order.items?.[0]?.mealId?._id ||
+        order.items?.[0]?.mealId ||
+        order.items?.[0]?._id ||
+        order.items?.[0]?.mealId;
 
     const handleAction = () => {
-        if (!isButtonDisabled && nextStatus && onStatusChange) {
-            onStatusChange(order._id || order.id, nextStatus);
+        if (!isButtonDisabled && nextStatus && onStatusChange && mealId) {
+            onStatusChange(order._id || order.id, nextStatus, mealId);
         }
     };
 
@@ -116,15 +134,21 @@ export default function OrderCard({ order, orderNumber, onStatusChange }) {
                     <p className="text-sm text-text-secondary mt-1">
                         {itemsSummary}
                     </p>
+
                 </div>
             </div>
 
             <div className="border-b border-gray-300 my-3" />
 
             <div className="mt-2 text-sm text-text-secondary">
+                
                 <div className="flex items-center gap-2">
-                    <Clock3 size={14} /> Delivery requested
+                    <Clock3 size={14} /> Pick Up Requested
                 </div>
+
+                <p className="text-sm text-text-secondary mt-1">
+                    <span className="flex items-center gap-2"> <Phone size={16} /> {customerPhone}</span>
+                </p>
             </div>
 
             <div className="flex gap-3 mt-auto pt-6">
