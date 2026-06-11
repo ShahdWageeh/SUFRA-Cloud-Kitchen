@@ -16,6 +16,7 @@ export default function LandingMealCard({ meal }) {
           alt={mealName}
           fill
           className="object-cover"
+          unoptimized
         />
 
         <span className="absolute top-4 right-4 bg-secondary-container px-3 py-1 rounded-full font-semibold">

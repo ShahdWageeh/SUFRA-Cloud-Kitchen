@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronLeft,
   faClock,
+  faFire,
   faHeart,
   faShieldHeart,
   faStar,
@@ -92,7 +93,7 @@ export default async function MealDetailPage({ params }) {
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             <div className="relative aspect-[1.15] overflow-hidden rounded-xl bg-secondary-container shadow-sm">
-              <Image src={meal.image} alt={meal.name} fill priority sizes="(max-width: 1024px) 100vw, 48vw" className="object-cover" />
+              <Image src={meal.image} alt={meal.name} fill priority unoptimized sizes="(max-width: 1024px) 100vw, 48vw" className="object-cover" />
               <button aria-label={`Save ${meal.name}`} className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-primary shadow-md">
                 <FontAwesomeIcon icon={faHeart} className="h-4 w-4" />
               </button>
@@ -100,7 +101,7 @@ export default async function MealDetailPage({ params }) {
             <div className="mt-4 grid grid-cols-4 gap-3">
               {galleryImages.map((image, index) => (
                 <div key={`${image}-${index}`} className="relative aspect-square overflow-hidden rounded-md bg-secondary-container ring-1 ring-primary/10">
-                  <Image src={image} alt={`${meal.name} preview ${index + 1}`} fill sizes="120px" className="object-cover" />
+                  <Image unoptimized src={image} alt={`${meal.name} preview ${index + 1}`} fill sizes="120px" className="object-cover" />
                 </div>
               ))}
             </div>
@@ -131,6 +132,12 @@ export default async function MealDetailPage({ params }) {
                 <FontAwesomeIcon icon={faTruckFast} className="mr-1 h-3 w-3 text-primary" />
                 Delivery available
               </span>
+              {meal.totalCalories && (
+                <span className="rounded-full bg-secondary-container px-3 py-2">
+                  <FontAwesomeIcon icon={faFire} className="mr-1 h-3 w-3 text-primary" />
+                  {meal.totalCalories} kcal
+                </span>
+              )}
             </div>
 
             <p className="mt-6 text-sm leading-7 text-text-secondary">{meal.description}</p>

@@ -63,6 +63,7 @@ export function normalizePublicMeal(meal) {
     badge: meal.badge,
     description: meal.description || "",
     ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : [],
+    totalCalories: meal.nutrition?.otherData?.totalCalories || meal.nutrition?.calories || null,
   };
 }
 

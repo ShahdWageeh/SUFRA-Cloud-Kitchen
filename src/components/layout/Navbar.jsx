@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buildLoginUrl } from "@/utils/authRedirects";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Brain } from 'lucide-react';
+import { Brain } from "lucide-react";
 
 import {
   faBars,
@@ -66,13 +66,14 @@ export default function Navbar() {
           >
             Contact
           </Link>
-
-          <Link
-            href="/register/chef"
-            className="hover:text-primary transition-colors"
-          >
-            Become a Chef
-          </Link>
+          {isCustomer ? null : (
+            <Link
+              href="/register/chef"
+              className="hover:text-primary transition-colors"
+            >
+              Become a Chef
+            </Link>
+          )}
         </div>
 
         {/* Search */}
@@ -95,7 +96,10 @@ export default function Navbar() {
             <FontAwesomeIcon icon={faBell} className="text-lg" />
           </button>
 
-          <Link href={isCustomer ? "/customer/cart" : loginHref} className="relative">
+          <Link
+            href={isCustomer ? "/customer/cart" : loginHref}
+            className="relative"
+          >
             <FontAwesomeIcon icon={faCartShopping} className="text-lg" />
             {isCustomer && cartCount > 0 && (
               <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
@@ -138,7 +142,10 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-primary transition hover:bg-secondary-container hover:text-primary"
                     role="menuitem"
                   >
-                    <FontAwesomeIcon icon={faTableColumns} className="h-4 w-4" />
+                    <FontAwesomeIcon
+                      icon={faTableColumns}
+                      className="h-4 w-4"
+                    />
                     Dashboard
                   </Link>
                   <Link
@@ -156,7 +163,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-primary transition hover:bg-secondary-container hover:text-primary"
                     role="menuitem"
                   >
-                    <Brain size={16}/>
+                    <Brain size={16} />
                     {/* <FontAwesomeIcon icon={faReceipt} className="h-4 w-4" /> */}
                     Meal Planner
                   </Link>
