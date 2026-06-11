@@ -221,7 +221,7 @@ export default function CheckoutPage() {
                   <li key={item.mealId._id} className="flex py-4">
                     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg">
                       <Image
-                        src={item.mealId.image || item.mealId.mealImages?.[0]}
+                        src={item?.mealId?.images?.[0] || item.mealId.mealImages?.[0]}
                         alt={item.mealId.name}
                         fill
                         className="object-cover"

@@ -81,7 +81,7 @@ export default function CartPage() {
                 <div className="shrink-0">
                   <div className="relative h-24 w-24 overflow-hidden rounded-lg sm:h-32 sm:w-32">
                     <Image
-                      src={item.mealId.image || item.mealId.mealImages?.[0]}
+                      src={item?.mealId?.images?.[0] || item.mealId.mealImages?.[0]}
                       alt={item.mealId.name}
                       fill
                       className="object-cover object-center"
