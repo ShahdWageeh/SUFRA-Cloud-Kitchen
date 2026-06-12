@@ -14,8 +14,8 @@ export default function AppProviders({ children }) {
           duration: 3000,
           style: {
             borderRadius: "12px",
-            background: "#fff",
-            color: "#2D2D2D",
+            background: "var(--color-surface)",
+            color: "var(--color-text-primary)",
           },
 
           success: {

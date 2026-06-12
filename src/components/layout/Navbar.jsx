@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buildLoginUrl } from "@/utils/authRedirects";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Brain } from "lucide-react";
+import { Brain, Moon, Sun } from "lucide-react";
 
 import {
   faBars,
@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import useAuth from "@/hooks/useAuth";
 import { useCart } from "@/context/CartContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function Navbar() {
   const loginHref = buildLoginUrl(pathname);
   const { user, isCustomer, logout } = useAuth();
   const { cartCount } = useCart();
+  const { theme, toggleTheme } = useTheme();
 
   const customerName =
     user?.firstName || user?.name?.split(" ")?.[0] || user?.email || "Customer";
@@ -92,6 +94,21 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-surface text-text-primary transition hover:border-primary hover:bg-secondary-container"
+          >
+            {theme === "light" ? (
+              <Moon className="h-5 w-5" />
+            ) : (
+              <Sun className="h-5 w-5" />
+            )}
+          </button>
+
           <button>
             <FontAwesomeIcon icon={faBell} className="text-lg" />
           </button>
@@ -113,7 +130,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setProfileOpen((current) => !current)}
-                className="flex items-center gap-2 rounded-full border border-primary/20 bg-white p-1 pr-3 shadow-sm transition hover:border-primary"
+                className="flex items-center gap-2 rounded-full border border-primary/20 bg-surface p-1 pr-3 shadow-sm transition hover:border-primary"
                 aria-expanded={profileOpen}
                 aria-haspopup="menu"
               >
@@ -134,7 +151,7 @@ export default function Navbar() {
               {profileOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 mt-3 w-56 overflow-hidden rounded-xl border border-primary/10 bg-white py-2 shadow-xl"
+                  className="absolute right-0 mt-3 w-56 overflow-hidden rounded-xl border border-primary/10 bg-surface py-2 shadow-xl"
                 >
                   <Link
                     href="/customer/dashboard"
