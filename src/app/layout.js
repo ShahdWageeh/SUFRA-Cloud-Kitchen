@@ -1,6 +1,7 @@
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -23,11 +24,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={jakarta.className}>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
-          <AppProviders>
-            <AuthProvider>
-              <CartProvider>{children}</CartProvider>
-            </AuthProvider>
-          </AppProviders>
+          <ThemeProvider>
+            <AppProviders>
+              <AuthProvider>
+                <CartProvider>{children}</CartProvider>
+              </AuthProvider>
+            </AppProviders>
+          </ThemeProvider>
         </GoogleOAuthProvider>
       </body>
     </html>

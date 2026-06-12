@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Search, Bell, Settings, X } from "lucide-react";
+import { Menu, Search, Bell, Settings, X, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 const sectionTitles = [
   { key: "/chef/dashboard", title: "Dashboard" },
   { key: "/chef/meals", title: "Manage Meals" },
@@ -22,6 +23,7 @@ function getSectionTitle(pathname) {
 export default function ChefTopbar({ onMenuClick }) {
   const pathname = usePathname();
   const title = getSectionTitle(pathname);
+  const { theme, toggleTheme } = useTheme();
 
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -67,6 +69,21 @@ export default function ChefTopbar({ onMenuClick }) {
             aria-label="Search"
           >
             <Search size={16} className="mr-2 text-[#8f7f78]" />
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#eaded8] bg-white text-[#624c44] hover:bg-[#f8f2ef]"
+          >
+            {theme === "light" ? (
+              <Moon size={18} />
+            ) : (
+              <Sun size={18} />
+            )}
           </button>
 
           <button
