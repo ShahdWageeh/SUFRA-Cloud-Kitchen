@@ -22,6 +22,18 @@ class AuthService {
     return result;
   }
 
+  async googleLogin(data) {
+    const response = await api.post("/auth/google", data);
+
+    const result = response.data;
+
+    if (result.success) {
+      tokenService.save(result.data.token);
+    }
+
+    return result;
+  }
+
   async me() {
     const response = await api.get("/auth/me");
     return response.data;

@@ -12,7 +12,7 @@ import {
   faUser,
   faUserCheck,
   faUtensils,
-  faChevronLeft
+  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { faFacebook, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { registerSchema } from "@/schemas/authSchemas";
@@ -21,6 +21,7 @@ import AuthInput from "@/components/auth/AuthInput";
 import SocialButton from "@/components/auth/SocialButton";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "react-hot-toast";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 export default function RegisterForm({ accountType, endpoint }) {
   const { register: registerUser, loading } = useAuth();
@@ -76,7 +77,7 @@ export default function RegisterForm({ accountType, endpoint }) {
         href="/"
         className="mt-6 z-10 cursor-pointer hover:text-primary-container absolute top-0 left-2.5 rounded-full text-primary px-6 py-3 text-xs font-bold"
       >
-       <FontAwesomeIcon icon={faChevronLeft}/> Back to Home
+        <FontAwesomeIcon icon={faChevronLeft} /> Back to Home
       </Link>
       <div className="relative flex min-h-dvh flex-col px-5 py-8 sm:px-8 lg:px-12">
         <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-7">
@@ -180,7 +181,7 @@ export default function RegisterForm({ accountType, endpoint }) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <SocialButton icon={faGoogle}>Google</SocialButton>
+              <GoogleLoginButton role={accountType} />{" "}
               <SocialButton icon={faFacebook}>Facebook</SocialButton>
             </div>
 

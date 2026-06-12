@@ -20,6 +20,7 @@ import AuthInput from "@/components/auth/AuthInput";
 import SocialButton from "@/components/auth/SocialButton";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "react-hot-toast";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -65,7 +66,7 @@ export default function LoginForm() {
         href="/"
         className="mt-6 z-10 cursor-pointer hover:text-primary-container absolute top-0 right-2.5 rounded-full text-primary px-6 py-3 text-xs font-bold"
       >
-        Back to Home <FontAwesomeIcon icon={faChevronRight} /> 
+        Back to Home <FontAwesomeIcon icon={faChevronRight} />
       </Link>
       <div className="mx-auto grid min-h-dvh max-w-7xl grid-cols-1 lg:grid-cols-[0.92fr_1fr]">
         <aside className="relative hidden min-h-dvh overflow-hidden lg:block">
@@ -201,7 +202,7 @@ export default function LoginForm() {
             </div>
 
             <div className="grid grid-cols-2 gap-5">
-              <SocialButton icon={faGoogle}>Google</SocialButton>
+              <GoogleLoginButton role={selectedRole} />
               <SocialButton icon={faApple}>Apple</SocialButton>
             </div>
 

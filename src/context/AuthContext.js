@@ -236,6 +236,50 @@ export function AuthProvider({ children }) {
     [redirectChefByVerification, router, refreshUser],
   );
 
+  const googleLogin = useCallback(
+    async ({ token, role }) => {
+      setLoading(true);
+
+      try {
+        const response = await authService.googleLogin({
+          token,
+          role,
+        });
+
+        const authData = getResponseData(response);
+
+        const loggedUser = authData.user;
+        const accessToken = authData.token;
+
+        tokenService.save(accessToken);
+
+        setToken(accessToken);
+        setUser(loggedUser);
+
+        if (loggedUser.role === "customer") {
+          router.push("/customer/dashboard");
+        }
+
+        if (loggedUser.role === "chef") {
+          await redirectChefByVerification();
+        }
+
+        return {
+          success: true,
+          user: loggedUser,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error?.response?.data?.message || "Google login failed",
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [router, redirectChefByVerification],
+  );
+
   const logout = useCallback(() => {
     tokenService.remove();
     setUser(null);
@@ -261,6 +305,7 @@ export function AuthProvider({ children }) {
       isAdmin,
       register,
       login,
+      googleLogin,
       logout,
       clearSession,
       refreshUser,
@@ -276,6 +321,7 @@ export function AuthProvider({ children }) {
       isAdmin,
       register,
       login,
+      googleLogin,
       logout,
       clearSession,
       refreshUser,
