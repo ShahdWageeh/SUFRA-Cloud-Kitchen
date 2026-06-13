@@ -40,7 +40,7 @@ export default function TopHeader({ setMobileOpen }) {
         </button>
 
         {/* Search Bar */}
-        <div
+        {/* <div
           className="flex items-center gap-3 rounded-full px-4 py-2 w-full max-w-[320px] md:max-w-[420px]"
           style={{ backgroundColor: '#F6F4F3' }}
         >
@@ -50,7 +50,7 @@ export default function TopHeader({ setMobileOpen }) {
             placeholder="Search..."
             className="bg-transparent text-sm outline-none flex-1 text-gray-600 placeholder-gray-400 min-w-0"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Right side Actions */}

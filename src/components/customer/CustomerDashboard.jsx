@@ -60,7 +60,7 @@ function toDashboardMeal(meal) {
     price: `$${normalized.price}`,
     image: normalized.image,
     rating: normalized.rating,
-    chef: `by ${normalized.chefName}`,
+    chef: normalized.chefName,
     description: normalized.description,
   };
 }
@@ -146,6 +146,7 @@ function DashboardMealCard({ meal }) {
     </article>
   );
 }
+
 
 export default function CustomerDashboard() {
   const { user, refreshUser } = useAuth();

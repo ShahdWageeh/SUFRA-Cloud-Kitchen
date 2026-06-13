@@ -1,9 +1,20 @@
-export function getChefName(chef) {
-  if (!chef) return "Chef";
-  if (typeof chef === "string") return chef;
+export function getChefName(chef, fallbackName) {
+  if (fallbackName && !/^[0-9a-fA-F]{24}$/.test(fallbackName) && !fallbackName.startsWith("chef-")) {
+    return fallbackName;
+  }
+  
+  if (!chef) return fallbackName || "Chef";
+
+  if (typeof chef === "string") {
+    // If it's a MongoDB ID (24 hex chars) or similar, don't return it as a name
+    if (/^[0-9a-fA-F]{24}$/.test(chef) || chef.startsWith("chef-")) {
+      return fallbackName || "Chef";
+    }
+    return chef;
+  }
 
   const name = [chef.firstName, chef.lastName].filter(Boolean).join(" ");
-  return name ? `Chef ${name}` : chef.kitchenName || chef.name || "Chef";
+  return name ? `Chef ${name}` : chef.kitchenName || chef.name || fallbackName || "Chef";
 }
 
 function getCategoryInfo(meal) {
@@ -49,7 +60,7 @@ export function normalizePublicMeal(meal) {
   return {
     id: meal._id || meal.id,
     name: meal.name || meal.title,
-    chefName: getChefName(chef),
+    chefName: getChefName(chef, meal.chefName),
     chefId,
     category,
     categoryLabel,

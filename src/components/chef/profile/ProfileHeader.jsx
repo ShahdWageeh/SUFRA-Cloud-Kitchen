@@ -15,7 +15,7 @@ export default function ProfileHeader() {
         </p>
       </div>
 
-      <button
+      {/* <button
         className="
         flex items-center gap-2
         border-2 border-teal-600
@@ -27,7 +27,7 @@ export default function ProfileHeader() {
       >
         <Eye size={18} />
         View Public Profile
-      </button>
+      </button> */}
     </div>
   );
 }

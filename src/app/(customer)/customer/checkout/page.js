@@ -73,7 +73,8 @@ export default function CheckoutPage() {
         
         // If paymobUrl is provided, redirect to it
         if (result.data.paymobUrl) {
-          window.location.href = result.data.paymobUrl;
+          window.open(result.data.paymobUrl, "_blank");
+          router.push("/customer/orders");
         } else {
           // If cash or no redirect needed, go to orders
           router.push("/customer/orders");

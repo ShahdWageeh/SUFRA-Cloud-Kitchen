@@ -50,7 +50,7 @@ export default function ChefTopbar({ onMenuClick }) {
         <div className="flex items-center gap-2 md:gap-3">
           {/* Desktop Search */}
 
-          <label className="hidden h-10 w-80 items-center rounded-full border border-[#eaded8] bg-white px-4 md:flex">
+          {/* <label className="hidden h-10 w-80 items-center rounded-full border border-[#eaded8] bg-white px-4 md:flex">
             <span className="mr-2 text-sm text-[#8f7f78]">⌕</span>
 
             <input
@@ -58,18 +58,18 @@ export default function ChefTopbar({ onMenuClick }) {
               placeholder="Search your kitchen..."
               className="w-full bg-transparent text-sm text-[#3f3531] outline-none placeholder:text-[#ad9f98]"
             />
-          </label>
+          </label> */}
 
           {/* Mobile Search Button */}
 
-          <button
+          {/* <button
             type="button"
             onClick={() => setSearchOpen(true)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#eaded8] bg-white text-[#624c44] hover:bg-[#f8f2ef] md:hidden"
             aria-label="Search"
           >
             <Search size={16} className="mr-2 text-[#8f7f78]" />
-          </button>
+          </button> */}
 
           <button
             type="button"

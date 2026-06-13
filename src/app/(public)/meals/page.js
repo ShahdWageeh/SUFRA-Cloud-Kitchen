@@ -60,7 +60,7 @@ export default async function MealsPage() {
             </button>
           </div>
 
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          {/* <div className="mt-4 flex flex-wrap justify-center gap-2">
             <button className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-text-secondary ring-1 ring-primary/15">
               Price Range <FontAwesomeIcon icon={faChevronDown} className="h-2.5 w-2.5" />
             </button>
@@ -74,7 +74,7 @@ export default async function MealsPage() {
               <FontAwesomeIcon icon={faSliders} className="h-2.5 w-2.5" />
               All Filters
             </button>
-          </div>
+          </div> */}
         </div>
       </section>
 
