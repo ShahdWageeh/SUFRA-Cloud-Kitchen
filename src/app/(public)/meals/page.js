@@ -4,6 +4,7 @@ import { faChevronDown, faMagnifyingGlass, faSliders } from "@fortawesome/free-s
 import MealsGrid from "@/components/public/MealsGrid";
 import { categoryService, mealService } from "@/services";
 import { normalizeCategory, normalizePublicMeal } from "@/utils/mealUtils";
+import { SearchInput } from "@/components/ui";
 
 async function getMealsPageData() {
   const state = {
@@ -33,9 +34,18 @@ async function getMealsPageData() {
   }
 }
 
-export default async function MealsPage() {
+export default async function MealsPage({ searchParams }) {
+  const { q = "" } = (await searchParams) || {};
   const { data, error } = await getMealsPageData();
-  const meals = data.meals;
+  
+  const filteredMeals = q 
+    ? data.meals.filter(meal => 
+        meal.name?.toLowerCase().includes(q.toLowerCase()) || 
+        meal.description?.toLowerCase().includes(q.toLowerCase()) ||
+        meal.chefName?.toLowerCase().includes(q.toLowerCase()) ||
+        meal.categoryLabel?.toLowerCase().includes(q.toLowerCase())
+      )
+    : data.meals;
 
   return (
     <main className="bg-background text-text-primary">
@@ -49,32 +59,15 @@ export default async function MealsPage() {
             Discover handmade meals crafted by passionate chefs in your community. Fresh food, real stories, and unforgettable flavor.
           </p>
 
-          <div className="mx-auto mt-7 flex max-w-3xl flex-col gap-3 rounded-lg bg-white p-3 shadow-[0_14px_35px_rgba(27,28,28,0.08)] sm:flex-row">
-            <label className="flex min-h-11 flex-1 items-center gap-3 rounded-md bg-background px-4 ring-1 ring-primary/10">
-              <FontAwesomeIcon icon={faMagnifyingGlass} className="h-4 w-4 text-outline" />
-              <span className="sr-only">Search meals</span>
-              <input className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-outline" type="search" placeholder="Search meals, cuisines or chefs..." />
-            </label>
-            <button className="rounded-md bg-primary px-8 py-3 text-sm font-bold text-white transition hover:bg-primary-container">
-              Search
-            </button>
-          </div>
+          <SearchInput
+            placeholder="Search meals, cuisines or chefs..."
+            className="mx-auto mt-7 max-w-3xl rounded-lg bg-white p-3 shadow-[0_14px_35px_rgba(27,28,28,0.08)]"
+            inputClassName="bg-background ring-1 ring-primary/10 rounded-md"
+            showButton={true}
+            basePath="/meals"
+          />
 
-          {/* <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <button className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-text-secondary ring-1 ring-primary/15">
-              Price Range <FontAwesomeIcon icon={faChevronDown} className="h-2.5 w-2.5" />
-            </button>
-            <button className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-text-secondary ring-1 ring-primary/15">
-              Duration <FontAwesomeIcon icon={faChevronDown} className="h-2.5 w-2.5" />
-            </button>
-            <button className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-text-secondary ring-1 ring-primary/15">
-              Rating <FontAwesomeIcon icon={faChevronDown} className="h-2.5 w-2.5" />
-            </button>
-            <button className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-white">
-              <FontAwesomeIcon icon={faSliders} className="h-2.5 w-2.5" />
-              All Filters
-            </button>
-          </div> */}
+          {/* ... */}
         </div>
       </section>
 
@@ -82,7 +75,7 @@ export default async function MealsPage() {
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-2xl font-bold">Browse CloudKitchen picks</h2>
-            <p className="mt-1 text-sm text-text-secondary">{meals.length} meals available today</p>
+            <p className="mt-1 text-sm text-text-secondary">{filteredMeals.length} meals available today</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/meals" className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-white">
@@ -104,12 +97,12 @@ export default async function MealsPage() {
           <div className="rounded-lg bg-white p-8 text-center text-sm text-text-secondary ring-1 ring-primary/10">
             We could not load meals right now.
           </div>
-        ) : meals.length === 0 ? (
+        ) : filteredMeals.length === 0 ? (
           <div className="rounded-lg bg-white p-8 text-center text-sm text-text-secondary ring-1 ring-primary/10">
-            No meals are available right now. Check back soon.
+            {q ? `No meals found matching "${q}"` : "No meals are available right now. Check back soon."}
           </div>
         ) : (
-          <MealsGrid meals={meals} />
+          <MealsGrid meals={filteredMeals} />
         )}
       </section>
     </main>

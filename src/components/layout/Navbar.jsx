@@ -22,6 +22,7 @@ import Image from "next/image";
 import useAuth from "@/hooks/useAuth";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
+import { SearchInput } from "@/components/ui";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -79,18 +80,11 @@ export default function Navbar() {
         </div>
 
         {/* Search */}
-        <div className="hidden border-primary-container border lg:flex items-center bg-secondary-container px-4 py-2 rounded-full w-72">
-          <FontAwesomeIcon
-            icon={faMagnifyingGlass}
-            className="text-text-secondary"
-          />
-
-          <input
-            type="text"
-            placeholder="Search dishes..."
-            className="bg-transparent outline-none ml-3 w-full"
-          />
-        </div>
+        <SearchInput
+          placeholder="Search dishes..."
+          className="hidden lg:flex w-72"
+          inputClassName="border-primary-container border bg-secondary-container rounded-full"
+        />
 
         {/* Actions */}
         <div className="flex items-center gap-4">

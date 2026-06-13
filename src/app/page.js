@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import LandingCategoriesSection from "@/components/public/LandingCategoriesSection";
 import LandingMealsSection from "@/components/public/LandingMealsSection";
 import LandingFeaturedChefsSection from "@/components/public/LandingFeaturedChefsSection";
+import { SearchInput } from "@/components/ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
@@ -48,24 +49,13 @@ export default function HomePage() {
                 chefs and delivered fresh to your door.
               </p>
 
-              <div className="bg-white p-2 rounded-3xl flex flex-col md:flex-row gap-2 max-w-2xl">
-                <div className="flex items-center flex-1 px-4">
-                  <FontAwesomeIcon
-                    icon={faLocationDot}
-                    className="text-primary text-2xl"
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Enter your delivery location"
-                    className="w-full ml-3 outline-none text-black"
-                  />
-                </div>
-
-                <button className="bg-primary text-white px-28 py-3 rounded-3xl hover:opacity-90 transition">
-                  Find Food
-                </button>
-              </div>
+              <SearchInput
+                placeholder="Search for meals, cuisines or chefs..."
+                className="mx-auto mt-7 max-w-2xl rounded-3xl bg-white text-black p-2"
+                inputClassName="bg-transparent"
+                showButton={true}
+                buttonClassName="rounded-3xl px-12"
+              />
             </div>
           </div>
         </section>
