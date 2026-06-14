@@ -62,8 +62,29 @@ export default async function CategoryPage({ params, searchParams }) {
 
   return (
     <main className="bg-background text-text-primary">
-      <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
-        {/* ... */}
+     <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-xl bg-text-primary">
+          <div className="relative h-72 sm:h-80">
+            <Image
+              src={data.category?.image || featuredMeal?.image || "/heroEnhance.jpeg"}
+              alt={`${title} meals`}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover opacity-75"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-black/10" />
+          </div>
+          <div className="absolute inset-0 flex items-center px-6 sm:px-10">
+            <div className="max-w-xl text-white">
+              <p className="text-xs font-bold uppercase tracking-wide text-white/75">Category Collection</p>
+              <h1 className="mt-3 text-4xl font-extrabold sm:text-5xl">{title} Delights</h1>
+              <p className="mt-3 text-sm leading-6 text-white/85">
+                Explore handpicked {title.toLowerCase()} meals from trusted local chefs, made fresh with tradition and care.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -75,7 +96,20 @@ export default async function CategoryPage({ params, searchParams }) {
           basePath={`/meals/categories/${category}`}
         />
 
-        {/* ... */}
+         <div className="mt-7 flex gap-5 overflow-x-auto border-b border-primary/10 pb-3">
+          <Link href="/meals" className="shrink-0 text-sm font-bold text-primary">
+            All Clients
+          </Link>
+          {data.categories.map((item) => (
+            <Link
+              key={item.id}
+              href={`/meals/categories/${item.slug || item.id}`}
+              className={`shrink-0 text-sm font-bold ${item.slug === category || item.id === category ? "text-primary" : "text-text-secondary"}`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
 
         {error || filteredMeals.length === 0 ? (
           <div className="mt-8 rounded-xl bg-white p-10 text-center shadow-sm ring-1 ring-primary/10">
