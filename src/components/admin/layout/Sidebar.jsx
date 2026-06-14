@@ -11,6 +11,7 @@ import {
   BarChart2,
   Plus,
   X,
+  Truck,
   ShieldIcon,
   MessageSquare,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const navItems = [
   },
   { id: "chefs", label: "Chefs", icon: ChefHat, href: "/admin/chefs" },
   { id: "users", label: "Customers", icon: Users, href: "/admin/users" },
+  {id: "deliveries", label:"Deliveries", icon: Truck, href: "/admin/deliveries"},
   { id: "contacts", label: "Contacts", icon: MessageSquare, href: "/admin/contacts" },
   {
     id: "categories",

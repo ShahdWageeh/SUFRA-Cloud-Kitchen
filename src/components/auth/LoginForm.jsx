@@ -29,8 +29,9 @@ export default function LoginForm() {
   const roleParam = searchParams.get("role");
   const redirectParam = searchParams.get("redirect");
   const isChefOnlyLogin = roleParam === "chef";
+  const isDeliveryOnlyLogin = roleParam === "delivery";
   const [selectedRole, setSelectedRole] = useState(
-    isChefOnlyLogin ? "chef" : "customer",
+    isChefOnlyLogin ? "chef" : isDeliveryOnlyLogin ? "delivery" : "customer",
   );
   const {
     register,
@@ -84,11 +85,11 @@ export default function LoginForm() {
           <div className="absolute left-14 top-16 max-w-xs text-white">
             <div className="flex items-center gap-2">
               <Image src="/icon.png" alt="logo" width="30" height="30"></Image>
-            <Link href="/" className="text-2xl font-bold">
-              Sufra
-            </Link>
+              <Link href="/" className="text-2xl font-bold">
+                Sufra
+              </Link>
             </div>
-            
+
             <p className="mt-3 text-sm leading-5 text-white/90">
               Welcome back to the heart of the home. Your community kitchen is
               waiting.
@@ -125,7 +126,7 @@ export default function LoginForm() {
               Continue your culinary journey with your local home chefs.
             </p>
 
-            <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="grid grid-cols-3 gap-3 mb-5">
               <button
                 type="button"
                 onClick={() => {
@@ -133,7 +134,7 @@ export default function LoginForm() {
                     setSelectedRole("customer");
                   }
                 }}
-                disabled={isChefOnlyLogin}
+                disabled={isChefOnlyLogin || isDeliveryOnlyLogin}
                 className={`rounded-md border py-2 text-sm transition ${
                   selectedRole === "customer"
                     ? "bg-primary text-white border-primary"
@@ -146,6 +147,7 @@ export default function LoginForm() {
               <button
                 type="button"
                 onClick={() => setSelectedRole("chef")}
+                disabled={isDeliveryOnlyLogin}
                 className={`rounded-md border py-2 text-sm transition ${
                   selectedRole === "chef"
                     ? "bg-primary text-white border-primary"
@@ -154,10 +156,28 @@ export default function LoginForm() {
               >
                 Chef
               </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedRole("delivery")}
+                disabled={isChefOnlyLogin}
+                className={`rounded-md border py-2 text-sm transition ${
+                  selectedRole === "delivery"
+                    ? "bg-primary text-white border-primary"
+                    : "border-primary/30"
+                }`}
+              >
+                Delivery
+              </button>
             </div>
             {isChefOnlyLogin && (
               <p className="-mt-2 mb-5 text-xs font-medium text-primary">
                 Chef sign in is required to continue becoming a chef.
+              </p>
+            )}
+            {isDeliveryOnlyLogin && (
+              <p className="-mt-2 mb-5 text-xs font-medium text-primary">
+                Delivery sign in is required to continue.
               </p>
             )}
             <div className="mt-7 space-y-5">

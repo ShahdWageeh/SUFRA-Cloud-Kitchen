@@ -63,9 +63,9 @@ export default function TopHeader({ setMobileOpen }) {
           />
         </button>
         
-        <button className="hidden sm:block p-2 rounded-xl hover:bg-gray-100 transition-colors">
+        {/* <button className="hidden sm:block p-2 rounded-xl hover:bg-gray-100 transition-colors">
           <Settings size={18} className="text-gray-500" />
-        </button>
+        </button> */}
 
         <div className="hidden sm:block w-px h-6 bg-gray-200" />
 
