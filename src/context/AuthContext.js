@@ -32,6 +32,7 @@ export function AuthProvider({ children }) {
   const isChef = user?.role === "chef";
   const isCustomer = user?.role === "customer";
   const isAdmin = user?.role === "admin";
+  const isDelivery = user?.role === "delivery";
 
   const redirectChefByVerification = useCallback(async () => {
     try {
@@ -58,6 +59,7 @@ export function AuthProvider({ children }) {
   const refreshUser = useCallback(async () => {
     try {
       const currentUser = await authService.me();
+      console.log("Current user:", currentUser);
       const restoredUser = getResponseData(currentUser);
       setUser(restoredUser);
       return restoredUser;
@@ -162,6 +164,7 @@ export function AuthProvider({ children }) {
 
       try {
         const { redirect, ...loginCredentials } = credentials;
+
         const response = await authService.login(loginCredentials);
         const safeRedirect = getSafeRedirectPath(redirect);
 
@@ -170,15 +173,28 @@ export function AuthProvider({ children }) {
 
           if (isBanMessage(message)) {
             router.replace("/banned");
-            return { success: false, banned: true, message };
+            return {
+              success: false,
+              banned: true,
+              message,
+            };
           }
 
-          return { success: false, message };
+          return {
+            success: false,
+            message,
+          };
         }
 
         const authData = getResponseData(response);
+
+        console.log("AUTH DATA:", authData);
+
         const loggedUser = authData.user;
         const accessToken = authData.token;
+
+        console.log("LOGGED USER:", loggedUser);
+        console.log("ROLE:", loggedUser?.role);
 
         if (accessToken) {
           tokenService.save(accessToken);
@@ -187,11 +203,17 @@ export function AuthProvider({ children }) {
         setToken(accessToken || null);
         setUser(loggedUser);
 
+        console.log("ENTERING REDIRECT LOGIC");
+
+        // CUSTOMER
         if (loggedUser?.role === "customer") {
+          console.log("CUSTOMER REDIRECT");
+
           const profile = (await refreshUser()) || loggedUser;
 
           if (isCustomerBlocked(profile)) {
             router.replace("/banned");
+
             return {
               success: true,
               banned: true,
@@ -200,16 +222,47 @@ export function AuthProvider({ children }) {
           }
 
           router.push(safeRedirect || "/customer/dashboard");
+
           return {
             success: true,
             user: profile,
           };
         }
 
+        // CHEF
         if (loggedUser?.role === "chef") {
+          console.log("CHEF REDIRECT");
+
           await redirectChefByVerification();
-        } else if (loggedUser?.role === "admin") {
+
+          return {
+            success: true,
+            user: loggedUser,
+          };
+        }
+
+        // DELIVERY
+        if (loggedUser?.role === "delivery") {
+          console.log("DELIVERY REDIRECT");
+
+          router.push(safeRedirect || "/delivery/dashboard");
+
+          return {
+            success: true,
+            user: loggedUser,
+          };
+        }
+
+        // ADMIN
+        if (loggedUser?.role === "admin") {
+          console.log("ADMIN REDIRECT");
+
           router.push(safeRedirect || "/admin/dashboard");
+
+          return {
+            success: true,
+            user: loggedUser,
+          };
         }
 
         return {
@@ -222,7 +275,12 @@ export function AuthProvider({ children }) {
 
         if (isBanMessage(message)) {
           router.replace("/banned");
-          return { success: false, banned: true, message };
+
+          return {
+            success: false,
+            banned: true,
+            message,
+          };
         }
 
         return {
@@ -263,6 +321,9 @@ export function AuthProvider({ children }) {
         if (loggedUser.role === "chef") {
           await redirectChefByVerification();
         }
+        if (loggedUser.role === "delivery") {
+          router.push("/delivery/dashboard");
+        }
 
         return {
           success: true,
@@ -301,6 +362,7 @@ export function AuthProvider({ children }) {
       loading,
       isAuthenticated,
       isChef,
+      isDelivery,
       isCustomer,
       isAdmin,
       register,
@@ -317,6 +379,7 @@ export function AuthProvider({ children }) {
       loading,
       isAuthenticated,
       isChef,
+      isDelivery,
       isCustomer,
       isAdmin,
       register,

@@ -20,6 +20,10 @@ export default function GuestGuard({ children }) {
           redirectChefByVerification();
           break;
 
+        case "delivery":
+          router.replace("/delivery/dashboard")
+          break;
+
         default:
           router.replace("/customer/dashboard");
       }
