@@ -19,7 +19,7 @@
 
   --radius-card: 24px;
 
-  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-display: "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
 :root {
@@ -46,6 +46,84 @@ body {
   font-family: var(--font-display);
   background: var(--color-background);
   color: var(--color-text-primary);
+}
+
+html[dir="rtl"] body {
+  text-align: right;
+}
+
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="tel"],
+html[dir="rtl"] input[type="number"] {
+  direction: rtl;
+}
+
+html[dir="rtl"] input[type="email"] {
+  unicode-bidi: plaintext;
+}
+
+.language-switcher {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid color-mix(in srgb, var(--color-outline) 28%, transparent);
+  border-radius: 999px;
+  padding: 0.3rem;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  color: var(--color-text-secondary);
+  box-shadow: 0 8px 26px rgba(48, 28, 20, 0.14);
+  backdrop-filter: blur(14px);
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.language-switcher:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 42%, transparent);
+  box-shadow: 0 10px 30px rgba(48, 28, 20, 0.2);
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.language-switcher:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  outline-offset: 3px;
+}
+
+.language-option {
+  min-width: 4.75rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.language-option.active {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 3px 10px rgba(150, 67, 38, 0.25);
+}
+
+.language-divider {
+  width: 1px;
+  height: 1rem;
+  background: color-mix(in srgb, var(--color-outline) 25%, transparent);
+}
+
+@media (max-width: 640px) {
+  .language-switcher {
+    bottom: 0.75rem;
+  }
+
+  .language-option {
+    min-width: 4.25rem;
+  }
 }
 
 @layer base {
