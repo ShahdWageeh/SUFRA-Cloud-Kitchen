@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { MessageCircle, Star } from "lucide-react";
 import { brandingService } from "@/services";
 import useAuth from "@/hooks/useAuth";
+import { Loader } from "@/components/ui";
 
 export default function BrandingPage() {
   const router = useRouter();
@@ -20,6 +21,14 @@ export default function BrandingPage() {
       router.replace("/");
     }
   }, [loading, user, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F7]">
+        <Loader />
+      </div>
+    );
+  }
 
   const cookingStyles = [
     "Levantine",
@@ -253,6 +262,9 @@ export default function BrandingPage() {
 
         </div>
       </div>
+    </div>
+  );
+}      </div>
     </div>
   );
 }

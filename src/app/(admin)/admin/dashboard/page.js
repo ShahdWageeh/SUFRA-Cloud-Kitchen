@@ -13,6 +13,7 @@ import {
   RefreshCw,
   ShieldAlert,
 } from "lucide-react";
+import { Loader } from "@/components/ui";
 import StatsCard from "@/components/admin/ui/StatsCard";
 import TopChefsCard from "@/components/admin/sections/TopChefsCard";
 import Footer from "@/components/admin/layout/Footer";
@@ -345,8 +346,12 @@ export default function DashboardPage() {
           disabled={loading}
           className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
         >
-          <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          Refresh
+          {loading ? (
+            <Loader size={20} className="p-0" />
+          ) : (
+            <RefreshCw size={15} />
+          )}
+          {loading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
@@ -371,7 +376,7 @@ export default function DashboardPage() {
 
       {loading ? (
         <div className="flex min-h-[420px] flex-col items-center justify-center gap-3">
-          <RefreshCw size={36} className="animate-spin text-[#A55632]" />
+          <Loader size={40} />
           <p className="text-sm font-medium text-slate-400">
             Loading documented API surfaces...
           </p>

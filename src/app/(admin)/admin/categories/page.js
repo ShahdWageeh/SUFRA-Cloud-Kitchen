@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { adminCategoryService } from "@/services";
+import { Loader } from "@/components/ui";
 import {
   Plus,
   Pencil,
@@ -297,14 +298,16 @@ function CategoryFormModal({ mode, category, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
               style={{ background: "#A55632" }}
             >
-              {submitting
-                ? "Saving..."
-                : isEdit
-                  ? "Save Changes"
-                  : "Create Category"}
+              {submitting ? (
+                <Loader size={20} color="#fff" className="p-0" />
+              ) : isEdit ? (
+                "Save Changes"
+              ) : (
+                "Create Category"
+              )}
             </button>
           </div>
         </form>
@@ -345,9 +348,9 @@ function DeleteConfirmModal({ category, onClose, onConfirm, deleting }) {
           <button
             onClick={onConfirm}
             disabled={deleting}
-            className="flex-1 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 transition disabled:opacity-50"
+            className="flex-1 flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 transition disabled:opacity-50"
           >
-            {deleting ? "Deleting..." : "Delete"}
+            {deleting ? <Loader size={20} color="#fff" className="p-0" /> : "Delete"}
           </button>
         </div>
       </div>
@@ -446,7 +449,11 @@ export default function CategoriesManagement() {
             disabled={loading}
             className="flex items-center gap-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg px-4 py-2 hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
           >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            {loading ? (
+              <Loader size={20} className="p-0" />
+            ) : (
+              <RefreshCw size={15} />
+            )}
             Refresh
           </button>
           <button
@@ -484,7 +491,7 @@ export default function CategoriesManagement() {
             onClick={loadCategories}
             className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
           >
-            <RefreshCw size={14} />
+            <Loader size={16} className="p-0" />
             Retry
           </button>
         )}
@@ -530,7 +537,7 @@ export default function CategoriesManagement() {
                         className="flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-opacity hover:opacity-90"
                         style={{ background: "#A55632" }}
                       >
-                        <RefreshCw size={14} />
+                        <Loader size={20} color="#fff" className="p-0" />
                         Try again
                       </button>
                     </div>
@@ -661,11 +668,13 @@ export default function CategoriesManagement() {
         </div>
 
         <div className="px-5 py-3.5 border-t border-slate-100">
-          <p className="text-xs text-slate-400">
-            {loading
-              ? "Loading categories..."
-              : `Showing ${filteredCategories.length} of ${categories.length} categories`}
-          </p>
+          <div className="text-xs text-slate-400">
+            {loading ? (
+              <Loader size={14} className="p-0 justify-start" />
+            ) : (
+              `Showing ${filteredCategories.length} of ${categories.length} categories`
+            )}
+          </div>
         </div>
       </div>
 

@@ -14,11 +14,11 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
-  Loader2,
   ShieldOff,
   ShieldCheck,
   Search,
 } from "lucide-react";
+import { Loader } from "@/components/ui";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -122,11 +122,11 @@ function Avatar({ user }) {
 function SkeletonRow() {
   return (
     <tr className="border-b border-slate-100">
-      {[...Array(6)].map((_, i) => (
-        <td key={i} className="px-4 py-4">
-          <div className="h-4 bg-slate-100 rounded animate-pulse w-full" />
-        </td>
-      ))}
+      <td colSpan={6} className="px-4 py-8">
+        <div className="flex justify-center">
+          <Loader />
+        </div>
+      </td>
     </tr>
   );
 }
@@ -135,10 +135,8 @@ function SkeletonRow() {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
-      <div className="h-3 bg-slate-100 rounded animate-pulse w-24" />
-      <div className="h-8 bg-slate-100 rounded animate-pulse w-20" />
-      <div className="h-3 bg-slate-100 rounded animate-pulse w-32" />
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center justify-center h-[108px]">
+      <Loader size={30} className="p-0" />
     </div>
   );
 }
@@ -280,7 +278,7 @@ function ConfirmModal({
               isBanning ? "bg-rose-500" : "bg-emerald-500"
             }`}
           >
-            {loading && <Loader2 size={13} className="animate-spin" />}
+            {loading && <Loader size={13} className="p-0" />}
             {isBanning ? "Yes, Ban" : "Yes, Unban"}
           </button>
         </div>
@@ -785,7 +783,7 @@ export default function UsersManagement() {
           <p className="text-xs text-slate-400">
             {loading ? (
               <span className="flex items-center gap-1.5">
-                <Loader2 size={12} className="animate-spin" /> Loading...
+                <Loader size={12} className="p-0" /> Loading...
               </span>
             ) : (
               <>

@@ -38,7 +38,7 @@ export default function Footer() {
               </li>
               {isCustomer ? null : (
                 <li>
-                  <Link href="/become-chef">Become A Chef</Link>
+                  <Link href="/register/chef">Become A Chef</Link>
                 </li>
               )}
 

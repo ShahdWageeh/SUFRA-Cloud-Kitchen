@@ -14,6 +14,7 @@ import {
   ShieldIcon,
   MessageSquare,
 } from "lucide-react";
+import Image from "next/image";
 
 const navItems = [
   {
@@ -45,7 +46,8 @@ function SidebarContent({ pathname, setMobileOpen }) {
       <div>
         {/* Logo */}
         <div className="px-6 pt-8 pb-6">
-          <div className="leading-none">
+          <div className="leading-none flex items-center gap-2">
+            <Image src="/icon.png" alt="logo" width="30" height="30"></Image>
             <div
               className="text-4xl font-bold tracking-tight"
               style={{ color: "#A55632", fontFamily: "Georgia, serif" }}

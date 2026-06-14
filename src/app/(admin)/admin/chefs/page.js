@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { Loader } from "@/components/ui";
 import {
   ChevronDown,
   Eye,
@@ -42,8 +43,10 @@ function AnalyticsCards({ chefs, loadingStats }) {
         {[...Array(3)].map((_, i) => (
           <div
             key={i}
-            className="rounded-2xl p-5 h-28 bg-slate-100 animate-pulse"
-          />
+            className="rounded-2xl p-5 h-28 bg-white border border-slate-100 flex items-center justify-center"
+          >
+            <Loader size={30} />
+          </div>
         ))}
       </div>
     );
@@ -279,8 +282,7 @@ export default function ChefsManagement() {
     return "All Statuses";
   };
 
-  if (loading)
-    return <div className="p-6 text-slate-600">Loading Chefs data...</div>;
+  if (loading) return <Loader fullPage={true} />;
   if (error)
     return (
       <div className="p-6 text-rose-600 font-semibold">Error: {error}</div>

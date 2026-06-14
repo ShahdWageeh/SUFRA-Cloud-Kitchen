@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { contactService } from "@/services";
+import { Loader } from "@/components/ui";
 import toast from "react-hot-toast";
 import {
   AlertTriangle,
@@ -11,7 +12,6 @@ import {
   ChevronRight,
   Clock,
   Eye,
-  Loader2,
   Mail,
   MessageSquare,
   RefreshCw,
@@ -89,11 +89,11 @@ function SenderAvatar({ message }) {
 function SkeletonRow() {
   return (
     <tr className="border-b border-slate-100">
-      {[...Array(6)].map((_, i) => (
-        <td key={i} className="px-4 py-4">
-          <div className="h-4 bg-slate-100 rounded animate-pulse w-full" />
-        </td>
-      ))}
+      <td colSpan={6} className="px-4 py-12">
+        <div className="flex justify-center">
+          <Loader />
+        </div>
+      </td>
     </tr>
   );
 }
@@ -108,13 +108,10 @@ function StatsCards({ messages, loading }) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {[...Array(3)].map((_, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 h-28 animate-pulse"
-          />
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="md:col-span-3 bg-white rounded-2xl border border-slate-100 shadow-sm p-10 flex justify-center">
+          <Loader />
+        </div>
       </div>
     );
   }
@@ -261,7 +258,7 @@ function MessageDetailModal({ message, onClose, onMarkFinished, marking }) {
               style={{ background: "#7c4a2d" }}
             >
               {marking ? (
-                <Loader2 size={14} className="animate-spin" />
+                <Loader size={14} className="p-0" />
               ) : (
                 <CheckCircle size={14} />
               )}
@@ -404,7 +401,11 @@ export default function ContactsManagement() {
           disabled={loading}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 shrink-0"
         >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          {loading ? (
+            <Loader size={16} className="p-0" />
+          ) : (
+            <RefreshCw size={16} />
+          )}
           Refresh
         </button>
       </div>
@@ -590,7 +591,7 @@ export default function ContactsManagement() {
                               title="Mark as finished"
                             >
                               {isMarking ? (
-                                <Loader2 size={15} className="animate-spin" />
+                                <Loader size={15} className="p-0" />
                               ) : (
                                 <CheckCircle size={15} />
                               )}
@@ -609,7 +610,7 @@ export default function ContactsManagement() {
           <p className="text-xs text-slate-400">
             {loading ? (
               <span className="flex items-center gap-1.5">
-                <Loader2 size={12} className="animate-spin" /> Loading...
+                <Loader size={12} className="p-0" /> Loading...
               </span>
             ) : (
               <>

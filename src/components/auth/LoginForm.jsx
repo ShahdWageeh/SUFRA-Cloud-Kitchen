@@ -21,6 +21,7 @@ import SocialButton from "@/components/auth/SocialButton";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "react-hot-toast";
 import GoogleLoginButton from "./GoogleLoginButton";
+import { Loader } from "@/components/ui";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -62,6 +63,7 @@ export default function LoginForm() {
 
   return (
     <section className="min-h-dvh relative bg-background">
+      {loading && <Loader fullPage={true} />}
       <Link
         href="/"
         className="mt-6 z-10 cursor-pointer hover:text-primary-container absolute top-0 right-2.5 rounded-full text-primary px-6 py-3 text-xs font-bold"
@@ -80,9 +82,13 @@ export default function LoginForm() {
           />
           <div className="absolute inset-0 bg-linear-to-b from-black/35 via-black/5 to-black/55" />
           <div className="absolute left-14 top-16 max-w-xs text-white">
+            <div className="flex items-center gap-2">
+              <Image src="/icon.png" alt="logo" width="30" height="30"></Image>
             <Link href="/" className="text-2xl font-bold">
               Sufra
             </Link>
+            </div>
+            
             <p className="mt-3 text-sm leading-5 text-white/90">
               Welcome back to the heart of the home. Your community kitchen is
               waiting.
@@ -174,13 +180,13 @@ export default function LoginForm() {
             </div>
 
             <div className="mt-4 flex items-center justify-between gap-4 text-xs">
-              <label className="flex items-center gap-2 text-text-secondary">
+              {/* <label className="flex items-center gap-2 text-text-secondary">
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-primary/25 accent-primary"
                 />
                 Remember Me
-              </label>
+              </label> */}
               <Link
                 href="/forgot-password"
                 className="font-medium text-primary"
@@ -201,9 +207,9 @@ export default function LoginForm() {
               <AuthDivider>or continue with</AuthDivider>
             </div>
 
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-5">
               <GoogleLoginButton role={selectedRole} />
-              <SocialButton icon={faApple}>Apple</SocialButton>
+              {/* <SocialButton icon={faApple}>Apple</SocialButton> */}
             </div>
 
             <div className="mt-10 border-t border-primary/18 pt-6 text-center text-xs text-text-secondary">

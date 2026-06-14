@@ -11,6 +11,7 @@ import {
   User,
   ChefHat,
 } from "lucide-react";
+import { Loader } from "@/components/ui";
 
 export default function ChefVerificationModeration() {
   const { token: contextToken, logout } = useAuth();
@@ -142,8 +143,8 @@ export default function ChefVerificationModeration() {
   if (!isMounted) {
     return (
       <div className="w-full max-w-7xl mx-auto px-4 pb-20 pt-6 flex min-h-[300px] flex-col gap-3 items-center justify-center">
-        <RefreshCw size={32} className="animate-spin text-[#964326]" />
-        <p className="text-sm font-medium text-slate-500 animate-pulse">
+        <Loader size={32} />
+        <p className="text-sm font-medium text-slate-500">
           Initializing Interface...
         </p>
       </div>
@@ -168,7 +169,11 @@ export default function ChefVerificationModeration() {
           disabled={loading}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
         >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          {loading ? (
+            <Loader size={16} className="p-0" />
+          ) : (
+            <RefreshCw size={16} />
+          )}
           Refresh Requests
         </button>
       </div>
@@ -185,8 +190,8 @@ export default function ChefVerificationModeration() {
 
       {loading ? (
         <div className="flex min-h-[300px] flex-col gap-3 items-center justify-center">
-          <RefreshCw size={32} className="animate-spin text-[#964326]" />
-          <p className="text-sm font-medium text-slate-500 animate-pulse">
+          <Loader size={32} />
+          <p className="text-sm font-medium text-slate-500">
             Loading compliance data from server...
           </p>
         </div>

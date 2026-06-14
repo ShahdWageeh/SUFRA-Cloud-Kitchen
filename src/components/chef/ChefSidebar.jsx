@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
+import Image from "next/image";
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -87,9 +88,13 @@ export default function ChefSidebar({ isOpen, onClose }) {
         {/* Header */}
 
         <div>
+          <div className="flex items-center gap-2">
+<Image src="/icon.png" alt="logo" width="30" height="30"></Image>
           <h1 className="text-[2rem] font-semibold leading-tight text-[#2d201b]">
             Sufra
           </h1>
+          </div>
+          
 
           <p className="mt-1 text-sm text-[#7e6a63]">Chef Portal</p>
         </div>
