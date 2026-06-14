@@ -27,7 +27,16 @@ api.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url || "";
+    const isPublicAuthRequest = [
+      "/auth/register",
+      "/auth/login",
+      "/auth/google",
+      "/auth/forgot-password",
+      "/auth/reset-password",
+    ].some((path) => requestUrl.startsWith(path));
+
+    if (error.response?.status === 401 && !isPublicAuthRequest) {
       tokenService.remove();
 
       if (typeof window !== "undefined") {

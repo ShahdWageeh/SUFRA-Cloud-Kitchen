@@ -34,6 +34,17 @@ class AuthService {
     return result;
   }
 
+  async forgotPassword(data) {
+    const response = await api.post("/auth/forgot-password", data);
+    return response.data;
+  }
+
+  async resetPassword(data) {
+    const response = await api.post("/auth/reset-password", data);
+
+    return response.data;
+  }
+
   async me() {
     const response = await api.get("/auth/me");
     return response.data;
