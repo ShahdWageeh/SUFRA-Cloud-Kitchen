@@ -1,6 +1,16 @@
 'use client'
-import { Search, Bell, Settings, Menu } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Search, Bell, Settings, Menu, Clock, CheckCheck, Trash2, X, ChevronRight, Shield, MessageSquare, Wallet } from 'lucide-react'
 import useAuth from '@/hooks/useAuth'
+import { notificationService } from '@/services'
+import Link from 'next/link'
+import toast from 'react-hot-toast'
+
+const NOTIFICATION_ICONS = {
+  "chef.verification.submitted": { icon: Shield, color: "text-blue-500 bg-blue-50" },
+  "customer.contact.submitted": { icon: MessageSquare, color: "text-teal-500 bg-teal-50" },
+  "chef.withdrawal.requested": { icon: Wallet, color: "text-amber-500 bg-amber-50" }
+};
 
 function getAdminDisplayName(user) {
   const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
@@ -18,15 +28,85 @@ function getInitials(name) {
   )
 }
 
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return new Date(date).toLocaleDateString();
+}
+
 export default function TopHeader({ setMobileOpen }) {
   const { user } = useAuth()
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+  
   const adminName = getAdminDisplayName(user)
   const initials = getInitials(adminName)
   const roleLabel = user?.role === 'admin' ? 'ADMIN' : 'ADMIN CONSOLE'
 
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await notificationService.getUnreadCount();
+      if (res.success) setUnreadCount(res.data.count || 0);
+    } catch (err) {}
+  };
+
+  const fetchRecentNotifications = async () => {
+    try {
+      const res = await notificationService.getNotifications({ limit: 5 });
+      if (res.success) {
+        // Ensure we always have an array even if API structure varies
+        const data = Array.isArray(res.data) ? res.data : (res.data?.notifications || []);
+        setNotifications(data);
+      }
+    } catch (err) {}
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    fetchRecentNotifications();
+    const interval = setInterval(() => {
+      fetchUnreadCount();
+      if (isDropdownOpen) fetchRecentNotifications();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isDropdownOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleMarkAsRead = async (id, e) => {
+    try {
+      await notificationService.markAsRead(id);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, readAt: new Date() } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {}
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, readAt: new Date() })));
+      setUnreadCount(0);
+      toast.success("All caught up!");
+    } catch (err) {}
+  };
+
   return (
     <header
-      className="h-16 md:h-[72px] flex items-center justify-between px-4 md:px-15 gap-4 border-b bg-white sticky top-0 z-20"
+      className="h-16 md:h-[72px] flex items-center justify-between px-4 md:px-15 gap-4 border-b bg-white sticky top-0 z-30"
       style={{ borderColor: '#ECE8E5' }}
     >
       {/* Left side: Hamburger (Mobile Only) & Search */}
@@ -38,41 +118,115 @@ export default function TopHeader({ setMobileOpen }) {
         >
           <Menu size={20} />
         </button>
-
-        {/* Search Bar */}
-        {/* <div
-          className="flex items-center gap-3 rounded-full px-4 py-2 w-full max-w-[320px] md:max-w-[420px]"
-          style={{ backgroundColor: '#F6F4F3' }}
-        >
-          <Search size={16} className="text-gray-400 flex-shrink-0" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-transparent text-sm outline-none flex-1 text-gray-600 placeholder-gray-400 min-w-0"
-          />
-        </div> */}
       </div>
 
       {/* Right side Actions */}
       <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-        <button className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors">
-          <Bell size={18} className="text-gray-500" />
-          <span
-            className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
-            style={{ backgroundColor: '#A55632' }}
-          />
-        </button>
+        {/* Notifications Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button 
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className={`relative p-2 rounded-xl transition-all duration-200 ${isDropdownOpen ? 'bg-[#7c3a2d]/10 text-[#7c3a2d]' : 'hover:bg-gray-100 text-gray-500'}`}
+          >
+            <Bell size={18} className={isDropdownOpen ? 'text-[#7c3a2d]' : ''} />
+            {unreadCount > 0 && (
+              <span
+                className="absolute top-1 right-1 min-w-[16px] h-4 rounded-full bg-[#A55632] text-white text-[10px] font-bold flex items-center justify-center px-1 border-2 border-white"
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="px-5 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-800">Notifications</span>
+                  {unreadCount > 0 && (
+                    <span className="bg-[#7c3a2d]/10 text-[#7c3a2d] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {unreadCount} New
+                    </span>
+                  )}
+                </div>
+                <button 
+                  onClick={handleMarkAllAsRead}
+                  className="text-[11px] font-bold text-[#7c3a2d] hover:underline flex items-center gap-1"
+                >
+                  <CheckCheck size={12} />
+                  Mark all read
+                </button>
+              </div>
+
+              <div className="max-h-[400px] overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="py-12 flex flex-col items-center justify-center text-center px-6">
+                    <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                      <Bell size={20} className="text-slate-300" />
+                    </div>
+                    <p className="text-sm font-medium text-slate-900">No notifications yet</p>
+                    <p className="text-xs text-slate-500 mt-1">We'll let you know when something happens.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-50">
+                    {notifications?.map((n) => {
+                      const config = NOTIFICATION_ICONS[n.type] || { icon: Bell, color: "text-slate-400 bg-slate-50" };
+                      const Icon = config.icon;
+                      const isUnread = !n.readAt;
+
+                      return (
+                        <Link
+                          key={n._id}
+                          href={n.actionPath || '#'}
+                          onClick={() => {
+                            if (isUnread) handleMarkAsRead(n._id);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 group ${isUnread ? 'bg-amber-50/20' : ''}`}
+                        >
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${config.color} transition-transform group-hover:scale-105 shadow-sm`}>
+                            <Icon size={16} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                              <p className={`text-xs font-bold truncate ${isUnread ? 'text-slate-900' : 'text-slate-600'}`}>
+                                {n.title}
+                              </p>
+                              <span className="text-[10px] text-slate-400 whitespace-nowrap flex items-center gap-1">
+                                <Clock size={10} />
+                                {getTimeAgo(n.createdAt)}
+                              </span>
+                            </div>
+                            <p className={`text-[11px] leading-relaxed line-clamp-2 ${isUnread ? 'text-slate-600 font-medium' : 'text-slate-500'}`}>
+                              {n.body}
+                            </p>
+                          </div>
+                          {isUnread && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#7c3a2d] mt-1.5 shrink-0 shadow-[0_0_8px_rgba(124,58,45,0.4)]" />
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <Link 
+                href="/admin/notifications" 
+                onClick={() => setIsDropdownOpen(false)}
+                className="block py-3.5 text-center text-xs font-bold text-slate-600 bg-slate-50/80 hover:bg-slate-100 transition-colors border-t border-slate-100"
+              >
+                View all notifications
+                <ChevronRight size={14} className="inline ml-1" />
+              </Link>
+            </div>
+          )}
+        </div>
         
-        {/* <button className="hidden sm:block p-2 rounded-xl hover:bg-gray-100 transition-colors">
-          <Settings size={18} className="text-gray-500" />
-        </button> */}
-
-        <div className="hidden sm:block w-px h-6 bg-gray-200" />
-
         {/* Profile */}
-        <div className="flex items-center gap-2 cursor-pointer">
+        <div className="flex items-center gap-2 cursor-pointer group">
           <div
-            className="w-8 md:w-9 h-8 md:h-9 rounded-full flex items-center justify-center text-white text-xs md:text-sm font-semibold flex-shrink-0"
+            className="w-8 md:w-9 h-8 md:h-9 rounded-full flex items-center justify-center text-white text-xs md:text-sm font-semibold flex-shrink-0 transition-transform group-hover:scale-105"
             style={{ backgroundColor: '#A55632' }}
           >
             {initials}
