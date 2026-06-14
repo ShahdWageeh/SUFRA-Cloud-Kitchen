@@ -8,6 +8,47 @@ import MarketEdgeCard from "@/components/chef/branding/MarketEdgeCard";
 import { RefreshCw } from "lucide-react";
 import { brandingService } from "@/services";
 
+const fallbackColors = [
+    { name: "Terracotta Red", value: "#964326" },
+    { name: "Sage Green", value: "#0F766E" },
+    { name: "Creamy Linen", value: "#F5EBDD" },
+    { name: "Charcoal Ash", value: "#4A4A4A" },
+];
+
+const fallbackMarketEdge = [
+    "Appeals to urban professionals",
+    "Strong local identity",
+    "High social media potential",
+];
+
+const firstText = (value, fallback = "") => {
+    if (Array.isArray(value)) return value.find(Boolean) || fallback;
+    return value || fallback;
+};
+
+const normalizeBrandingResponse = (payload, form) => {
+    const responsePayload = payload?.data ?? payload;
+    const branding = responsePayload?.data ?? responsePayload ?? {};
+
+    return {
+        brandName: firstText(
+            branding.kitchenNames || branding.kitchenName || branding.brandName,
+            "Your Kitchen",
+        ),
+        slogan: firstText(branding.slogans || branding.slogan, ""),
+        description: branding.description || branding.bio || "",
+        tags: form?.cookingStyles || [],
+        colors:
+            Array.isArray(branding.colors) && branding.colors.length
+                ? branding.colors
+                : fallbackColors,
+        marketEdge:
+            Array.isArray(branding.marketEdge) && branding.marketEdge.length
+                ? branding.marketEdge
+                : fallbackMarketEdge,
+    };
+};
+
 export default function BrandRevealPage() {
     const router = useRouter();
     const [brandData, setBrandData] = useState(null);
@@ -29,25 +70,7 @@ export default function BrandRevealPage() {
 
                 setBrandingForm(parsedForm);
 
-                const mapped = {
-                    brandName: parsed.kitchenName || "Your Kitchen",
-                    slogan: parsed.slogan || "",
-                    description: parsed.description || "",
-                    tags: parsedForm?.cookingStyles || [],
-                    colors: [
-                        { name: "Terracotta Red", value: "#964326" },
-                        { name: "Sage Green", value: "#0F766E" },
-                        { name: "Creamy Linen", value: "#F5EBDD" },
-                        { name: "Charcoal Ash", value: "#4A4A4A" },
-                    ],
-                    marketEdge: [
-                        "Appeals to urban professionals",
-                        "Strong local identity",
-                        "High social media potential",
-                    ],
-                };
-
-                setBrandData(mapped);
+                setBrandData(normalizeBrandingResponse(parsed, parsedForm));
                 return;
             } catch (e) {
                 // fallthrough to defaults
@@ -62,17 +85,8 @@ export default function BrandRevealPage() {
             description:
                 "Born from generations of Levantine tradition, Amina's Authentic Bites brings soulful warmth of a home kitchen to your modern lifestyle.",
             tags: ["Authentic", "Heritage", "Levantine"],
-            colors: [
-                { name: "Terracotta Red", value: "#964326" },
-                { name: "Sage Green", value: "#0F766E" },
-                { name: "Creamy Linen", value: "#F5EBDD" },
-                { name: "Charcoal Ash", value: "#4A4A4A" },
-            ],
-            marketEdge: [
-                "Appeals to urban professionals",
-                "Strong local identity",
-                "High social media potential",
-            ],
+            colors: fallbackColors,
+            marketEdge: fallbackMarketEdge,
         });
     }, []);
 
@@ -143,8 +157,7 @@ export default function BrandRevealPage() {
 
                         try {
                             const result = await brandingService.generateKitchenBranding(brandingForm);
-                            const responsePayload = result?.data ?? result;
-                            const brandingResponse = responsePayload?.data ?? responsePayload;
+                            const brandingResponse = result?.data ?? result;
 
                             if (typeof window !== "undefined") {
                                 window.sessionStorage.setItem(
@@ -153,25 +166,13 @@ export default function BrandRevealPage() {
                                 );
                             }
 
-                            const updatedData = {
-                                brandName: brandingResponse?.kitchenName || "Your Kitchen",
-                                slogan: brandingResponse?.slogan || "",
-                                description: brandingResponse?.description || "",
-                                tags: brandingForm?.cookingStyles || [],
-                                colors: [
-                                    { name: "Terracotta Red", value: "#964326" },
-                                    { name: "Sage Green", value: "#0F766E" },
-                                    { name: "Creamy Linen", value: "#F5EBDD" },
-                                    { name: "Charcoal Ash", value: "#4A4A4A" },
-                                ],
-                                marketEdge: [
-                                    "Appeals to urban professionals",
-                                    "Strong local identity",
-                                    "High social media potential",
-                                ],
-                            };
-
-                            setBrandData(updatedData);
+                            setBrandData(
+                                normalizeBrandingResponse(
+                                    brandingResponse,
+                                    brandingForm,
+                                ),
+                            );
+                            setIsUsingFallback(false);
                         } catch (err) {
                             setError(
                                 err?.response?.data?.message ||

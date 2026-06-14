@@ -7,10 +7,11 @@ import { brandingService } from "@/services";
 import useAuth from "@/hooks/useAuth";
 import { Loader } from "@/components/ui";
 
+const unwrapBrandingResponse = (response) => response?.data ?? response;
+
 export default function BrandingPage() {
   const router = useRouter();
   const { loading, user } = useAuth();
-  console.log("user log", user);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -73,6 +74,7 @@ export default function BrandingPage() {
     const payload = {
       cookingStyles: selectedStyles,
       signatureDish,
+      audience,
       story,
     };
 
@@ -80,9 +82,13 @@ export default function BrandingPage() {
       setLoadingSubmit(true);
 
       const result = await brandingService.generateKitchenBranding(payload);
+      const brandingResponse = unwrapBrandingResponse(result);
 
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("brandingResponse", JSON.stringify(result.data));
+        sessionStorage.setItem(
+          "brandingResponse",
+          JSON.stringify(brandingResponse),
+        );
         sessionStorage.setItem("brandingForm", JSON.stringify(payload));
       }
 
@@ -254,8 +260,9 @@ export default function BrandingPage() {
 
               <p className="text-sm leading-relaxed">
                 Be descriptive! Mentioning specific ingredients like
-                "hand-pressed Palestinian olive oil" or "Slow-roasted za'atar"
-                helps foodies find exactly what they're craving.
+                &quot;hand-pressed Palestinian olive oil&quot; or
+                &quot;Slow-roasted za&apos;atar&quot; helps foodies find exactly
+                what they&apos;re craving.
               </p>
             </div>
 

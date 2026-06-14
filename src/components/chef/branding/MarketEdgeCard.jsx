@@ -1,6 +1,8 @@
 import { TrendingUp } from "lucide-react";
 
 export default function MarketEdgeCard({ items }) {
+  const marketItems = Array.isArray(items) ? items : [];
+
   return (
     <div className="bg-[#0F766E] text-white rounded-3xl p-6 border border-gray-300">
 
@@ -12,7 +14,7 @@ export default function MarketEdgeCard({ items }) {
       </div>
 
       <ul className="space-y-4">
-        {items.map((item) => (
+        {marketItems.map((item) => (
           <li
             key={item}
             className="text-sm"

@@ -1,4 +1,6 @@
 export default function BrandPaletteCard({ colors }) {
+  const palette = Array.isArray(colors) ? colors : [];
+
   return (
     <div className="bg-white rounded-3xl border border-gray-300 p-6">
 
@@ -8,8 +10,8 @@ export default function BrandPaletteCard({ colors }) {
 
       <div className="grid grid-cols-2 gap-4">
 
-        {colors.map((color) => (
-          <div key={color.name}>
+        {palette.map((color) => (
+          <div key={color.name || color.value}>
             <div
               className="h-16 rounded-xl"
               style={{

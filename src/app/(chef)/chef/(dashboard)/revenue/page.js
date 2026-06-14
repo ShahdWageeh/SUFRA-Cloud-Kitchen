@@ -17,6 +17,75 @@ import toast from "react-hot-toast";
 import { Card, Button, Modal, Input } from "@/components/ui";
 import { settlementService, withdrawalService } from "@/services";
 
+const listKeys = [
+  "earnings",
+  "withdrawals",
+  "records",
+  "items",
+  "results",
+  "docs",
+  "data",
+];
+
+const extractList = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== "object") return [];
+
+  for (const key of listKeys) {
+    const value = payload[key];
+    if (Array.isArray(value)) return value;
+
+    if (value && typeof value === "object") {
+      const nested = extractList(value);
+      if (nested.length) return nested;
+    }
+  }
+
+  return [];
+};
+
+const extractObject = (payload) => {
+  if (!payload || typeof payload !== "object") return null;
+  if (payload.data && !Array.isArray(payload.data)) return payload.data;
+  return payload;
+};
+
+const getNumber = (record, keys) => {
+  for (const key of keys) {
+    const value = record?.[key];
+    if (value !== undefined && value !== null && value !== "") {
+      return Number(value) || 0;
+    }
+  }
+
+  return 0;
+};
+
+const getDate = (record) =>
+  record?.createdAt ||
+  record?.updatedAt ||
+  record?.date ||
+  record?.paidAt ||
+  record?.completedAt;
+
+const getOrderLabel = (earning) => {
+  const order = earning?.order || earning?.orderId || earning?.orderNum;
+  const value =
+    order?.orderNumber ||
+    order?.orderNo ||
+    order?.code ||
+    order?._id ||
+    order?.id ||
+    earning?.orderNumber ||
+    earning?.orderNo ||
+    earning?.orderCode ||
+    earning?.orderId ||
+    earning?.id ||
+    earning?._id;
+
+  return value ? String(value).substring(0, 8).toUpperCase() : "N/A";
+};
+
 export default function RevenuePage() {
   const [wallet, setWallet] = useState(null);
   const [earnings, setEarnings] = useState([]);
@@ -34,9 +103,10 @@ export default function RevenuePage() {
         settlementService.getEarnings(),
         withdrawalService.getHistory(),
       ]);
-      setWallet(walletRes.data);
-      setEarnings(earningsRes.data || []);
-      setWithdrawals(withdrawalsRes.data || []);
+
+      setWallet(extractObject(walletRes));
+      setEarnings(extractList(earningsRes));
+      setWithdrawals(extractList(withdrawalsRes));
     } catch (error) {
       console.error("Failed to load revenue data:", error);
       toast.error("Failed to load revenue data. Please try again later.");
@@ -58,7 +128,8 @@ export default function RevenuePage() {
       return;
     }
 
-    if (wallet && amount > wallet.availableBalance) {
+    const availableBalance = wallet?.availableBalance || wallet?.balance || 0;
+    if (amount > availableBalance) {
       toast.error("Withdrawal amount cannot exceed available balance");
       return;
     }
@@ -75,13 +146,12 @@ export default function RevenuePage() {
         setIsModalOpen(false);
         setRequestData({ amount: "", notes: "" });
 
-        // Refresh wallet and withdrawal history
         const [walletRes, withdrawalsRes] = await Promise.all([
           settlementService.getWallet(),
           withdrawalService.getHistory(),
         ]);
-        setWallet(walletRes.data);
-        setWithdrawals(withdrawalsRes.data || []);
+        setWallet(extractObject(walletRes));
+        setWithdrawals(extractList(withdrawalsRes));
       }
     } catch (error) {
       const message =
@@ -142,7 +212,10 @@ export default function RevenuePage() {
                   Available Balance
                 </p>
                 <h3 className="mt-2 text-4xl font-bold text-[#2f221d]">
-                  ${wallet?.availableBalance?.toFixed(2) || "0.00"}
+                  $
+                  {(wallet?.availableBalance ?? wallet?.balance ?? 0).toFixed(
+                    2,
+                  )}
                 </h3>
               </div>
               <div className="rounded-2xl bg-[#f6efed] p-4 text-primary">
@@ -153,9 +226,13 @@ export default function RevenuePage() {
             <div className="mt-8 flex items-center gap-4">
               <Button
                 onClick={() => setIsModalOpen(true)}
-                disabled={!wallet || wallet.availableBalance <= 0}
+                disabled={
+                  !wallet ||
+                  (wallet?.availableBalance ?? wallet?.balance ?? 0) <= 0
+                }
                 className={`flex-1 rounded-xl py-4 text-sm font-bold transition flex items-center justify-center gap-2 ${
-                  !wallet || wallet.availableBalance <= 0
+                  !wallet ||
+                  (wallet?.availableBalance ?? wallet?.balance ?? 0) <= 0
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed border-none"
                     : "bg-primary text-white hover:bg-primary-container"
                 }`}
@@ -175,7 +252,18 @@ export default function RevenuePage() {
                 <h3 className="mt-2 text-3xl font-bold text-[#2f221d]">
                   $
                   {earnings
-                    .reduce((sum, e) => sum + (Number(e.amount) || 0), 0)
+                    .reduce(
+                      (sum, e) =>
+                        sum + getNumber(e, [
+                          "amount",
+                          "earnedAmount",
+                          "chefEarning",
+                          "chefShare",
+                          "netAmount",
+                          "total",
+                        ]),
+                      0,
+                    )
                     .toFixed(2)}
                 </h3>
                 <p className="mt-2 text-xs text-[#7e6a63]">
@@ -224,28 +312,36 @@ export default function RevenuePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#ebdfd9]">
-                    {earnings.map((earning) => (
-                      <tr
-                        key={earning._id}
-                        className="hover:bg-[#faf8f6] transition-colors"
-                      >
-                        <td className="whitespace-nowrap px-6 py-4 font-medium text-[#2f221d]">
-                          {earning.createdAt
-                            ? new Date(earning.createdAt).toLocaleDateString()
-                            : "N/A"}
-                        </td>
-                        <td className="px-6 py-4 text-[#7e6a63]">
-                          {earning.orderId
-                            ? String(earning.orderId)
-                                .substring(0, 8)
-                                .toUpperCase()
-                            : "N/A"}
-                        </td>
-                        <td className="px-6 py-4 font-bold text-primary">
-                          +${(Number(earning.amount) || 0).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
+                    {earnings.map((earning, index) => {
+                      const itemDate = getDate(earning);
+                      const amountValue = getNumber(earning, [
+                        "amount",
+                        "earnedAmount",
+                        "chefEarning",
+                        "chefShare",
+                        "netAmount",
+                        "total",
+                      ]);
+
+                      return (
+                        <tr
+                          key={earning._id || earning.id || index}
+                          className="hover:bg-[#faf8f6] transition-colors"
+                        >
+                          <td className="whitespace-nowrap px-6 py-4 font-medium text-[#2f221d]">
+                            {itemDate
+                              ? new Date(itemDate).toLocaleDateString()
+                              : "N/A"}
+                          </td>
+                          <td className="px-6 py-4 text-[#7e6a63]">
+                            {getOrderLabel(earning)}
+                          </td>
+                          <td className="px-6 py-4 font-bold text-primary">
+                            +${(Number(amountValue) || 0).toFixed(2)}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               ) : (
@@ -292,26 +388,32 @@ export default function RevenuePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#ebdfd9]">
-                    {withdrawals.map((withdrawal) => (
-                      <tr
-                        key={withdrawal._id}
-                        className="hover:bg-[#faf8f6] transition-colors"
-                      >
-                        <td className="whitespace-nowrap px-6 py-4 font-medium text-[#2f221d]">
-                          {withdrawal.createdAt
-                            ? new Date(
-                                withdrawal.createdAt,
-                              ).toLocaleDateString()
-                            : "N/A"}
-                        </td>
-                        <td className="px-6 py-4 font-bold text-[#2f221d]">
-                          ${(Number(withdrawal.amount) || 0).toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4">
-                          {getStatusBadge(withdrawal.status)}
-                        </td>
-                      </tr>
-                    ))}
+                    {withdrawals.map((withdrawal, index) => {
+                      const wDate = getDate(withdrawal);
+                      return (
+                        <tr
+                          key={withdrawal._id || withdrawal.id || index}
+                          className="hover:bg-[#faf8f6] transition-colors"
+                        >
+                          <td className="whitespace-nowrap px-6 py-4 font-medium text-[#2f221d]">
+                            {wDate
+                              ? new Date(wDate).toLocaleDateString()
+                              : "N/A"}
+                          </td>
+                          <td className="px-6 py-4 font-bold text-[#2f221d]">
+                            $
+                            {getNumber(withdrawal, [
+                              "amount",
+                              "total",
+                              "requestedAmount",
+                            ]).toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4">
+                            {getStatusBadge(withdrawal.status)}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               ) : (
@@ -345,7 +447,7 @@ export default function RevenuePage() {
               Current Balance
             </p>
             <p className="text-2xl font-bold text-[#2f221d]">
-              ${wallet?.availableBalance?.toFixed(2) || "0.00"}
+              ${(wallet?.availableBalance ?? wallet?.balance ?? 0).toFixed(2)}
             </p>
           </div>
 
@@ -354,7 +456,7 @@ export default function RevenuePage() {
             type="number"
             step="0.01"
             min="0.01"
-            max={wallet?.availableBalance}
+            max={wallet?.availableBalance ?? wallet?.balance}
             placeholder="0.00"
             value={requestData.amount}
             onChange={(e) =>

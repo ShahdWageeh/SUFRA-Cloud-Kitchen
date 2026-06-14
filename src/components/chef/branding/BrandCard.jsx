@@ -2,6 +2,8 @@ import LogoConceptCard from "@/components/chef/branding/LogoConceptCard";
 
 
 export default function BrandCard({ data }) {
+  const tags = Array.isArray(data?.tags) ? data.tags : [];
+
   return (
     <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-300">
 
@@ -35,7 +37,7 @@ export default function BrandCard({ data }) {
           </p>
 
           <div className="flex flex-wrap gap-2 mt-6">
-            {data.tags.map((tag) => (
+            {tags.map((tag) => (
               <span
                 key={tag}
                 className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full"
