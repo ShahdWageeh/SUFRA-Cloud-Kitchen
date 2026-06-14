@@ -9,7 +9,7 @@ import MealsGrid from "@/components/public/MealsGrid";
 import ChefsGrid from "@/components/public/ChefsGrid";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { SearchInput } from "@/components/ui";
+import { SearchInput, Loader } from "@/components/ui";
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -112,7 +112,8 @@ export default function SearchPage() {
 
           <div className="mt-8">
             {isLoading ? (
-              <div className="py-20 text-center">
+              <div className="py-20 flex flex-col items-center justify-center gap-4">
+                <Loader />
                 <p className="text-text-secondary">Searching...</p>
               </div>
             ) : (

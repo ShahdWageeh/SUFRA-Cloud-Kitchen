@@ -22,6 +22,7 @@ import SocialButton from "@/components/auth/SocialButton";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "react-hot-toast";
 import GoogleLoginButton from "./GoogleLoginButton";
+import { Loader } from "@/components/ui";
 
 export default function RegisterForm({ accountType, endpoint }) {
   const { register: registerUser, loading } = useAuth();
@@ -65,6 +66,7 @@ export default function RegisterForm({ accountType, endpoint }) {
   };
   return (
     <section className="relative min-h-dvh overflow-hidden bg-background">
+      {loading && <Loader fullPage={true} />}
       <div
         className="absolute inset-0 bg-[url('/registerBackground.jpg')] bg-cover bg-center"
         aria-hidden="true"
@@ -180,9 +182,9 @@ export default function RegisterForm({ accountType, endpoint }) {
               <AuthDivider>Or continue with</AuthDivider>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <GoogleLoginButton role={accountType} />{" "}
-              <SocialButton icon={faFacebook}>Facebook</SocialButton>
+              {/* <SocialButton icon={faFacebook}>Facebook</SocialButton> */}
             </div>
 
             <p className="mt-8 text-center text-xs text-text-secondary">

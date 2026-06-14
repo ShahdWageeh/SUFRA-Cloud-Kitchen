@@ -11,9 +11,9 @@ import {
   ChevronRight,
   RefreshCw,
   AlertTriangle,
-  Loader2,
   Package,
 } from "lucide-react";
+import { Loader } from "@/components/ui";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -173,9 +173,8 @@ function MetricWidget({ label, value, valueClass }) {
 
 function MetricSkeleton() {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm min-w-[100px]">
-      <div className="h-2.5 bg-slate-100 rounded animate-pulse w-14 mb-2" />
-      <div className="h-6 bg-slate-100 rounded animate-pulse w-10" />
+    <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm min-w-[100px] flex items-center justify-center h-[54px]">
+      <Loader size={20} className="p-0" />
     </div>
   );
 }
@@ -183,11 +182,11 @@ function MetricSkeleton() {
 function SkeletonRow() {
   return (
     <tr className="border-b border-slate-100">
-      {[...Array(7)].map((_, i) => (
-        <td key={i} className="px-5 py-4">
-          <div className="h-4 bg-slate-100 rounded animate-pulse w-full" />
-        </td>
-      ))}
+      <td colSpan={7} className="px-5 py-8">
+        <div className="flex justify-center">
+          <Loader />
+        </div>
+      </td>
     </tr>
   );
 }
@@ -572,7 +571,7 @@ export default function LiveOrdersControl() {
           <p className="text-sm text-slate-500">
             {loading ? (
               <span className="flex items-center gap-1.5 text-xs">
-                <Loader2 size={12} className="animate-spin" /> Loading…
+                <Loader size={12} className="p-0" /> Loading…
               </span>
             ) : (
               <>

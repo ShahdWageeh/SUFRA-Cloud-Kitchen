@@ -5,3 +5,4 @@ export { default as Modal } from "./Modal";
 export { default as UploadZone } from "./UploadZone";
 export { default as CategoriesSlider } from "./CategoriesSlider";
 export { default as SearchInput } from "./SearchInput";
+export { default as Loader } from "./Loader";
