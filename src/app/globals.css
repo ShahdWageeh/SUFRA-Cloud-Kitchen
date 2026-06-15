@@ -132,6 +132,26 @@ html[dir="rtl"] input[type="email"] {
     color: var(--color-text-primary);
   }
 
+  .dark input,
+  .dark textarea,
+  .dark select,
+  .dark [contenteditable] {
+    background-color: var(--color-surface) !important;
+    color: var(--color-text-primary) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder,
+  .dark select::placeholder {
+    color: rgba(255, 255, 255, 0.65) !important;
+  }
+
+  .dark option {
+    background-color: var(--color-surface) !important;
+    color: var(--color-text-primary) !important;
+  }
+
   .dark .bg-white,
   .dark [class*="bg-white/"],
   .dark .bg-slate-50,
