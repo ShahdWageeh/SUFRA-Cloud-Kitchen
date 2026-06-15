@@ -1,9 +1,11 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Search, Bell, Settings, Menu, Clock, CheckCheck, Trash2, X, ChevronRight, Shield, MessageSquare, Wallet } from 'lucide-react'
+import { Bell, Menu, Clock, CheckCheck, ChevronRight, Shield, MessageSquare, Wallet } from 'lucide-react'
 import useAuth from '@/hooks/useAuth'
 import { notificationService } from '@/services'
+import { extractUnreadCount, getNotificationDestination } from '@/utils/adminNotifications'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
 const NOTIFICATION_ICONS = {
@@ -40,6 +42,7 @@ function getTimeAgo(date) {
 
 export default function TopHeader({ setMobileOpen }) {
   const { user } = useAuth()
+  const router = useRouter()
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -52,7 +55,7 @@ export default function TopHeader({ setMobileOpen }) {
   const fetchUnreadCount = async () => {
     try {
       const res = await notificationService.getUnreadCount();
-      if (res.success) setUnreadCount(res.data.count || 0);
+      if (res.success) setUnreadCount(extractUnreadCount(res));
     } catch (err) {}
   };
 
@@ -68,8 +71,10 @@ export default function TopHeader({ setMobileOpen }) {
   };
 
   useEffect(() => {
-    fetchUnreadCount();
-    fetchRecentNotifications();
+    queueMicrotask(() => {
+      fetchUnreadCount();
+      fetchRecentNotifications();
+    });
     const interval = setInterval(() => {
       fetchUnreadCount();
       if (isDropdownOpen) fetchRecentNotifications();
@@ -87,12 +92,22 @@ export default function TopHeader({ setMobileOpen }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleMarkAsRead = async (id, e) => {
-    try {
-      await notificationService.markAsRead(id);
-      setNotifications(prev => prev.map(n => n._id === id ? { ...n, readAt: new Date() } : n));
+  const handleNotificationClick = async (notification) => {
+    const destination = getNotificationDestination(notification);
+    const isUnread = !notification.readAt;
+
+    setIsDropdownOpen(false);
+    if (isUnread) {
+      setNotifications(prev => prev.map(n => n._id === notification._id ? { ...n, readAt: new Date() } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (err) {}
+      try {
+        await notificationService.markAsRead(notification._id);
+      } catch (err) {
+        fetchUnreadCount();
+        fetchRecentNotifications();
+      }
+    }
+    router.push(destination);
   };
 
   const handleMarkAllAsRead = async () => {
@@ -165,7 +180,7 @@ export default function TopHeader({ setMobileOpen }) {
                       <Bell size={20} className="text-slate-300" />
                     </div>
                     <p className="text-sm font-medium text-slate-900">No notifications yet</p>
-                    <p className="text-xs text-slate-500 mt-1">We'll let you know when something happens.</p>
+                    <p className="text-xs text-slate-500 mt-1">We will let you know when something happens.</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-50">
@@ -173,16 +188,16 @@ export default function TopHeader({ setMobileOpen }) {
                       const config = NOTIFICATION_ICONS[n.type] || { icon: Bell, color: "text-slate-400 bg-slate-50" };
                       const Icon = config.icon;
                       const isUnread = !n.readAt;
+                      const destination = getNotificationDestination(n);
 
                       return (
-                        <Link
+                        <button
                           key={n._id}
-                          href={n.actionPath || '#'}
-                          onClick={() => {
-                            if (isUnread) handleMarkAsRead(n._id);
-                            setIsDropdownOpen(false);
-                          }}
-                          className={`flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 group ${isUnread ? 'bg-amber-50/20' : ''}`}
+                          type="button"
+                          onClick={() => handleNotificationClick(n)}
+                          className={`w-full text-left flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 group ${isUnread ? 'bg-amber-50/20' : ''}`}
+                          aria-label={`Open notification: ${n.title || 'Notification'}`}
+                          title={destination}
                         >
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${config.color} transition-transform group-hover:scale-105 shadow-sm`}>
                             <Icon size={16} />
@@ -204,7 +219,7 @@ export default function TopHeader({ setMobileOpen }) {
                           {isUnread && (
                             <div className="w-1.5 h-1.5 rounded-full bg-[#7c3a2d] mt-1.5 shrink-0 shadow-[0_0_8px_rgba(124,58,45,0.4)]" />
                           )}
-                        </Link>
+                        </button>
                       );
                     })}
                   </div>

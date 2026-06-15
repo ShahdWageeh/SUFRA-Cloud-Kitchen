@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import useAuth from "@/hooks/useAuth";
 import {
   Check,
@@ -21,9 +21,11 @@ export default function ChefVerificationModeration() {
   const [error, setError] = useState(null);
   const [processingId, setProcessingId] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [highlightedRequestId, setHighlightedRequestId] = useState(null);
+  const requestRefs = useRef({});
 
   useEffect(() => {
-    setIsMounted(true);
+    queueMicrotask(() => setIsMounted(true));
   }, []);
 
   const loadPendingRequests = useCallback(async () => {
@@ -100,9 +102,43 @@ export default function ChefVerificationModeration() {
 
   useEffect(() => {
     if (isMounted) {
-      loadPendingRequests();
+      queueMicrotask(loadPendingRequests);
     }
   }, [loadPendingRequests, isMounted]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || requests.length === 0) return;
+
+    const entityId = new URLSearchParams(window.location.search).get("entity");
+    if (!entityId) return;
+
+    const targetRequest = requests.find((request) => {
+      const chefId =
+        request.chefId && typeof request.chefId === "object"
+          ? request.chefId._id
+          : request.chefId;
+
+      return request._id === entityId || chefId === entityId;
+    });
+
+    if (!targetRequest) return;
+
+    queueMicrotask(() => {
+      requestRefs.current[targetRequest._id]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      setHighlightedRequestId(targetRequest._id);
+    });
+
+    const timeout = setTimeout(() => {
+      setHighlightedRequestId((current) =>
+        current === targetRequest._id ? null : current,
+      );
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [requests]);
 
   const handleUpdateStatus = async (requestId, targetStatus) => {
     setProcessingId(requestId);
@@ -219,11 +255,20 @@ export default function ChefVerificationModeration() {
             const chefContact = isChefObject
               ? `${request.chefId.email} | ${request.chefId.phone || "No Phone"}`
               : "";
+            const isHighlighted = highlightedRequestId === request._id;
 
             return (
               <div
                 key={request._id}
-                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden grid lg:grid-cols-[1fr_320px]"
+                ref={(node) => {
+                  if (node) requestRefs.current[request._id] = node;
+                  else delete requestRefs.current[request._id];
+                }}
+                className={`bg-white rounded-2xl border shadow-sm overflow-hidden grid lg:grid-cols-[1fr_320px] transition-all duration-500 ${
+                  isHighlighted
+                    ? "border-[#A55632] ring-4 ring-[#A55632]/20 shadow-lg"
+                    : "border-slate-200"
+                }`}
               >
                 <div className="p-6 space-y-6">
                   {/* Top Header Information Details safely extracted as specific primitives */}

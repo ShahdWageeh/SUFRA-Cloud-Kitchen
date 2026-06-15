@@ -15,8 +15,9 @@ import {
   AlertCircle
 } from "lucide-react";
 import { notificationService } from "@/services";
+import { getNotificationDestination } from "@/utils/adminNotifications";
 import { Loader } from "@/components/ui";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const NOTIFICATION_ICONS = {
@@ -53,9 +54,11 @@ function getTimeAgo(date) {
 }
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const unreadCount = notifications.filter(n => !n.readAt).length;
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -74,18 +77,26 @@ export default function NotificationsPage() {
   }, []);
 
   useEffect(() => {
-    fetchNotifications();
+    queueMicrotask(fetchNotifications);
   }, [fetchNotifications]);
 
-  const handleMarkAsRead = async (id) => {
-    try {
-      await notificationService.markAsRead(id);
-      setNotifications(prev => 
-        prev.map(n => n._id === id ? { ...n, readAt: new Date() } : n)
+  const handleNotificationClick = async (notification) => {
+    const destination = getNotificationDestination(notification);
+    const isUnread = !notification.readAt;
+
+    if (isUnread) {
+      setNotifications(prev =>
+        prev.map(n => n._id === notification._id ? { ...n, readAt: new Date() } : n)
       );
-    } catch (err) {
-      toast.error("Failed to mark notification as read.");
+      try {
+        await notificationService.markAsRead(notification._id);
+      } catch (err) {
+        toast.error("Failed to mark notification as read.");
+        fetchNotifications();
+      }
     }
+
+    router.push(destination);
   };
 
   const handleMarkAllAsRead = async () => {
@@ -122,12 +133,17 @@ export default function NotificationsPage() {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
             <Bell className="text-[#7c3a2d]" />
             Notifications
+            {unreadCount > 0 && (
+              <span className="rounded-full bg-[#7c3a2d] px-2.5 py-1 text-xs font-bold text-white">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             Stay updated with the latest activities from chefs and customers.
           </p>
         </div>
-        {notifications.some(n => !n.readAt) && (
+        {unreadCount > 0 && (
           <button
             onClick={handleMarkAllAsRead}
             disabled={actionLoading}
@@ -147,7 +163,7 @@ export default function NotificationsPage() {
             </div>
             <h3 className="text-lg font-semibold text-slate-900">No notifications yet</h3>
             <p className="text-sm text-slate-500 mt-1 max-w-xs">
-              When important events happen, they'll show up here.
+              When important events happen, they will show up here.
             </p>
           </div>
         ) : (
@@ -162,13 +178,14 @@ export default function NotificationsPage() {
               const isUnread = !notification.readAt;
 
               return (
-                <Link
+                <button
                   key={notification._id}
-                  href={notification.actionPath || "#"}
-                  onClick={() => isUnread && handleMarkAsRead(notification._id)}
-                  className={`flex items-start gap-4 p-5 transition-colors hover:bg-slate-50/80 group ${
+                  type="button"
+                  onClick={() => handleNotificationClick(notification)}
+                  className={`w-full text-left flex items-start gap-4 p-5 transition-colors hover:bg-slate-50/80 group ${
                     isUnread ? "bg-amber-50/30" : ""
                   }`}
+                  aria-label={`Open notification: ${notification.title || config.defaultTitle}`}
                 >
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${config.color} shadow-sm group-hover:scale-110 transition-transform`}>
                     <Icon size={24} />
@@ -218,7 +235,7 @@ export default function NotificationsPage() {
                       </div>
                     </div>
                   </div>
-                </Link>
+                </button>
               );
             })}
           </div>

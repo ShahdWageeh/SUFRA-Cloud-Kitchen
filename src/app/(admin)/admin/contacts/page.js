@@ -308,6 +308,16 @@ export default function ContactsManagement() {
     loadMessages();
   }, [loadMessages]);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || allMessages.length === 0) return;
+
+    const entityId = new URLSearchParams(window.location.search).get("entity");
+    if (!entityId) return;
+
+    const message = allMessages.find((item) => item._id === entityId);
+    if (message) queueMicrotask(() => setSelectedMessage(message));
+  }, [allMessages]);
+
   const handleMarkFinished = async (messageId) => {
     setMarkingId(messageId);
     try {
