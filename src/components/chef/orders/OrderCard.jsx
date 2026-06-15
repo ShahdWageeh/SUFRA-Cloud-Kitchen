@@ -42,11 +42,12 @@ export default function OrderCard({ order, orderNumber, onStatusChange }) {
     const imageSrc = order.items?.[0]?.image;
     const normalizeStatus = (status) => {
         if (!status) return "preparing";
-        if (status === "ready") return "out_for_delivery";
+        if (status === "ready" || status === "out_for_delivery") return "out_for_delivery";
+        if (status === "delivered") return "completed";
         return status;
     };
 
-    const status = normalizeStatus(order.status);
+    const status = normalizeStatus(order.items?.[0]?.status ?? order.status);
 
     const badgeText =
         status === "preparing"
@@ -67,7 +68,7 @@ export default function OrderCard({ order, orderNumber, onStatusChange }) {
             ? "Ready To Pick Up"
             : status === "out_for_delivery"
                 ? "Complete"
-                : "Completed";
+                : "Delivered";
 
     const isButtonDisabled = status === "completed";
     const nextStatus =
@@ -143,12 +144,12 @@ export default function OrderCard({ order, orderNumber, onStatusChange }) {
             <div className="mt-2 text-sm text-text-secondary">
                 
                 <div className="flex items-center gap-2">
-                    <Clock3 size={14} /> Pick Up Requested
+                    <Clock3 size={14} /> Delivery Requested
                 </div>
 
-                <p className="text-sm text-text-secondary mt-1">
+                {/* <p className="text-sm text-text-secondary mt-1">
                     <span className="flex items-center gap-2"> <Phone size={16} /> {customerPhone}</span>
-                </p>
+                </p> */}
             </div>
 
             <div className="flex gap-3 mt-auto pt-6">

@@ -16,8 +16,14 @@ export default function OrdersPage() {
 
   const normalizeStatus = (status) => {
     if (!status) return "preparing";
-    if (status === "ready") return "out_for_delivery";
+    if (status === "ready" || status === "out_for_delivery") return "out_for_delivery";
+    if (status === "delivered") return "completed";
     return status;
+  };
+
+  const getOrderStatus = (order) => {
+    const itemStatus = order.items?.[0]?.status;
+    return normalizeStatus(itemStatus ?? order.status);
   };
 
   const loadChefOrders = async () => {
@@ -49,9 +55,9 @@ export default function OrdersPage() {
     }
   };
 
-  const preparingOrders = orders.filter((o) => normalizeStatus(o.status) === "preparing");
-  const readyOrders = orders.filter((o) => normalizeStatus(o.status) === "out_for_delivery");
-  const completedOrders = orders.filter((o) => normalizeStatus(o.status) === "completed");
+  const preparingOrders = orders.filter((o) => getOrderStatus(o) === "preparing");
+  const readyOrders = orders.filter((o) => getOrderStatus(o) === "out_for_delivery");
+  const completedOrders = orders.filter((o) => getOrderStatus(o) === "completed");
 
   const visibleOrders =
     selectedStatus === "ready"
