@@ -116,7 +116,7 @@ export default async function MealDetailPage({ params }) {
                 <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">{meal.name}</h1>
                 <p className="mt-2 text-sm font-semibold text-text-secondary">by {meal.chefName}</p>
               </div>
-              <span className="text-2xl font-extrabold text-primary">${meal.price}</span>
+              <span className="text-2xl font-extrabold text-primary">EGP {meal.price}</span>
             </div>
 
             <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-text-secondary">

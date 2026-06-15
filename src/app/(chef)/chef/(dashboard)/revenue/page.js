@@ -212,8 +212,7 @@ export default function RevenuePage() {
                   Available Balance
                 </p>
                 <h3 className="mt-2 text-4xl font-bold text-[#2f221d]">
-                  $
-                  {(wallet?.availableBalance ?? wallet?.balance ?? 0).toFixed(
+                  EGP {(wallet?.availableBalance ?? wallet?.balance ?? 0).toFixed(
                     2,
                   )}
                 </h3>
@@ -250,8 +249,7 @@ export default function RevenuePage() {
                   Total Earned
                 </p>
                 <h3 className="mt-2 text-3xl font-bold text-[#2f221d]">
-                  $
-                  {earnings
+                  EGP {earnings
                     .reduce(
                       (sum, e) =>
                         sum + getNumber(e, [
@@ -337,7 +335,7 @@ export default function RevenuePage() {
                             {getOrderLabel(earning)}
                           </td>
                           <td className="px-6 py-4 font-bold text-primary">
-                            +${(Number(amountValue) || 0).toFixed(2)}
+                            +EGP {(Number(amountValue) || 0).toFixed(2)}
                           </td>
                         </tr>
                       );
@@ -401,8 +399,7 @@ export default function RevenuePage() {
                               : "N/A"}
                           </td>
                           <td className="px-6 py-4 font-bold text-[#2f221d]">
-                            $
-                            {getNumber(withdrawal, [
+                            EGP {getNumber(withdrawal, [
                               "amount",
                               "total",
                               "requestedAmount",

@@ -204,7 +204,7 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   Place Order & Pay
-                  <span className="ml-2 font-extrabold">${cartTotal.toFixed(2)}</span>
+                  <span className="ml-2 font-extrabold">EGP {cartTotal.toFixed(2)}</span>
                 </>
               )}
             </Button>
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
                     <div className="ml-4 flex flex-1 flex-col justify-center">
                       <h3 className="text-sm font-bold text-text-primary">{item.mealId.name}</h3>
                       <p className="text-xs text-text-secondary">Quantity: {item.quantity}</p>
-                      <p className="mt-1 text-sm font-bold text-primary">${(item.mealId.price * item.quantity).toFixed(2)}</p>
+                      <p className="mt-1 text-sm font-bold text-primary">EGP {(item.mealId.price * item.quantity).toFixed(2)}</p>
                     </div>
                   </li>
                 ))}
@@ -240,7 +240,7 @@ export default function CheckoutPage() {
               <dl className="mt-6 space-y-4 border-t border-primary-container pt-6">
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-text-secondary">Subtotal</dt>
-                  <dd className="text-sm font-bold text-text-primary">${cartTotal.toFixed(2)}</dd>
+                  <dd className="text-sm font-bold text-text-primary">EGP {cartTotal.toFixed(2)}</dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-text-secondary">Shipping</dt>
@@ -248,7 +248,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex items-center justify-between border-t border-primary-container pt-4">
                   <dt className="text-base font-bold text-text-primary">Total</dt>
-                  <dd className="text-base font-extrabold text-primary">${cartTotal.toFixed(2)}</dd>
+                  <dd className="text-base font-extrabold text-primary">EGP {cartTotal.toFixed(2)}</dd>
                 </div>
               </dl>
             </div>
@@ -259,7 +259,7 @@ export default function CheckoutPage() {
               className="lg:hidden bg-primary hover:bg-primary-container w-full rounded-full flex items-center justify-center gap-2 text-base font-bold shadow-md"
               disabled={loading}
             >
-              {loading ? "Processing..." : `Place Order - $${cartTotal.toFixed(2)}`}
+              {loading ? "Processing..." : `Place Order - EGP ${cartTotal.toFixed(2)}`}
             </Button>
 
             <div className="text-center">

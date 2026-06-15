@@ -17,7 +17,7 @@ const statIconMap = {
   followers: faUsers,
 };
 
-const OFFERING_FILTERS = ["All Items", "Main Course", "Sides", "Desserts"];
+const OFFERING_FILTERS = ["All Items"];
 
 async function getChefProfileData(chefId) {
   const state = {
@@ -74,6 +74,7 @@ export default async function ChefProfilePage({ params }) {
 
   return (
     <main className="min-h-screen bg-background text-text-primary">
+      {console.log(data)}
       <section className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:px-8">
         <div className="relative h-52 overflow-hidden rounded-t-md sm:h-64 lg:h-72">
           <Image
@@ -103,6 +104,7 @@ export default async function ChefProfilePage({ params }) {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h1 className="text-2xl font-bold">{chef.brandName}</h1>
+                  <p className="text-xs">By {data?.meals?.[0].chefName}</p>
                   <p className="mt-1 text-sm font-semibold text-primary">
                     <span aria-hidden="true">&ldquo;</span>
                     {chef.slogan}

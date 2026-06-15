@@ -158,12 +158,12 @@ export default function OrderDetailsPage({ params }) {
                         <h4 className="font-bold text-text-primary">{item.name}</h4>
                         <p className="mt-1 text-xs text-text-secondary line-clamp-2">{item.description}</p>
                       </div>
-                      <p className="font-bold text-primary">${item.unitPrice.toFixed(2)}</p>
+                      <p className="font-bold text-primary">EGP {item.unitPrice.toFixed(2)}</p>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                       <p className="text-sm font-semibold text-text-tertiary">Quantity: {item.quantity}</p>
                       <div className="flex items-center gap-4">
-                        <p className="text-sm font-extrabold text-text-primary">Subtotal: ${item.subtotal.toFixed(2)}</p>
+                        <p className="text-sm font-extrabold text-text-primary">Subtotal: EGP {item.subtotal.toFixed(2)}</p>
                         <Button
                           variant="outline"
                           size="sm"
@@ -218,7 +218,7 @@ export default function OrderDetailsPage({ params }) {
               <dl className="space-y-4">
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-text-secondary">Subtotal</dt>
-                  <dd className="text-sm font-bold text-text-primary">${order.totalAmount.toFixed(2)}</dd>
+                  <dd className="text-sm font-bold text-text-primary">EGP {order.totalAmount.toFixed(2)}</dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-text-secondary">Shipping</dt>
@@ -226,7 +226,7 @@ export default function OrderDetailsPage({ params }) {
                 </div>
                 <div className="flex items-center justify-between border-t border-primary-container pt-4">
                   <dt className="text-base font-bold text-text-primary">Total Paid</dt>
-                  <dd className="text-base font-extrabold text-primary">${order.totalAmount.toFixed(2)}</dd>
+                  <dd className="text-base font-extrabold text-primary">EGP {order.totalAmount.toFixed(2)}</dd>
                 </div>
               </dl>
               <div className="mt-6 rounded-xl bg-background p-4 text-center">

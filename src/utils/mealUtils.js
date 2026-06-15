@@ -1,8 +1,12 @@
 export function getChefName(chef, fallbackName) {
-  if (fallbackName && !/^[0-9a-fA-F]{24}$/.test(fallbackName) && !fallbackName.startsWith("chef-")) {
+  if (
+    fallbackName &&
+    !/^[0-9a-fA-F]{24}$/.test(fallbackName) &&
+    !fallbackName.startsWith("chef-")
+  ) {
     return fallbackName;
   }
-  
+
   if (!chef) return fallbackName || "Chef";
 
   if (typeof chef === "string") {
@@ -14,7 +18,9 @@ export function getChefName(chef, fallbackName) {
   }
 
   const name = [chef.firstName, chef.lastName].filter(Boolean).join(" ");
-  return name ? `Chef ${name}` : chef.kitchenName || chef.name || fallbackName || "Chef";
+  return name
+    ? `Chef ${name}`
+    : chef.kitchenName || chef.name || fallbackName || "Chef";
 }
 
 function getCategoryInfo(meal) {
@@ -54,7 +60,10 @@ export function normalizePublicMeal(meal) {
   const { slug: category, label: categoryLabel } = getCategoryInfo(meal);
   const images = getMealImages(meal);
 
-  const reviews = (meal.reviews?.length > 0) ? meal.reviews : (meal.recentReviews || meal.reviews || []);
+  const reviews =
+    meal.reviews?.length > 0
+      ? meal.reviews
+      : meal.recentReviews || meal.reviews || [];
   const reviewsCount = meal.reviewsCount ?? reviews.length;
 
   return {
@@ -66,7 +75,10 @@ export function normalizePublicMeal(meal) {
     categoryLabel,
     cuisine: meal.cuisine || categoryLabel,
     price: meal.price,
-    rating: typeof meal.averageRating === "number" ? meal.averageRating : (meal.rating || meal.ratingAverage || 4.8),
+    rating:
+      typeof meal.averageRating === "number"
+        ? meal.averageRating
+        : meal.rating || meal.ratingAverage || 4.8,
     reviews,
     reviewsCount,
     image: images[0],
@@ -74,7 +86,12 @@ export function normalizePublicMeal(meal) {
     badge: meal.badge,
     description: meal.description || "",
     ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : [],
-    totalCalories: meal.nutrition?.otherData?.totalCalories || meal.nutrition?.calories || null,
+    totalCalories:
+      meal.nutrition?.otherData?.totalCalories ||
+      meal.nutrition?.calories ||
+      null,
+    createdAt: meal.createdAt,
+    updatedAt: meal.updatedAt,
   };
 }
 
@@ -104,7 +121,8 @@ export function normalizeCategory(category) {
   return {
     id: category._id || category.id,
     label: category.name || category.title,
-    slug: category.slug || slugify(category.name || category.title || category._id),
+    slug:
+      category.slug || slugify(category.name || category.title || category._id),
     image: category.image,
   };
 }

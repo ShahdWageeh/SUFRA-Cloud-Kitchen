@@ -36,6 +36,9 @@ export default function Navbar() {
   const customerName =
     user?.firstName || user?.name?.split(" ")?.[0] || user?.email || "Customer";
   const avatarInitial = customerName.charAt(0).toUpperCase();
+  const isActive = (href) => {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   const closeMenus = () => {
     setOpen(false);
@@ -55,17 +58,35 @@ export default function Navbar() {
 
         {/* Desktop Links */}
         <div className="hidden text-sm md:flex items-center gap-8">
-          <Link href="/" className="text-primary font-semibold">
+          <Link
+            href="/"
+            className={`transition-colors ${
+              pathname === "/"
+                ? "text-primary font-semibold"
+                : "hover:text-primary"
+            }`}
+          >
             Browse
           </Link>
 
-          <Link href="/about" className="hover:text-primary transition-colors">
+          <Link
+            href="/about"
+            className={`transition-colors ${
+              isActive("/about")
+                ? "text-primary font-semibold"
+                : "hover:text-primary"
+            }`}
+          >
             About
           </Link>
 
           <Link
             href="/contact"
-            className="hover:text-primary transition-colors"
+            className={`transition-colors ${
+              isActive("/contact")
+                ? "text-primary font-semibold"
+                : "hover:text-primary"
+            }`}
           >
             Contact
           </Link>
