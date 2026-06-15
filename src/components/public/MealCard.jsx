@@ -18,7 +18,7 @@ export default function MealCard({ meal, featured = false }) {
             unoptimized
           />
           <span className="absolute right-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold text-primary shadow-sm">
-            ${meal.price}
+            EGP {meal.price}
           </span>
           {meal.badge && (
             <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">

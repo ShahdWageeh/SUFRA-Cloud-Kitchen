@@ -22,7 +22,9 @@ function SectionHeader({ title, subtitle, cta, ctaHref }) {
     <div className="mb-5 flex items-end justify-between gap-4">
       <div>
         <h2 className="text-xl font-bold text-text-primary">{title}</h2>
-        {subtitle && <p className="mt-1 text-xs text-text-secondary">{subtitle}</p>}
+        {subtitle && (
+          <p className="mt-1 text-xs text-text-secondary">{subtitle}</p>
+        )}
       </div>
       {cta && ctaHref && (
         <Link
@@ -57,7 +59,7 @@ function toDashboardMeal(meal) {
   return {
     id: normalized.id,
     name: normalized.name,
-    price: `$${normalized.price}`,
+    price: `EGP ${normalized.price}`,
     image: normalized.image,
     rating: normalized.rating,
     chef: normalized.chefName,
@@ -70,7 +72,7 @@ function toFeaturedMeal(meal) {
 
   return {
     id: normalized.id,
-    eyebrow: "Popular Today",
+    eyebrow: "NEW TODAY",
     name: normalized.name,
     description: normalized.description,
     image: normalized.image,
@@ -84,12 +86,23 @@ function DashboardChefCard({ chef }) {
     <article className="rounded-md bg-white p-4 text-center shadow-sm ring-1 ring-primary/10">
       <Link href={`/chefs/${chef.id}`} className="block">
         <div className="relative mx-auto h-16 w-16 overflow-hidden rounded-full">
-          <Image src={chef.image} alt={chef.name} fill sizes="64px" className="object-cover" />
+          <Image
+            src={chef.image}
+            alt={chef.name}
+            fill
+            sizes="64px"
+            className="object-cover"
+          />
         </div>
-        <h3 className="mt-3 text-sm font-bold hover:text-primary">{chef.name}</h3>
+        <h3 className="mt-3 text-sm font-bold hover:text-primary">
+          {chef.name}
+        </h3>
         <p className="text-xs text-text-secondary">{chef.specialty}</p>
         <p className="mt-2 text-[11px] text-text-secondary">
-          <FontAwesomeIcon icon={faStar} className="mr-1 h-2.5 w-2.5 text-primary" />
+          <FontAwesomeIcon
+            icon={faStar}
+            className="mr-1 h-2.5 w-2.5 text-primary"
+          />
           {chef.rating} - {chef.distance}
         </p>
       </Link>
@@ -108,7 +121,13 @@ function DashboardMealCard({ meal }) {
     <article className="overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-primary/10">
       <Link href={`/meals/${meal.id}`} className="block">
         <div className="relative aspect-[1.45] overflow-hidden">
-          <Image src={meal.image} alt={meal.name} fill sizes="(max-width: 768px) 100vw, 28vw" className="object-cover" />
+          <Image
+            src={meal.image}
+            alt={meal.name}
+            fill
+            sizes="(max-width: 768px) 100vw, 28vw"
+            className="object-cover"
+          />
           <span className="absolute left-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold text-white">
             {meal.price}
           </span>
@@ -124,16 +143,23 @@ function DashboardMealCard({ meal }) {
       </Link>
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <Link href={`/meals/${meal.id}`} className="text-sm font-bold leading-snug hover:text-primary">
+          <Link
+            href={`/meals/${meal.id}`}
+            className="text-sm font-bold leading-snug hover:text-primary"
+          >
             {meal.name}
           </Link>
           <span className="rounded-full bg-teal-50 px-2 py-1 text-[10px] font-bold text-teal-700">
             {meal.rating}
           </span>
         </div>
-        <p className="mt-1 text-xs leading-5 text-text-secondary">{meal.description}</p>
+        <p className="mt-1 text-xs leading-5 text-text-secondary">
+          {meal.description}
+        </p>
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs font-semibold text-text-secondary">{meal.chef}</span>
+          <span className="text-xs font-semibold text-text-secondary">
+            {meal.chef}
+          </span>
           <AddToCartButton
             mealId={meal.id}
             aria-label={`Order ${meal.name}`}
@@ -146,7 +172,6 @@ function DashboardMealCard({ meal }) {
     </article>
   );
 }
-
 
 export default function CustomerDashboard() {
   const { user, refreshUser } = useAuth();
@@ -171,34 +196,45 @@ export default function CustomerDashboard() {
         setIsLoading(true);
         setError("");
 
-        const [categoriesResponse, chefsResponse, mealsResponse] = await Promise.all([
-          categoryService.getActiveCategories(),
-          chefService.getVerifiedChefs(),
-          mealService.getActiveMeals(),
-        ]);
+        const [categoriesResponse, chefsResponse, mealsResponse] =
+          await Promise.all([
+            categoryService.getActiveCategories(),
+            chefService.getVerifiedChefs(),
+            mealService.getActiveMeals(),
+          ]);
 
         if (!isMounted) return;
 
-        const sliderCategories = (categoriesResponse.data || []).map((category) => {
-          const normalized = normalizeCategory(category);
-          return {
-            id: normalized.id,
-            title: normalized.label,
-            slug: normalized.slug,
-            image: normalized.image,
-          };
-        });
+        const sliderCategories = (categoriesResponse.data || []).map(
+          (category) => {
+            const normalized = normalizeCategory(category);
+            return {
+              id: normalized.id,
+              title: normalized.label,
+              slug: normalized.slug,
+              image: normalized.image,
+            };
+          },
+        );
 
-        const chefs = (chefsResponse.data || []).slice(0, 4).map(toDashboardChef);
+        const chefs = (chefsResponse.data || [])
+          .slice(0, 4)
+          .map(toDashboardChef);
         const meals = (mealsResponse.data || []).map(normalizePublicMeal);
 
         setCategories(sliderCategories);
         setTopChefs(chefs);
         setRecommendedMeals(meals.slice(0, 3).map(toDashboardMeal));
-        setFeaturedMeal(meals.length ? toFeaturedMeal(meals[meals.length - 1]) : null);
+        const latestMeal = [...meals].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        )[0];
+        setFeaturedMeal(latestMeal ? toFeaturedMeal(latestMeal) : null);
       } catch (err) {
         if (isMounted) {
-          setError(err.response?.data?.message || "Dashboard content is unavailable right now.");
+          setError(
+            err.response?.data?.message ||
+              "Dashboard content is unavailable right now.",
+          );
         }
       } finally {
         if (isMounted) {
@@ -222,21 +258,30 @@ export default function CustomerDashboard() {
             <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
               Welcome back, <span className="text-primary">{firstName}!</span>
             </h1>
-            <p className="mt-1 text-2xl font-bold sm:text-3xl">What are you craving today?</p>
+            <p className="mt-1 text-2xl font-bold sm:text-3xl">
+              What are you craving today?
+            </p>
             <p className="mt-2 text-sm text-text-secondary">
-              Authentic home-cooked meals from the best chefs in your neighborhood.
+              Authentic home-cooked meals from the best chefs in your
+              neighborhood.
             </p>
           </div>
         </section>
 
         <section className="mt-8">
-          <SectionHeader title="Explore Cuisines" cta="See All" ctaHref="/meals/categories" />
+          <SectionHeader
+            title="Explore Cuisines"
+            cta="See All"
+            ctaHref="/meals/categories"
+          />
           {isLoading ? (
             <p className="text-sm text-text-secondary">Loading cuisines...</p>
           ) : error ? (
             <p className="text-sm text-text-secondary">{error}</p>
           ) : categories.length === 0 ? (
-            <p className="text-sm text-text-secondary">No categories available right now.</p>
+            <p className="text-sm text-text-secondary">
+              No categories available right now.
+            </p>
           ) : (
             <CategoriesSlider categories={categories} />
           )}
@@ -250,7 +295,9 @@ export default function CustomerDashboard() {
           {isLoading ? (
             <p className="text-sm text-text-secondary">Loading chefs...</p>
           ) : topChefs.length === 0 ? (
-            <p className="text-sm text-text-secondary">No verified chefs available right now.</p>
+            <p className="text-sm text-text-secondary">
+              No verified chefs available right now.
+            </p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {topChefs.map((chef) => (
@@ -263,9 +310,13 @@ export default function CustomerDashboard() {
         <section className="mt-10">
           <SectionHeader title={`Recommended for ${firstName}`} />
           {isLoading ? (
-            <p className="text-sm text-text-secondary">Loading recommendations...</p>
+            <p className="text-sm text-text-secondary">
+              Loading recommendations...
+            </p>
           ) : recommendedMeals.length === 0 ? (
-            <p className="text-sm text-text-secondary">No meal recommendations available right now.</p>
+            <p className="text-sm text-text-secondary">
+              No meal recommendations available right now.
+            </p>
           ) : (
             <div className="grid gap-5 md:grid-cols-3">
               {recommendedMeals.map((meal) => (
@@ -282,7 +333,9 @@ export default function CustomerDashboard() {
                 <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
                   {featuredMeal.eyebrow}
                 </span>
-                <h2 className="mt-4 max-w-sm text-3xl font-bold leading-tight">{featuredMeal.name}</h2>
+                <h2 className="mt-4 max-w-sm text-3xl font-bold leading-tight">
+                  {featuredMeal.name}
+                </h2>
                 <p className="mt-3 max-w-md text-sm leading-6 text-text-secondary">
                   {featuredMeal.description}
                 </p>

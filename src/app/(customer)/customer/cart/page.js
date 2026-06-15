@@ -108,7 +108,7 @@ export default function CartPage() {
                         </p>
                       </div>
                       <p className="mt-1 text-sm font-bold text-primary">
-                        ${item.mealId.price}
+                        EGP {item.mealId.price}
                       </p>
                     </div>
 
@@ -152,7 +152,7 @@ export default function CartPage() {
                   <p className="mt-4 flex space-x-2 text-sm text-text-primary">
                     <span className="font-bold">Subtotal:</span>
                     <span className="font-extrabold text-primary">
-                      ${(item.mealId.price * item.quantity).toFixed(2)}
+                      EGP {(item.mealId.price * item.quantity).toFixed(2)}
                     </span>
                   </p>
                 </div>
@@ -173,15 +173,15 @@ export default function CartPage() {
           <dl className="mt-6 space-y-4">
             <div className="flex items-center justify-between">
               <dt className="text-sm text-text-secondary">Subtotal</dt>
-              <dd className="text-sm font-bold text-text-primary">${cartTotal.toFixed(2)}</dd>
+              <dd className="text-sm font-bold text-text-primary">EGP {cartTotal.toFixed(2)}</dd>
             </div>
             <div className="flex items-center justify-between border-t border-primary-container pt-4">
               <dt className="text-sm text-text-secondary">Shipping estimate</dt>
-              <dd className="text-sm font-bold text-text-primary">$0.00</dd>
+              <dd className="text-sm font-bold text-text-primary">EGP 0.00</dd>
             </div>
             <div className="flex items-center justify-between border-t border-primary-container pt-4">
               <dt className="text-base font-bold text-text-primary">Order total</dt>
-              <dd className="text-base font-extrabold text-primary">${cartTotal.toFixed(2)}</dd>
+              <dd className="text-base font-extrabold text-primary">EGP {cartTotal.toFixed(2)}</dd>
             </div>
           </dl>
 

@@ -18,4 +18,5 @@ export { default as withdrawalService } from "./withdrawalService";
 export { default as deliveryService } from "./deliveryService";
 export { default as adminDeliveryService } from "./adminDeliveryService";
 export { default as notificationService } from "./notificationService";
+export { default as adminWithdrawalService } from "./adminWithdrawalService";
 

@@ -9,6 +9,8 @@ import {
   Shield,
   UtensilsCrossed,
   BarChart2,
+  Wallet,
+  ShoppingCart,
   Plus,
   X,
   Truck,
@@ -24,6 +26,7 @@ const navItems = [
     icon: LayoutDashboard,
     href: "/admin/dashboard",
   },
+  { id:"orders", label:"Orders", icon: ShoppingCart, href: "/admin/orders"},
   { id: "chefs", label: "Chefs", icon: ChefHat, href: "/admin/chefs" },
   { id: "users", label: "Customers", icon: Users, href: "/admin/users" },
   { id: "delivery-users", label: "Delivery Users", icon: Truck, href: "/admin/delivery-users" },
@@ -40,6 +43,7 @@ const navItems = [
     icon: ShieldIcon,
     href: "/admin/verifications",
   },
+  {id:"withdrawals", label:"Withdrawals", icon:Wallet, href:"/admin/withdrawals"}
 ];
 
 function SidebarContent({ pathname, setMobileOpen }) {

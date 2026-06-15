@@ -141,7 +141,7 @@ export default function MyOrdersPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-text-tertiary">Total Amount</p>
-                    <p className="mt-1 text-sm font-extrabold text-primary">${order.totalAmount.toFixed(2)}</p>
+                    <p className="mt-1 text-sm font-extrabold text-primary">EGP {order.totalAmount.toFixed(2)}</p>
                   </div>
                 </div>
                 
@@ -176,11 +176,11 @@ export default function MyOrdersPage() {
                                 <h4 className="text-sm font-bold text-text-primary">{item.name}</h4>
                                 <p className="mt-1 text-xs font-semibold text-text-secondary line-clamp-1">{item.description}</p>
                               </div>
-                              <p className="text-sm font-bold text-primary">${item.unitPrice.toFixed(2)}</p>
+                              <p className="text-sm font-bold text-primary">EGP {item.unitPrice.toFixed(2)}</p>
                             </div>
                             <div className="mt-3 flex items-center justify-between">
                               <p className="text-xs font-bold text-text-tertiary">Qty: {item.quantity}</p>
-                              <p className="text-xs font-extrabold text-text-primary">Subtotal: ${item.subtotal.toFixed(2)}</p>
+                              <p className="text-xs font-extrabold text-text-primary">Subtotal: EGP {item.subtotal.toFixed(2)}</p>
                             </div>
                           </div>
                         </li>
@@ -212,7 +212,7 @@ export default function MyOrdersPage() {
                     <div className="rounded-xl border border-dashed border-primary/20 p-5">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-bold text-text-primary">Order Total</p>
-                        <p className="text-lg font-extrabold text-primary">${order.totalAmount.toFixed(2)}</p>
+                        <p className="text-lg font-extrabold text-primary">EGP {order.totalAmount.toFixed(2)}</p>
                       </div>
                       <p className="mt-2 text-[10px] text-center text-text-tertiary italic">
                         Payment via Paymob - Secure Transaction
