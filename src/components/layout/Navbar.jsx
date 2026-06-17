@@ -23,6 +23,7 @@ import useAuth from "@/hooks/useAuth";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
 import { SearchInput } from "@/components/ui";
+import CustomerNotificationBell from "@/components/customer/CustomerNotificationBell";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -124,9 +125,13 @@ export default function Navbar() {
             )}
           </button>
 
-          <button>
-            <FontAwesomeIcon icon={faBell} className="text-lg" />
-          </button>
+          {isCustomer ? (
+            <CustomerNotificationBell />
+          ) : (
+            <button>
+              <FontAwesomeIcon icon={faBell} className="text-lg" />
+            </button>
+          )}
 
           <Link
             href={isCustomer ? "/customer/cart" : loginHref}

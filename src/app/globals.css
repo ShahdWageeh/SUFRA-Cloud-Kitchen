@@ -216,3 +216,35 @@ html[dir="rtl"] input[type="email"] {
     background-color: #1b1b1b !important;
   }
 }
+
+@keyframes order-highlight-pulse {
+  0% {
+    border-color: #964326;
+    box-shadow: 0 0 0 0 rgba(150, 67, 38, 0.6);
+    transform: scale(1);
+    background-color: white;
+  }
+  25% {
+    background-color: rgba(150, 67, 38, 0.05);
+  }
+  50% {
+    border-color: #964326;
+    box-shadow: 0 0 0 20px rgba(150, 67, 38, 0);
+    transform: scale(1.04);
+    background-color: rgba(150, 67, 38, 0.1);
+  }
+  100% {
+    border-color: #EAD3CB;
+    box-shadow: 0 0 0 0 rgba(150, 67, 38, 0);
+    transform: scale(1);
+    background-color: white;
+  }
+}
+
+.animate-order-highlight {
+  animation: order-highlight-pulse 2.5s ease-in-out infinite;
+  z-index: 20;
+  position: relative;
+  border-width: 3px !important;
+  border-style: solid !important;
+}

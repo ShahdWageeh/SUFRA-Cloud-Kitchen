@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import OrdersTabs from "@/components/chef/orders/OrdersTabs";
 import OrdersList from "@/components/chef/orders/OrdersList";
 import StatsSection from "@/components/chef/orders/StatsSection";
@@ -9,10 +10,12 @@ import { ordersService } from "@/services";
 
 export default function OrdersPage() {
   const { token } = useAuth();
+  const searchParams = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("preparing");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [highlightedOrderId, setHighlightedOrderId] = useState(null);
 
   const normalizeStatus = (status) => {
     if (!status) return "preparing";
@@ -32,7 +35,33 @@ export default function OrdersPage() {
       setError(null);
 
       const result = await ordersService.getChefOrders();
-      setOrders(Array.isArray(result.data) ? result.data : []);
+      const fetchedOrders = Array.isArray(result.data) ? result.data : [];
+      setOrders(fetchedOrders);
+
+      // Check for highlight parameter after orders are loaded
+      const highlight = searchParams.get("highlight");
+      if (highlight && fetchedOrders.length > 0) {
+        const targetOrder = fetchedOrders.find(o => (o._id || o.id) === highlight);
+        if (targetOrder) {
+          const status = getOrderStatus(targetOrder);
+          const tab = status === "out_for_delivery" ? "ready" : (status === "completed" ? "completed" : "preparing");
+          setSelectedStatus(tab);
+          setHighlightedOrderId(highlight);
+
+          // Scroll to the order card after a short delay to allow for tab switching and rendering
+          setTimeout(() => {
+            const element = document.getElementById(`order-card-${highlight}`);
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }, 500);
+
+          // Clear highlight after some time
+          setTimeout(() => {
+            setHighlightedOrderId(null);
+          }, 8000);
+        }
+      }
     } catch (err) {
       console.error("Chef orders load failed:", err);
       setError(err?.message || "Failed to fetch orders.");
@@ -89,7 +118,11 @@ export default function OrdersPage() {
       />
 
       <div className="mt-6">
-          <OrdersList orders={visibleOrders} onStatusChange={handleStatusChange} />
+          <OrdersList 
+            orders={visibleOrders} 
+            onStatusChange={handleStatusChange} 
+            highlightedOrderId={highlightedOrderId}
+          />
       </div>
 
       {/* <div className="mt-16">

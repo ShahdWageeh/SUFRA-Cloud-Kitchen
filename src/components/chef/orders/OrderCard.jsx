@@ -1,4 +1,4 @@
-import { Clock3, MapPin, Phone } from "lucide-react";
+import { Clock3, MapPin, Phone, BellRing } from "lucide-react";
 import Image from "next/image";
 
 function formatOrderItems(items) {
@@ -32,7 +32,7 @@ function getTimeAgo(dateString) {
     return `${days}d ago`;
 }
 
-export default function OrderCard({ order, orderNumber, onStatusChange }) {
+export default function OrderCard({ order, orderNumber, onStatusChange, isHighlighted }) {
     const amount = order.totalAmount;
     const customerName = `${order.customerId.firstName} ${order.customerId.lastName}`;
     const customerPhone = order.contactPhone
@@ -91,7 +91,16 @@ export default function OrderCard({ order, orderNumber, onStatusChange }) {
     };
 
     return (
-        <div className="bg-white rounded-card border border-[#EAD3CB] p-5 shadow-sm flex flex-col h-full">
+        <div 
+            id={`order-card-${order._id || order.id}`}
+            className={`bg-white rounded-card border border-[#EAD3CB] p-5 shadow-sm flex flex-col h-full transition-all duration-500 relative ${isHighlighted ? "animate-order-highlight ring-4 ring-primary/30" : ""}`}
+        >
+            {isHighlighted && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1 z-30 animate-bounce">
+                    <BellRing size={12} />
+                    SELECTED FROM NOTIFICATION
+                </div>
+            )}
 
             <div className="flex justify-between items-start">
 

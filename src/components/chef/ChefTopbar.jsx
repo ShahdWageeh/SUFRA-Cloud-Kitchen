@@ -4,6 +4,8 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, Search, Bell, Settings, X, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import ChefNotificationBell from "./ChefNotificationBell";
+
 const sectionTitles = [
   { key: "/chef/dashboard", title: "Dashboard" },
   { key: "/chef/meals", title: "Manage Meals" },
@@ -86,13 +88,7 @@ export default function ChefTopbar({ onMenuClick }) {
             )}
           </button>
 
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#eaded8] bg-white text-[#624c44] hover:bg-[#f8f2ef]"
-            aria-label="Notifications"
-          >
-            <Bell size={18} />
-          </button>
+          <ChefNotificationBell />
 
           <button
             type="button"
