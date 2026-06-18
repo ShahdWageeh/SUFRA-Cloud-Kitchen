@@ -18,6 +18,7 @@ import {
   CheckCircle,
   EyeOff,
 } from "lucide-react";
+import Image from "next/image";
 
 const STATUS_CONFIG = {
   active: {
@@ -253,8 +254,9 @@ function CategoryFormModal({ mode, category, onClose, onSuccess }) {
             />
             {imagePreview ? (
               <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200">
-                <img
+                <Image
                   src={imagePreview}
+                  fill
                   alt="Preview"
                   className="h-full w-full object-cover"
                 />
@@ -499,7 +501,7 @@ export default function CategoriesManagement() {
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left">
+          <table className="w-full min-w-160 text-left">
             <thead>
               <tr className="border-b border-slate-100">
                 {["Category", "Status", "Created", "Actions"].map((h) => (
@@ -580,9 +582,11 @@ export default function CategoriesManagement() {
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shrink-0">
                             {category.image ? (
-                              <img
+                              <Image
                                 src={category.image}
                                 alt={category.name}
+                                width="100"
+                                height="100"
                                 className="h-full w-full object-cover"
                               />
                             ) : (

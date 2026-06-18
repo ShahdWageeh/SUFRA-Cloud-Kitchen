@@ -61,7 +61,7 @@ export default function RegisterForm({ accountType, endpoint }) {
     toast.success(
       accountType === "chef"
         ? "Registration successful! Complete your verification."
-        : "Welcome to Matbakhna!",
+        : "Welcome to Sufra!",
     );
   };
   return (

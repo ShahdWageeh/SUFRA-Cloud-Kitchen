@@ -12,6 +12,7 @@ import {
   ChefHat,
 } from "lucide-react";
 import { Loader } from "@/components/ui";
+import Image from "next/image";
 
 export default function ChefVerificationModeration() {
   const { token: contextToken, logout } = useAuth();
@@ -178,7 +179,7 @@ export default function ChefVerificationModeration() {
 
   if (!isMounted) {
     return (
-      <div className="w-full max-w-7xl mx-auto px-4 pb-20 pt-6 flex min-h-[300px] flex-col gap-3 items-center justify-center">
+      <div className="w-full max-w-7xl mx-auto px-4 pb-20 pt-6 flex min-h-75 flex-col gap-3 items-center justify-center">
         <Loader size={32} />
         <p className="text-sm font-medium text-slate-500">
           Initializing Interface...
@@ -225,7 +226,7 @@ export default function ChefVerificationModeration() {
       )}
 
       {loading ? (
-        <div className="flex min-h-[300px] flex-col gap-3 items-center justify-center">
+        <div className="flex min-h-75 flex-col gap-3 items-center justify-center">
           <Loader size={32} />
           <p className="text-sm font-medium text-slate-500">
             Loading compliance data from server...
@@ -274,7 +275,7 @@ export default function ChefVerificationModeration() {
                   {/* Top Header Information Details safely extracted as specific primitives */}
                   <div className="flex flex-col gap-1 border-b border-slate-100 pb-4">
                     <div className="flex items-center gap-2 text-slate-900">
-                      <ChefHat className="text-[#964326]" size={20} />
+                      <ChefHat className="text-primary" size={20} />
                       <h3 className="text-lg font-bold">{kitchenName}</h3>
                     </div>
 
@@ -307,11 +308,14 @@ export default function ChefVerificationModeration() {
                         href={request.nationalIdImage}
                         target="_blank"
                         rel="noreferrer"
-                        className="block aspect-[4/3] rounded-xl border overflow-hidden bg-slate-50"
+                        className="block aspect-4/3 rounded-xl border overflow-hidden bg-slate-50"
                       >
-                        <img
+                        <Image
                           src={request.nationalIdImage}
                           alt="ID Front"
+                          width="200"
+                          height="100"
+                          unoptimized
                           className="h-full w-full object-cover hover:scale-105 transition duration-200"
                         />
                       </a>
@@ -325,11 +329,14 @@ export default function ChefVerificationModeration() {
                         href={request.nationalIdBackImage}
                         target="_blank"
                         rel="noreferrer"
-                        className="block aspect-[4/3] rounded-xl border overflow-hidden bg-slate-50"
+                        className="block aspect-4/3 rounded-xl border overflow-hidden bg-slate-50"
                       >
-                        <img
+                        <Image
                           src={request.nationalIdBackImage}
                           alt="ID Back"
+                          width="200"
+                          height="100"
+                          unoptimized
                           className="h-full w-full object-cover hover:scale-105 transition duration-200"
                         />
                       </a>
@@ -343,11 +350,14 @@ export default function ChefVerificationModeration() {
                         href={request.healthCertificateImage}
                         target="_blank"
                         rel="noreferrer"
-                        className="block aspect-[4/3] rounded-xl border overflow-hidden bg-slate-50"
+                        className="block aspect-4/3 rounded-xl border overflow-hidden bg-slate-50"
                       >
-                        <img
+                        <Image
                           src={request.healthCertificateImage}
                           alt="Certificate"
+                          width="200"
+                          height="100"
+                          unoptimized
                           className="h-full w-full object-cover hover:scale-105 transition duration-200"
                         />
                       </a>
@@ -371,9 +381,12 @@ export default function ChefVerificationModeration() {
                               rel="noreferrer"
                               className="h-20 w-20 rounded-lg border overflow-hidden bg-slate-50 block hover:border-slate-400 transition"
                             >
-                              <img
+                              <Image
                                 src={imgUrl}
                                 alt="Kitchen space"
+                                width="200"
+                                height="100"
+                                unoptimized
                                 className="h-full w-full object-cover"
                               />
                             </a>

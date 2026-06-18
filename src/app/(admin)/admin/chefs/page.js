@@ -378,7 +378,7 @@ export default function ChefsManagement() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[680px] text-left">
+          <table className="w-full min-w-170 text-left">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
                 {["#", "Chef & Kitchen", "Email", "Status", "Actions"].map(

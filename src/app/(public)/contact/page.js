@@ -137,7 +137,7 @@ export default function ContactPage() {
               <div>
                 <h2 className="text-lg font-bold">Chat with Us</h2>
                 <p className="mt-1 text-sm leading-6 text-text-secondary">
-                  Need help navigating Matbakhna or managing an order? Send us a
+                  Need help navigating Sufra or managing an order? Send us a
                   message.
                 </p>
                 <a
@@ -162,7 +162,7 @@ export default function ContactPage() {
                   inquiries.
                 </p>
                 <a
-                  href="mailto:hello@matbakhna.com"
+                  href="mailto:hello@Sufra.com"
                   className="mt-2 inline-block text-sm font-bold text-primary"
                 >
                   hello@sufra.com
@@ -179,7 +179,7 @@ export default function ContactPage() {
                   <a
                     key={index}
                     href="#"
-                    aria-label="Matbakhna social channel"
+                    aria-label="Sufra social channel"
                     className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-container text-text-secondary transition hover:bg-primary hover:text-white"
                   >
                     <FontAwesomeIcon icon={icon} className="h-3.5 w-3.5" />

@@ -10,7 +10,7 @@ export const testimonials = [
     id: 2,
     name: "Chef Amina",
     role: "Partner Chef",
-    text: "Becoming a chef on Matbakhna changed my life. I can share my heritage and support my family from my own kitchen.",
+    text: "Becoming a chef on Sufra changed my life. I can share my heritage and support my family from my own kitchen.",
   },
 
   {

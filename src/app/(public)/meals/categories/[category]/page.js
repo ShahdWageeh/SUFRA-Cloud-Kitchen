@@ -73,7 +73,7 @@ export default async function CategoryPage({ params, searchParams }) {
               sizes="100vw"
               className="object-cover opacity-75"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-black/10" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/30 to-black/10" />
           </div>
           <div className="absolute inset-0 flex items-center px-6 sm:px-10">
             <div className="max-w-xl text-white">

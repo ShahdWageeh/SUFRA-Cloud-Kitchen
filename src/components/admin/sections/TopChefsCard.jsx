@@ -26,7 +26,7 @@ export default function TopChefsCard({ chefs = [] }) {
             <div key={chef.id}>
               <div className="flex items-center gap-3 mb-2">
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
                   style={{ backgroundColor: chef.color }}
                 >
                   {chef.initials}
@@ -37,7 +37,7 @@ export default function TopChefsCard({ chefs = [] }) {
                     <span className="text-sm font-semibold text-gray-800 truncate">
                       {chef.name}
                     </span>
-                    <span className="text-xs font-semibold text-gray-600 flex-shrink-0">
+                    <span className="text-xs font-semibold text-gray-600 shrink-0">
                       {chef.statusText}
                     </span>
                   </div>

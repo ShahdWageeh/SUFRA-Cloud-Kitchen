@@ -130,9 +130,8 @@ export default function VerificationForm() {
             Chef Verification
           </h1>
           <p className="font-body-lg text-lg text-text-secondary max-w-xl mx-auto">
-            Complete your verification to start selling homemade meals on
-            Matbakhna. Help us maintain our community&apos;s trust and safety
-            standards.
+            Complete your verification to start selling homemade meals on Sufra.
+            Help us maintain our community&apos;s trust and safety standards.
           </p>
         </div>
 
@@ -388,10 +387,7 @@ export default function VerificationForm() {
               >
                 I confirm that all submitted information is accurate and that I
                 have read and agree to the{" "}
-                <a
-                  href="#"
-                  className="text-primary font-bold hover:underline"
-                >
+                <a href="#" className="text-primary font-bold hover:underline">
                   Chef Partnership Agreement
                 </a>
                 .

@@ -138,7 +138,7 @@ export default function HomePage() {
                 <div>
                   <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full mb-6">
                     <FontAwesomeIcon icon={faWandMagicSparkles} />
-                    Powered by Matbakhna AI
+                    Powered by Sufra AI
                   </div>
 
                   <h2 className="text-3xl font-bold mb-6">
@@ -152,7 +152,10 @@ export default function HomePage() {
                     for you.
                   </p>
                   <div className="mt-8 flex flex-col md:flex-row gap-4">
-                    <Link href="customer/meal-planner" className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
+                    <Link
+                      href="customer/meal-planner"
+                      className="bg-white/10 backdrop-blur-sm p-6 rounded-xl"
+                    >
                       <h4 className="text-left text-xl font-semibold">
                         Meal Planner
                       </h4>

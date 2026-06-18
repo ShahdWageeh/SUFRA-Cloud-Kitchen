@@ -184,7 +184,7 @@ export default function LoginForm() {
               <AuthInput
                 label="Email Address"
                 type="email"
-                placeholder="chef@matbakhna.com"
+                placeholder="chef@Sufra.com"
                 icon={faEnvelope}
                 error={errors.email?.message}
                 {...register("email")}

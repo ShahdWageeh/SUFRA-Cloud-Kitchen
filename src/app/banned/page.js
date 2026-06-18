@@ -74,7 +74,7 @@ export default function BannedPage() {
         </div>
 
         <p className="text-xs text-slate-400 mt-6">
-          Matbakhna · Community Standards Enforcement
+          Sufra · Community Standards Enforcement
         </p>
       </div>
     </div>

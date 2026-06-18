@@ -492,7 +492,7 @@ export default function UsersManagement() {
             Users Management
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Review, monitor, and manage customer accounts for the Matbakhna
+            Review, monitor, and manage customer accounts for the Sufra
             platform.
           </p>
         </div>

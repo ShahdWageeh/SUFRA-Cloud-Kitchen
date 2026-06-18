@@ -83,14 +83,14 @@ export default function AdminOrdersPage() {
       {/* Alert Messages */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-          <AlertCircle className="text-red-600 mt-0.5 flex-shrink-0" size={20} />
+          <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={20} />
           <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {success && (
         <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-3">
-          <CheckCircle className="text-emerald-600 mt-0.5 flex-shrink-0" size={20} />
+          <CheckCircle className="text-emerald-600 mt-0.5 shrink-0" size={20} />
           <p className="text-sm text-emerald-700">{success}</p>
         </div>
       )}
@@ -109,7 +109,7 @@ export default function AdminOrdersPage() {
                 <p className="text-slate-600">All orders are assigned!</p>
               </div>
             ) : (
-              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              <div className="space-y-3 max-h-150 overflow-y-auto">
                 {unassignedOrders.map((order) => (
                   <div
                     key={order._id}
@@ -180,7 +180,7 @@ export default function AdminOrdersPage() {
                 <p className="text-sm">No free delivery personnel available</p>
               </div>
             ) : (
-              <div className="space-y-2 mb-6 max-h-[300px] overflow-y-auto">
+              <div className="space-y-2 mb-6 max-h-75 overflow-y-auto">
                 {freeDeliveryPersonnel.map((delivery) => (
                   <div
                     key={delivery._id}

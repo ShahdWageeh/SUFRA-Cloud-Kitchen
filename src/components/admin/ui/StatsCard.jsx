@@ -26,13 +26,13 @@ export default function StatsCard({ icon, iconBg, iconColor, metric, label, subl
 
   return (
     <div
-      className="bg-white rounded-2xl border p-6 flex flex-col justify-between h-[140px] shadow-sm hover:shadow-md transition-shadow"
+      className="bg-white rounded-2xl border p-6 flex flex-col justify-between h-35 shadow-sm hover:shadow-md transition-shadow"
       style={{ borderColor: '#ECE8E5' }}
     >
       <div className="flex items-start justify-between">
         {/* Icon */}
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
           style={{ backgroundColor: iconBg }}
         >
           <Icon size={20} style={{ color: iconColor }} strokeWidth={1.8} />
