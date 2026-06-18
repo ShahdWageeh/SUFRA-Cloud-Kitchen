@@ -13,8 +13,10 @@ const deliveryService = {
     return response.data;
   },
 
-  async completeOrder(orderId) {
-    const response = await api.post(`/delivery/orders/${orderId}/complete`);
+  async completeOrder(orderId, otp) {
+    const response = await api.post(`/delivery/orders/${orderId}/complete`, {
+      otp,
+    });
 
     return response.data;
   },

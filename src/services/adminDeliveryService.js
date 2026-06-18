@@ -20,6 +20,19 @@ const adminDeliveryService = {
     const response = await api.patch(`/users/delivery/${userId}/toggle-block`);
     return response.data;
   },
+
+  async getDeliveryManagementData() {
+    const response = await api.get("/admin/delivery-management");
+    return response.data;
+  },
+
+  async assignDeliveryPerson(orderId, deliveryId) {
+    const response = await api.post("/admin/assign-delivery", {
+      orderId,
+      deliveryId,
+    });
+    return response.data;
+  },
 };
 
 export default adminDeliveryService;

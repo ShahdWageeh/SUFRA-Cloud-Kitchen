@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { deliveryService } from "@/services";
-import { MapPin, Phone, Package, CircleCheckBig } from "lucide-react";
+import { MapPin, Phone, Package, CircleCheckBig, X } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 export default function CurrentOrderPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState("");
 
   useEffect(() => {
     async function loadOrder() {
@@ -25,16 +27,25 @@ export default function CurrentOrderPage() {
     loadOrder();
   }, []);
 
-  async function handleCompleteOrder() {
-    if (!order) return;
+  async function handleSubmitOtp() {
+    if (!order || !otp.trim()) {
+      toast.error("Please enter the 6-digit OTP");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(otp)) {
+      toast.error("OTP must be exactly 6 digits");
+      return;
+    }
 
     try {
       setCompleting(true);
 
-      const response = await deliveryService.completeOrder(order._id);
+      const response = await deliveryService.completeOrder(order._id, otp);
 
       toast.success(response?.message || "Order completed successfully");
-
+      setShowOtpModal(false);
+      setOtp("");
       setOrder(null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to complete order");
@@ -170,7 +181,7 @@ export default function CurrentOrderPage() {
       {/* Complete Button */}
 
       <button
-        onClick={handleCompleteOrder}
+        onClick={() => setShowOtpModal(true)}
         disabled={completing}
         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-6 py-4 font-semibold text-white transition hover:bg-green-700 disabled:opacity-50"
       >
@@ -178,6 +189,48 @@ export default function CurrentOrderPage() {
 
         {completing ? "Completing..." : "Mark As Delivered"}
       </button>
+
+      {/* OTP Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Enter OTP</h3>
+              <button
+                onClick={() => {
+                  setShowOtpModal(false);
+                  setOtp("");
+                }}
+                className="rounded-full p-1 text-text-secondary hover:bg-slate-100"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="mt-2 text-sm text-text-secondary">
+              Please enter the 6-digit code from the customer.
+            </p>
+
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              placeholder="123456"
+              className="mt-4 w-full rounded-xl border border-slate-300 px-4 py-3 text-center text-lg tracking-[0.4em] outline-none focus:border-green-500"
+            />
+
+            <button
+              onClick={handleSubmitOtp}
+              disabled={completing || otp.length !== 6}
+              className="mt-5 flex w-full items-center justify-center rounded-xl bg-green-600 px-4 py-3 font-semibold text-white transition hover:bg-green-700 disabled:opacity-50"
+            >
+              {completing ? "Submitting..." : "Submit OTP"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
