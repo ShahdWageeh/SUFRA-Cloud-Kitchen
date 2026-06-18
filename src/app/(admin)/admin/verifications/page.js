@@ -292,6 +292,9 @@ export default function ChefVerificationModeration() {
                     <p className="text-[10px] font-mono text-slate-400 mt-2">
                       Request Token ID: {request._id}
                     </p>
+                    <p className="text-[10px] font-mono text-slate-400 mt-2">
+                      Kitchen Address: {request?.kitchenAddress}
+                    </p>
                   </div>
 
                   {/* Identity Files */}

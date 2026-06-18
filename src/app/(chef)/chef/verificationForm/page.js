@@ -29,6 +29,7 @@ export default function VerificationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState({});
+  const [kitchenAddress, setKitchenAddress] = useState("");
 
   const getFirstFile = (fieldName) => uploadedFiles[fieldName]?.[0] || null;
 
@@ -50,6 +51,10 @@ export default function VerificationForm() {
 
     if (!healthCertificateImage) {
       return "Please upload your health certificate.";
+    }
+
+    if (!kitchenAddress) {
+      return "Please enter your kitchen address.";
     }
 
     if (kitchenImages.length < 3) {
@@ -84,6 +89,7 @@ export default function VerificationForm() {
       formData.append("nationalIdImage", getFirstFile("idFront"));
       formData.append("nationalIdBackImage", getFirstFile("idBack"));
       formData.append("healthCertificateImage", getFirstFile("healthCert"));
+      formData.append("kitchenAddress", kitchenAddress);
 
       [1, 2, 3, 4, 5]
         .map((num) => getFirstFile(`kitchenPhoto${num}`))
@@ -252,6 +258,18 @@ export default function VerificationForm() {
               <h2 className="font-headline-md text-2xl text-text-primary">
                 Kitchen Verification
               </h2>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="font-label-md text-sm text-text-secondary">
+                Kitchen Address
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your kitchen address"
+                value={kitchenAddress}
+                onChange={(e) => setKitchenAddress(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-outline bg-surface-low focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
+              />
             </div>
             <p className="text-label-md text-text-secondary mb-6">
               Please provide three clear photos of your cooking environment
