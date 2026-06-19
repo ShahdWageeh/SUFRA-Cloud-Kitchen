@@ -464,7 +464,7 @@ export default function ContactsManagement() {
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left">
+          <table className="w-full min-w-190 text-left">
             <thead>
               <tr className="border-b border-slate-100">
                 {["Sender", "Subject", "Role", "Date", "Status", "Actions"].map(

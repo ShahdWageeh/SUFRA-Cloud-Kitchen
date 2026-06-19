@@ -10,7 +10,7 @@ const translations = {
   "Become a Chef": "انضم كطاهٍ",
   "Become A Chef": "انضم كطاهٍ",
   About: "من نحن",
-  "Contact Us": "تواصل معنا",
+  "Contact": "تواصل معنا",
   "Sign in": "تسجيل الدخول",
   "Sign In": "تسجيل الدخول",
   "Log in": "تسجيل الدخول",

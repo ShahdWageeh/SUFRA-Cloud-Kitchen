@@ -182,7 +182,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-100 items-center justify-center">
         <p className="text-lg font-medium text-[#7A6560] animate-pulse">
           Loading kitchen insights...
         </p>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
 
             <div className="overflow-hidden rounded-[22px] border border-[#EDE6E3] bg-white">
               <div className="overflow-x-auto">
-                <table className="min-w-[700px] w-full">
+                <table className="min-w-175 w-full">
                   <thead>
                     <tr className="border-b border-[#F2E9E5]">
                       {["Order ID", "Customer", "Meal", "Status", "Total"].map(
@@ -350,7 +350,7 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="flex h-9 min-w-[36px] items-center justify-center rounded-lg border border-[#EDE6E3] bg-white px-2 text-sm font-semibold text-[#7A6560] transition hover:bg-[#FDF2EC]/50 disabled:opacity-40 disabled:hover:bg-white"
+                className="flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#EDE6E3] bg-white px-2 text-sm font-semibold text-[#7A6560] transition hover:bg-[#FDF2EC]/50 disabled:opacity-40 disabled:hover:bg-white"
               >
                 ←
               </button>
@@ -380,7 +380,7 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="flex h-9 min-w-[36px] items-center justify-center rounded-lg border border-[#EDE6E3] bg-white px-2 text-sm font-semibold text-[#7A6560] transition hover:bg-[#FDF2EC]/50 disabled:opacity-40 disabled:hover:bg-white"
+                className="flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#EDE6E3] bg-white px-2 text-sm font-semibold text-[#7A6560] transition hover:bg-[#FDF2EC]/50 disabled:opacity-40 disabled:hover:bg-white"
               >
                 →
               </button>
@@ -405,7 +405,7 @@ export default function DashboardPage() {
                   key={meal.id}
                   className="overflow-hidden rounded-[20px] border border-[#EDE6E3] bg-white shadow-sm transition hover:shadow-md"
                 >
-                  <div className="relative h-[180px] md:h-[160px]">
+                  <div className="relative h-45 md:h-40">
                     <Image
                       src={meal.image}
                       alt={meal.name}
