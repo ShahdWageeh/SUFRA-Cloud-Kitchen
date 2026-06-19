@@ -247,9 +247,9 @@ export default function Navbar() {
           <div className="flex flex-col gap-5 p-5">
             <Link href="/">Browse</Link>
 
-            <Link href="/categories">Categories</Link>
+            <Link href="/about">About</Link>
 
-            <Link href="/how-it-works">How It Works</Link>
+            <Link href="/contact">Contact</Link>
 
             <Link href="/register/chef">Become a Chef</Link>
 
