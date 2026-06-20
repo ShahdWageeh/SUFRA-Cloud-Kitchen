@@ -98,17 +98,6 @@ flowchart LR
 | Payments | Paymob Payment Gateway |
 | Deployment | Vercel |
 
-## 📸 Screenshots
-
-> Add your product screenshots to `public/screenshots/`, then replace the placeholders below with the matching image paths.
-
-| Home & Discovery | Customer Dashboard |
-| --- | --- |
-| `public/screenshots/home.png` | `public/screenshots/customer-dashboard.png` |
-
-| Chef Dashboard | Admin Dashboard |
-| --- | --- |
-| `public/screenshots/chef-dashboard.png` | `public/screenshots/admin-dashboard.png` |
 
 ## ⚙️ Installation & Setup
 
@@ -134,7 +123,7 @@ npm install
 
 ### 3. Configure environment variables
 
-Create a `.env.local` file in the project root:
+Create a `.env` file in the project root:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
@@ -164,7 +153,6 @@ npm run start   # Serve the production build
 | `NEXT_PUBLIC_API_BASE_URL` | Yes | Base URL of the Sufra REST API, including `/api` |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Yes | Google OAuth client ID used by the login provider |
 
-> Keep credentials and service secrets out of version control. Backend-only credentials for MongoDB, JWT, Cloudinary, Gemini, and Paymob belong in the backend environment—not in this client application.
 
 ## 📡 API Overview
 
@@ -219,9 +207,13 @@ api.md                   # Backend API reference
 
 Sufra was developed by a team of developers as part of the **ITI MEARN Stack Graduation Project**.
 
-| Role | Team Member |
+| Name | Github |
 | --- | --- |
-| Team members | _Add team member names and GitHub profiles here_ |
+| Shahd Wageeh | https://github.com/ShahdWageeh |
+| Mustafa Osama | https://github.com/mustafaaosamaa |
+| Mostafa Tamer | https://github.com/Mostafa-Tamer2 |
+| Omar Yasser | https://github.com/omaryasserreda9 |
+| Mohamed Ibrahim | https://github.com/germanpt |
 
 ## 🌍 Deployment
 
