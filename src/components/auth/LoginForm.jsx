@@ -228,8 +228,17 @@ export default function LoginForm() {
             </div>
 
             <div className="grid grid-cols-1 gap-5">
-              <GoogleLoginButton role={selectedRole} />
-              {/* <SocialButton icon={faApple}>Apple</SocialButton> */}
+              {selectedRole !== "delivery" ? (
+                <GoogleLoginButton role={selectedRole} />
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="h-12 w-full rounded-lg border bg-gray-100 text-gray-400 cursor-not-allowed"
+                >
+                  Google Sign In Not Available For Delivery
+                </button>
+              )}
             </div>
 
             <div className="mt-10 border-t border-primary/18 pt-6 text-center text-xs text-text-secondary">
