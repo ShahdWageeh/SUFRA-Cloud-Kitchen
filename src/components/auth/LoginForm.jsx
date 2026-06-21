@@ -135,11 +135,10 @@ export default function LoginForm() {
                   }
                 }}
                 disabled={isChefOnlyLogin || isDeliveryOnlyLogin}
-                className={`rounded-md border py-2 text-sm transition ${
-                  selectedRole === "customer"
-                    ? "bg-primary text-white border-primary"
-                    : "border-primary/30"
-                } disabled:cursor-not-allowed disabled:opacity-45`}
+                className={`rounded-md border py-2 text-sm transition ${selectedRole === "customer"
+                  ? "bg-primary text-white border-primary"
+                  : "border-primary/30"
+                  } disabled:cursor-not-allowed disabled:opacity-45`}
               >
                 Customer
               </button>
@@ -148,11 +147,10 @@ export default function LoginForm() {
                 type="button"
                 onClick={() => setSelectedRole("chef")}
                 disabled={isDeliveryOnlyLogin}
-                className={`rounded-md border py-2 text-sm transition ${
-                  selectedRole === "chef"
-                    ? "bg-primary text-white border-primary"
-                    : "border-primary/30"
-                }`}
+                className={`rounded-md border py-2 text-sm transition ${selectedRole === "chef"
+                  ? "bg-primary text-white border-primary"
+                  : "border-primary/30"
+                  }`}
               >
                 Chef
               </button>
@@ -161,11 +159,10 @@ export default function LoginForm() {
                 type="button"
                 onClick={() => setSelectedRole("delivery")}
                 disabled={isChefOnlyLogin}
-                className={`rounded-md border py-2 text-sm transition ${
-                  selectedRole === "delivery"
-                    ? "bg-primary text-white border-primary"
-                    : "border-primary/30"
-                }`}
+                className={`rounded-md border py-2 text-sm transition ${selectedRole === "delivery"
+                  ? "bg-primary text-white border-primary"
+                  : "border-primary/30"
+                  }`}
               >
                 Delivery
               </button>
@@ -223,18 +220,23 @@ export default function LoginForm() {
               {loading ? "Signing in..." : "Sign In"}
             </button>
 
-            <div className="my-8">
+            {/* <div className="my-8">
               <AuthDivider>or continue with</AuthDivider>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 gap-5">
               {selectedRole !== "delivery" ? (
-                <GoogleLoginButton role={selectedRole} />
+                <>
+                  <div className="my-8">
+                    <AuthDivider>or continue with</AuthDivider>
+                  </div>
+                  <GoogleLoginButton role={selectedRole} />
+                </>
               ) : (
                 <button
                   type="button"
                   disabled
-                  className="h-12 w-full rounded-lg border bg-gray-100 text-gray-400 cursor-not-allowed"
+                  className="h-12 w-full rounded-lg border bg-gray-100 text-gray-400 cursor-not-allowed hidden"
                 >
                   Google Sign In Not Available For Delivery
                 </button>
