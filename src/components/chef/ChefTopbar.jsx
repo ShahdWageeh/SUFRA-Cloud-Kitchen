@@ -90,13 +90,13 @@ export default function ChefTopbar({ onMenuClick }) {
 
           <ChefNotificationBell />
 
-          <button
+          {/* <button
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#eaded8] bg-white text-[#624c44] hover:bg-[#f8f2ef]"
             aria-label="Settings"
           >
             <Settings size={18} />
-          </button>
+          </button> */}
         </div>
       </header>
 

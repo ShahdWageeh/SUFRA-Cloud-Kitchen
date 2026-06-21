@@ -93,13 +93,13 @@ export default function DashboardPage() {
           ).length;
 
           setMetrics([
-            {
-              id: "revenue",
-              label: "Total Earnings",
-              value: formatCurrency(totalRevenue),
-              iconBg: "#FDF2EC",
-              icon: DollarSign,
-            },
+            // {
+            //   id: "revenue",
+            //   label: "Total Earnings",
+            //   value: formatCurrency(totalRevenue),
+            //   iconBg: "#FDF2EC",
+            //   icon: DollarSign,
+            // },
             {
               id: "orders",
               label: "Total Orders",

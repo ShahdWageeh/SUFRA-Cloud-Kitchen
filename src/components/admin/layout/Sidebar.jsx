@@ -111,7 +111,7 @@ function SidebarContent({ pathname, setMobileOpen }) {
       </div>
 
       {/* New Report Button */}
-      <div className="px-4 pb-8 mt-4">
+      {/* <div className="px-4 pb-8 mt-4">
         <button
           className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
           style={{ backgroundColor: "#A55632" }}
@@ -119,7 +119,7 @@ function SidebarContent({ pathname, setMobileOpen }) {
           <Plus size={16} />
           New Report
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

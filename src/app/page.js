@@ -181,7 +181,7 @@ export default function HomePage() {
 
                   <p className="mb-5 p-6 rounded-card bg-secondary-container">
                     &quot;Based on your love for spicy dishes, I recommend Chef
-                    Karim’s Spicy Miso Ramen for dinner tonight.&quot;
+                    Mustafa’s Spicy Miso Ramen for dinner tonight.&quot;
                   </p>
 
                   <button className="bg-primary ml-auto block text-white px-5 py-3 rounded-full">
